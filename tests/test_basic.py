@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 # test_basic.py
-#
-# author: Christopher S. Corley
 
 from context import whatthepatch
 
