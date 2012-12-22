@@ -36,37 +36,39 @@ class PatchTestSuite(unittest.TestCase):
 >
 > This paragraph contains
 > important new additions
-> to this document.
-"""
+> to this document."""
+
         expected = [
-                (patch.DIFF.insert, None, 1, 'This is an important'),
-                (patch.DIFF.insert, None, 2, 'notice! It should'),
-                (patch.DIFF.insert, None, 3, 'therefore be located at'),
-                (patch.DIFF.insert, None, 4, 'the beginning of this'),
-                (patch.DIFF.insert, None, 5, 'document!'),
-                (patch.DIFF.insert, None, 6, ''),
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, ''),
 
-                (patch.DIFF.delete, 8, None, 'compress the size of the'),
-                (patch.DIFF.delete, 9, None, 'changes.'),
-                (patch.DIFF.delete, 10, None, ''),
-                (patch.DIFF.delete, 11, None, 'This paragraph contains'),
-                (patch.DIFF.delete, 12, None, 'text that is outdated.'),
-                (patch.DIFF.delete, 13, None, 'It will be deleted in the'),
-                (patch.DIFF.delete, 14, None, 'near future.'),
-                (patch.DIFF.insert, None, 14, 'compress anything.'),
+                (8, None, 'compress the size of the'),
+                (9, None, 'changes.'),
+                (10, None, ''),
+                (11, None, 'This paragraph contains'),
+                (12, None, 'text that is outdated.'),
+                (13, None, 'It will be deleted in the'),
+                (14, None, 'near future.'),
+                (None, 14, 'compress anything.'),
 
-                (patch.DIFF.delete, 17, None, 'check this dokument. On'),
-                (patch.DIFF.insert, None, 17, 'check this document. On'),
+                (17, None, 'check this dokument. On'),
+                (None, 17, 'check this document. On'),
 
-                (patch.DIFF.insert, None, 25, ''),
-                (patch.DIFF.insert, None, 26, 'This paragraph contains'),
-                (patch.DIFF.insert, None, 27, 'important new additions'),
-                (patch.DIFF.insert, None, 28, 'to this document.')
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.')
                 ]
 
         results = [x for x in patch.parse_default_diff(text)]
-
         assert results == expected
+
+        results_main = [x for x in patch.parse_diff(text)]
+        assert result_main == expected
 
 
     def test_unified_diff(self):
@@ -108,50 +110,52 @@ class PatchTestSuite(unittest.TestCase):
 +
 +This paragraph contains
 +important new additions
-+to this document.
-"""
++to this document."""
+
         expected = [
-                (patch.DIFF.insert, None, 1, 'This is an important'),
-                (patch.DIFF.insert, None, 2, 'notice! It should'),
-                (patch.DIFF.insert, None, 3, 'therefore be located at'),
-                (patch.DIFF.insert, None, 4, 'the beginning of this'),
-                (patch.DIFF.insert, None, 5, 'document!'),
-                (patch.DIFF.insert, None, 6, ''),
-                (patch.DIFF.equal, 1, 7, 'This part of the'),
-                (patch.DIFF.equal, 2, 8, 'document has stayed the'),
-                (patch.DIFF.equal, 3, 9, 'same from version to'),
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, ''),
+                (1, 7, 'This part of the'),
+                (2, 8, 'document has stayed the'),
+                (3, 9, 'same from version to'),
 
-                (patch.DIFF.equal, 5, 11, 'be shown if it doesn\'t'),
-                (patch.DIFF.equal, 6, 12, 'change.  Otherwise, that'),
-                (patch.DIFF.equal, 7, 13, 'would not be helping to'),
-                (patch.DIFF.delete, 8, None, 'compress the size of the'),
-                (patch.DIFF.delete, 9, None, 'changes.'),
-                (patch.DIFF.delete, 10, None, ''),
-                (patch.DIFF.delete, 11, None, 'This paragraph contains'),
-                (patch.DIFF.delete, 12, None, 'text that is outdated.'),
-                (patch.DIFF.delete, 13, None, 'It will be deleted in the'),
-                (patch.DIFF.delete, 14, None, 'near future.'),
-                (patch.DIFF.insert, None, 14, 'compress anything.'),
-                (patch.DIFF.equal, 15, 15, ''),
-                (patch.DIFF.equal, 16, 16, 'It is important to spell'),
-                (patch.DIFF.delete, 17, None, 'check this dokument. On'),
-                (patch.DIFF.insert, None, 17, 'check this document. On'),
-                (patch.DIFF.equal, 18, 18, 'the other hand, a'),
-                (patch.DIFF.equal, 19, 19, 'misspelled word isn\'t'),
-                (patch.DIFF.equal, 20, 20, 'the end of the world.'),
+                (5, 11, 'be shown if it doesn\'t'),
+                (6, 12, 'change.  Otherwise, that'),
+                (7, 13, 'would not be helping to'),
+                (8, None, 'compress the size of the'),
+                (9, None, 'changes.'),
+                (10, None, ''),
+                (11, None, 'This paragraph contains'),
+                (12, None, 'text that is outdated.'),
+                (13, None, 'It will be deleted in the'),
+                (14, None, 'near future.'),
+                (None, 14, 'compress anything.'),
+                (15, 15, ''),
+                (16, 16, 'It is important to spell'),
+                (17, None, 'check this dokument. On'),
+                (None, 17, 'check this document. On'),
+                (18, 18, 'the other hand, a'),
+                (19, 19, 'misspelled word isn\'t'),
+                (20, 20, 'the end of the world.'),
 
-                (patch.DIFF.equal, 22, 22, 'this paragraph needs to'),
-                (patch.DIFF.equal, 23, 23, 'be changed. Things can'),
-                (patch.DIFF.equal, 24, 24, 'be added after it.'),
-                (patch.DIFF.insert, None, 25, ''),
-                (patch.DIFF.insert, None, 26, 'This paragraph contains'),
-                (patch.DIFF.insert, None, 27, 'important new additions'),
-                (patch.DIFF.insert, None, 28, 'to this document.')
+                (22, 22, 'this paragraph needs to'),
+                (23, 23, 'be changed. Things can'),
+                (24, 24, 'be added after it.'),
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.')
                 ]
 
         results = [x for x in patch.parse_unified_diff(text)]
-
         assert results == expected
+
+        results_main = [x for x in patch.parse_diff(text)]
+        assert result_main == expected
 
     def test_context_diff(self):
         text = """*** /path/to/original   ''timestamp''
@@ -206,103 +210,164 @@ class PatchTestSuite(unittest.TestCase):
 +
 + This paragraph contains
 + important new additions
-+ to this document.
-"""
++ to this document."""
+
         expected = [
-                (patch.DIFF.insert, None, 1, 'This is an important'),
-                (patch.DIFF.insert, None, 2, 'notice! It should'),
-                (patch.DIFF.insert, None, 3, 'therefore be located at'),
-                (patch.DIFF.insert, None, 4, 'the beginning of this'),
-                (patch.DIFF.insert, None, 5, 'document!'),
-                (patch.DIFF.insert, None, 6, ''),
-                (patch.DIFF.equal, 1, 7, 'This part of the'),
-                (patch.DIFF.equal, 2, 8, 'document has stayed the'),
-                (patch.DIFF.equal, 3, 9, 'same from version to'),
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, ''),
+                (1, 7, 'This part of the'),
+                (2, 8, 'document has stayed the'),
+                (3, 9, 'same from version to'),
 
-                (patch.DIFF.equal, 5, 11, 'be shown if it doesn\'t'),
-                (patch.DIFF.equal, 6, 12, 'change.  Otherwise, that'),
-                (patch.DIFF.equal, 7, 13, 'would not be helping to'),
-                (patch.DIFF.delete, 8, None, 'compress the size of the'),
-                (patch.DIFF.delete, 9, None, 'changes.'),
-                (patch.DIFF.delete, 10, None, ''),
-                (patch.DIFF.delete, 11, None, 'This paragraph contains'),
-                (patch.DIFF.delete, 12, None, 'text that is outdated.'),
-                (patch.DIFF.delete, 13, None, 'It will be deleted in the'),
-                (patch.DIFF.delete, 14, None, 'near future.'),
-                (patch.DIFF.insert, None, 14, 'compress anything.'),
-                (patch.DIFF.equal, 15, 15, ''),
-                (patch.DIFF.equal, 16, 16, 'It is important to spell'),
-                (patch.DIFF.delete, 17, None, 'check this dokument. On'),
-                (patch.DIFF.insert, None, 17, 'check this document. On'),
-                (patch.DIFF.equal, 18, 18, 'the other hand, a'),
-                (patch.DIFF.equal, 19, 19, 'misspelled word isn\'t'),
-                (patch.DIFF.equal, 20, 20, 'the end of the world.'),
+                # merge the two sections of the hunk so that deletions
+                # are followed by the appropriate insertion
+                (5, 11, 'be shown if it doesn\'t'),
+                (6, 12, 'change.  Otherwise, that'),
+                (7, 13, 'would not be helping to'),
+                (8, None, 'compress the size of the'),
+                (9, None, 'changes.'),
+                (10, None, ''),
+                (11, None, 'This paragraph contains'),
+                (12, None, 'text that is outdated.'),
+                (13, None, 'It will be deleted in the'),
+                (14, None, 'near future.'),
+                (None, 14, 'compress anything.'),
+                (15, 15, ''),
+                (16, 16, 'It is important to spell'),
+                (17, None, 'check this dokument. On'),
+                (None, 17, 'check this document. On'),
+                (18, 18, 'the other hand, a'),
+                (19, 19, 'misspelled word isn\'t'),
+                (20, 20, 'the end of the world.'),
 
-                (patch.DIFF.equal, 22, 22, 'this paragraph needs to'),
-                (patch.DIFF.equal, 23, 23, 'be changed. Things can'),
-                (patch.DIFF.equal, 24, 24, 'be added after it.'),
-                (patch.DIFF.insert, None, 25, ''),
-                (patch.DIFF.insert, None, 26, 'This paragraph contains'),
-                (patch.DIFF.insert, None, 27, 'important new additions'),
-                (patch.DIFF.insert, None, 28, 'to this document.')
+                (22, 22, 'this paragraph needs to'),
+                (23, 23, 'be changed. Things can'),
+                (24, 24, 'be added after it.'),
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.')
                 ]
 
         results = [x for x in patch.parse_context_diff(text)]
-
         assert results == expected
 
+        results_main = [x for x in patch.parse_diff(text)]
+        assert result_main == expected
+
     def test_ed_diff(self):
-        text = """ 24a
+        text = """24a
 
- This paragraph contains
- important new additions
- to this document.
- .
- 17c
- check this document. On
- .
- 8,14c
- compress anything.
- .
- 0a
- This is an important
- notice! It should
- therefore be located at
- the beginning of this
- document!
+This paragraph contains
+important new additions
+to this document.
+.
+17c
+check this document. On
+.
+8,14c
+compress anything.
+.
+0a
+This is an important
+notice! It should
+therefore be located at
+the beginning of this
+document!
 
- .
-"""
+."""
         expected = [
-                # ed you so cray
-                (patch.DIFF.insert, None, 25, ''),
-                (patch.DIFF.insert, None, 26, 'This paragraph contains'),
-                (patch.DIFF.insert, None, 27, 'important new additions'),
-                (patch.DIFF.insert, None, 28, 'to this document.'),
+                # ed, you so cray
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.'),
 
-                (patch.DIFF.delete, 17, None, 'check this dokument. On'),
-                (patch.DIFF.insert, None, 17, 'check this document. On'),
+                (17, None, None),
+                (None, 17, 'check this document. On'),
 
-                (patch.DIFF.delete, 8, None, 'compress the size of the'),
-                (patch.DIFF.delete, 9, None, 'changes.'),
-                (patch.DIFF.delete, 10, None, ''),
-                (patch.DIFF.delete, 11, None, 'This paragraph contains'),
-                (patch.DIFF.delete, 12, None, 'text that is outdated.'),
-                (patch.DIFF.delete, 13, None, 'It will be deleted in the'),
-                (patch.DIFF.delete, 14, None, 'near future.'),
-                (patch.DIFF.insert, None, 14, 'compress anything.'),
+                # ed, aka the lossy diff format.
+                (8, None, None),
+                (9, None, None),
+                (10, None, None),
+                (11, None, None),
+                (12, None, None),
+                (13, None, None),
+                (14, None, None),
+                (None, 14, 'compress anything.'),
 
-                (patch.DIFF.insert, None, 1, 'This is an important'),
-                (patch.DIFF.insert, None, 2, 'notice! It should'),
-                (patch.DIFF.insert, None, 3, 'therefore be located at'),
-                (patch.DIFF.insert, None, 4, 'the beginning of this'),
-                (patch.DIFF.insert, None, 5, 'document!'),
-                (patch.DIFF.insert, None, 6, '')
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, '')
                 ]
 
         results = [x for x in patch.parse_ed_diff(text)]
-
         assert results == expected
+
+        results_main = [x for x in patch.parse_diff(text)]
+        assert result_main == expected
+
+        def test_rcs_ed_diff(self):
+            text="""a0 6
+This is an important
+notice! It should
+therefore be located at
+the beginning of this
+document!
+
+d8 7
+a14 1
+compress anything.
+d17 1
+a17 1
+check this document. On
+a24 4
+
+This paragraph contains
+important new additions
+to this document."""
+
+        expected = [
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, ''),
+
+                (8, None, None),
+                (9, None, None),
+                (10, None, None),
+                (11, None, None),
+                (12, None, None),
+                (13, None, None),
+                (14, None, None),
+
+                (None, 14, 'compress anything.'),
+
+                (17, None, None),
+
+                (None, 17, 'check this document. On'),
+
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.')
+                ]
+
+        results = [x for x in patch.parse_rcs_ed_diff(text)]
+        assert results == expected
+
+        results_main = [x for x in patch.parse_diff(text)]
+        assert result_main == expected
+
 
 if __name__ == '__main__':
     unittest.main()

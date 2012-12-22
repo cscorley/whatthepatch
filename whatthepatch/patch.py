@@ -9,24 +9,81 @@
 from __future__ import print_function
 import re
 
-class Enum(set):
-    # http://stackoverflow.com/a/2182437
-    def __getattr__(self, name):
-        if name in self:
-            return name
-        raise AttributeError
 
-DIFF = Enum(['delete', 'insert', 'equal'])
 
-#chunk_startu = re.compile('@@ -(\d+),(\d+) \+(\d+),(\d+) @@')
-chunk_startu = re.compile('@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
-chunk_startc = re.compile('\*\*\* (\d+),(\d+) \*\*\*')
-chunk_midc = re.compile('--- (\d+),(\d+) ---')
+# used by CVS, subversion, git
+unified_header_old_line = re.compile('^--- ([-/._\w ]+)[\s]*([\s\S]*)$')
+unified_header_new_line = re.compile('^\+\+\+ ([-/._\w ]+)[\s]*([\s\S]*)$')
+unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@$')
+unified_change = re.compile('^([-+ ])([\s\S]*)$')
 
-cvs_old_file_line = re.compile('--- ([-/._\w ]+)[\s]*(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')
-cvs_old_file_month = re.compile('--- ([-/._\w ]+)[\s]*(\d+) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})')
-cvs_new_file_line = re.compile('\+\+\+ ([-/._\w ]+)[\s]*(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')
-cvs_new_file_month = re.compile('\+\+\+ ([-/._\w ]+)[\s]*(\d+) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})')
+context_header_old_line = re.compile('^\*\*\* ([-/._\w ]+)[\s]*([\s\S]*)$')
+context_header_new_line = unified_header_new_line
+context_hunk_start = re.compile('^\*\*\* (\d+),(\d+) \*\*\*$')
+context_hunk_mid = re.compile('^--- (\d+),(\d+) ---$')
+context_change = re.compile('^([-+ !]) ([\s\S]*)$')
+
+ed_hunk_start = re.compile('^(\d+),?(\d*)([acd])$')
+ed_hunk_end = re.compile('^.$')
+
+# much like forward ed, but no 'c' type
+rcs_ed_hunk_start = re.compile('^([ad])(\d+) ?(\d*)$')
+
+default_hunk_start = re.compile('^(\d+),?(\d*)([acd])(\d+),?(\d*)$')
+default_hunk_mid = re.compile('^---$')
+defualt_change = re.compile('^([><]) ([\s\S]*)$')
+
+# Headers
+#
+# used by CVS, subversion
+index_header = re.compile('^Index: ([-/._\w ]+)$')
+
+# used by CVS
+rcs_header = re.compile('^RCS file: ([-/._\w ]+),\w{1}$')
+
+git_index_header = re.compile('index ([\w]{7})..([\w]{7}) \d+')
+svn_header_end_part = re.compile('\((?:working copy|revision (\d+))\)')
+
+# necessary?
+# can we just use some lib to parse the date for us?
+cvs_header_end_part1 = re.compile('(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')
+cvs_header_end_part2 = re.compile('(\d+) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})')
+
+# cvs header: split at tab, first item is file, second is date, third is
+# rev, but can't do this because when a patch is copy/pasted, editors
+# could mangle the tabs into spaces
+cvs_header_end_part = re.compile('([\s\S]+)[\s]+[\d.]+')
+
+# cvs header example
+"""
+Index: org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java
+===================================================================
+RCS file: /cvsroot/eclipse/org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java,v
+retrieving revision 1.6.4.1
+retrieving revision 1.8
+diff -u -r1.6.4.1 -r1.8
+--- org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	23 Jul 2001 17:51:45 -0000	1.6.4.1
++++ org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	17 May 2002 20:27:56 -0000	1.8
+@@ -1 +1 @@
+"""
+
+# svn header example
+"""
+Index: bug_cartographer/bug_method.py
+===================================================================
+--- bug_cartographer/bug_method.py  (revision 6534)
++++ bug_cartographer/bug_method.py  (working copy)
+@@ -1,80 +0,0 @@
+"""
+
+# git header example
+"""
+diff --git a/bugtrace/patch.py b/bugtrace/patch.py
+index a3aa076..52821d9 100644
+--- a/bugtrace/patch.py
++++ b/bugtrace/patch.py
+@@ -9,24 +9,68 @@
+"""
 
 
 def parse_patch(text):
@@ -87,21 +144,41 @@ def parse_patch(text):
     diffs.append(temp)
 
     for diff in diffs:
+        h = parse_header(diff)
         d = parse_diff(diff)
 
+
+def parse_header(text):
+    parsers = [parse_git_header, parse_svn_header, parse_cvs_header,
+            parse_unified_header, parse_context_header]
+
+    return parse_things(parsers, text)
+
 def parse_diff(text):
-    res = parse_default_diff(text)
+    parsers = [parse_unified_diff, parse_context_diff,
+            parse_default_diff, parse_ed_diff, parse_rcs_ed_diff]
 
-    if res is None:
-        res = parse_unified_diff(text)
+    return parse_things(parsers, text)
 
-    if res is None:
-        res = parse_context_diff(text)
+def parse_things(parsers, text):
+    for p in parsers:
+        try:
+            return p(text)
+        except Exception:
+            pass
 
-    if res is None:
-        res = parse_ed_diff(text)
+    return None
 
-    return res
+def parse_git_header(text):
+    pass
+def parse_svn_header(text):
+    pass
+def parse_cvs_header(text):
+    pass
+def parse_unified_header(text):
+    pass
+def parse_context_header(text):
+    pass
 
 def parse_default_diff(text):
     """
@@ -133,7 +210,7 @@ def parse_default_diff(text):
 > to this document.
 """
     for i in range(0, len(text)):
-        yield (DIFF.equal, i+1, i+1, text[i])
+        yield (i+1, i+1, text[i])
 
 def parse_unified_diff(text):
     """
@@ -178,7 +255,7 @@ def parse_unified_diff(text):
 +to this document.
 """
     for i in range(0, len(text)):
-        yield (DIFF.equal, i+1, i+1, text[i])
+        yield (i+1, i+1, text[i])
 
 def parse_context_diff(text):
     """
@@ -237,7 +314,7 @@ def parse_context_diff(text):
 + to this document.
 """
     for i in range(0, len(text)):
-        yield (DIFF.equal, i+1, i+1, text[i])
+        yield (i+1, i+1, text[i])
 
 def parse_ed_diff(text):
     """
@@ -263,4 +340,8 @@ def parse_ed_diff(text):
  .
 """
     for i in range(0, len(text)):
-        yield (DIFF.equal, i+1, i+1, text[i])
+        yield (i+1, i+1, text[i])
+
+def parse_rcs_ed_diff(text):
+    for i in range(0, len(text)):
+        yield (i+1, i+1, text[i])
