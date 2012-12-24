@@ -17,11 +17,11 @@ class PatchTestSuite(unittest.TestCase):
 > therefore be located at
 > the beginning of this
 > document!
->
+> 
 8,14c14
 < compress the size of the
 < changes.
-<
+< 
 < This paragraph contains
 < text that is outdated.
 < It will be deleted in the
@@ -33,7 +33,7 @@ class PatchTestSuite(unittest.TestCase):
 ---
 > check this document. On
 24a25,28
->
+> 
 > This paragraph contains
 > important new additions
 > to this document."""
@@ -68,13 +68,16 @@ class PatchTestSuite(unittest.TestCase):
         assert results == expected
 
         results_main = [x for x in patch.parse_diff(text)]
-        assert result_main == expected
+        assert results_main == expected
 
 
     def test_unified_diff(self):
         text = """--- /path/to/original   ''timestamp''
 +++ /path/to/new        ''timestamp''
 @@ -1,3 +1,9 @@
+"""
+
+        text = """@@ -1,3 +1,9 @@
 +This is an important
 +notice! It should
 +therefore be located at
@@ -155,12 +158,13 @@ class PatchTestSuite(unittest.TestCase):
         assert results == expected
 
         results_main = [x for x in patch.parse_diff(text)]
-        assert result_main == expected
+        assert results_main == expected
 
     def test_context_diff(self):
         text = """*** /path/to/original   ''timestamp''
 --- /path/to/new        ''timestamp''
-***************
+***************"""
+        text = """***************
 *** 1,3 ****
 --- 1,9 ----
 + This is an important
@@ -168,7 +172,7 @@ class PatchTestSuite(unittest.TestCase):
 + therefore be located at
 + the beginning of this
 + document!
-+
++ 
   This part of the
   document has stayed the
   same from version to
@@ -179,12 +183,12 @@ class PatchTestSuite(unittest.TestCase):
   would not be helping to
 ! compress the size of the
 ! changes.
-!
+! 
 ! This paragraph contains
 ! text that is outdated.
 ! It will be deleted in the
 ! near future.
-
+  
   It is important to spell
 ! check this dokument. On
   the other hand, a
@@ -195,7 +199,7 @@ class PatchTestSuite(unittest.TestCase):
   change.  Otherwise, that
   would not be helping to
 ! compress anything.
-
+  
   It is important to spell
 ! check this document. On
   the other hand, a
@@ -207,7 +211,7 @@ class PatchTestSuite(unittest.TestCase):
   this paragraph needs to
   be changed. Things can
   be added after it.
-+
++ 
 + This paragraph contains
 + important new additions
 + to this document."""
@@ -225,6 +229,7 @@ class PatchTestSuite(unittest.TestCase):
 
                 # merge the two sections of the hunk so that deletions
                 # are followed by the appropriate insertion
+                # follow up: that was a horrible idea.
                 (5, 11, 'be shown if it doesn\'t'),
                 (6, 12, 'change.  Otherwise, that'),
                 (7, 13, 'would not be helping to'),
@@ -257,7 +262,7 @@ class PatchTestSuite(unittest.TestCase):
         assert results == expected
 
         results_main = [x for x in patch.parse_diff(text)]
-        assert result_main == expected
+        assert results_main == expected
 
     def test_ed_diff(self):
         text = """24a
@@ -298,7 +303,13 @@ document!
                 (12, None, None),
                 (13, None, None),
                 (14, None, None),
-                (None, 14, 'compress anything.'),
+
+                # This is 14 in the other formats, because we are aware
+                # of the previous changes (incoming blow), which add
+                # the 6 lines (8+6=14)
+                (None, 8, 'compress anything.'),
+
+                # But, not in ed.
 
                 (None, 1, 'This is an important'),
                 (None, 2, 'notice! It should'),
@@ -312,10 +323,10 @@ document!
         assert results == expected
 
         results_main = [x for x in patch.parse_diff(text)]
-        assert result_main == expected
+        assert results_main == expected
 
-        def test_rcs_ed_diff(self):
-            text="""a0 6
+    def test_rcs_ed_diff(self):
+        text="""a0 6
 This is an important
 notice! It should
 therefore be located at
@@ -366,7 +377,7 @@ to this document."""
         assert results == expected
 
         results_main = [x for x in patch.parse_diff(text)]
-        assert result_main == expected
+        assert results_main == expected
 
 
 if __name__ == '__main__':
