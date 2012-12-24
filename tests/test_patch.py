@@ -7,6 +7,7 @@ from whatthepatch import patch
 
 import unittest
 from io import StringIO
+import dateutil.parser
 
 class PatchTestSuite(unittest.TestCase):
 
@@ -70,13 +71,88 @@ class PatchTestSuite(unittest.TestCase):
         results_main = [x for x in patch.parse_diff(text)]
         assert results_main == expected
 
+    def test_git_header(self):
+        text = """
+diff --git a/bugtrace/patch.py b/bugtrace/patch.py
+index 8910dfd..456e34f 100644
+--- a/bugtrace/patch.py
++++ b/bugtrace/patch.py
+@@ -8,20 +8,30 @@
+"""
+        expected = patch.header(old_path = 'bugtrace/patch.py',
+                old_version = '8910dfd',
+                new_path = 'bugtrace/patch.py',
+                new_version = '456e34f')
+
+        results = patch.parse_git_header(text)
+        print(expected)
+        print('~~~~~~')
+        print(results)
+        assert results == expected
+
+        results_main = patch.parse_header(text)
+        assert results_main == expected
+
+    def test_svn_header(self):
+        text = """
+Index: bugtrace/trunk/src/bugtrace/csc.py
+===================================================================
+--- bugtrace/trunk/src/bugtrace/csc.py  (revision 12783)
++++ bugtrace/trunk/src/bugtrace/csc.py  (revision 12784)
+@@ -1,3 +1,6 @@
+"""
+        expected = patch.header(old_path = 'bugtrace/trunk/src/bugtrace/csc.py',
+                old_version = 12783,
+                new_path = 'bugtrace/trunk/src/bugtrace/csc.py',
+                new_version = 12784)
+        results = patch.parse_svn_header(text)
+        assert results == expected
+
+        results_main = patch.parse_header(text)
+        assert results_main == expected
+
+    def test_cvs_header(self):
+        text = """Index: org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java
+===================================================================
+RCS file: /cvsroot/eclipse/org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java,v
+retrieving revision 1.6.4.1
+retrieving revision 1.8
+diff -u -r1.6.4.1 -r1.8
+--- org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	23 Jul 2001 17:51:45 -0000	1.6.4.1
++++ org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	17 May 2002 20:27:56 -0000	1.8
+@@ -1 +1 @@
+"""
+        expected = patch.header(old_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
+                old_version = '1.6.4.1',
+                new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
+                new_version = '1.8')
+        results = patch.parse_cvs_header(text)
+        assert results == expected
+
+        results_main = patch.parse_header(text)
+        assert results_main == expected
+
+    def test_unified_header(self):
+        text = """--- /tmp/o  2012-12-22 06:43:35.000000000 -0600
++++ /tmp/n  2012-12-23 20:40:50.000000000 -0600
+@@ -1,3 +1,9 @@"""
+
+        expected = patch.header(old_path = '/tmp/o',
+                old_version = dateutil.parser.parse('2012-12-22 06:43:35.000000000 -0600'),
+                new_path = '/tmp/n',
+                new_version = dateutil.parser.parse('2012-12-23 20:40:50.000000000 -0600'))
+
+        results = patch.parse_unified_header(text)
+        assert results == expected
+
+        results_main = patch.parse_header(text)
+        print(expected)
+        print('~~~~~~')
+        print(results)
+        assert results_main == expected
+
 
     def test_unified_diff(self):
-        text = """--- /path/to/original   ''timestamp''
-+++ /path/to/new        ''timestamp''
-@@ -1,3 +1,9 @@
-"""
-
         text = """@@ -1,3 +1,9 @@
 +This is an important
 +notice! It should
@@ -160,10 +236,24 @@ class PatchTestSuite(unittest.TestCase):
         results_main = [x for x in patch.parse_diff(text)]
         assert results_main == expected
 
-    def test_context_diff(self):
-        text = """*** /path/to/original   ''timestamp''
---- /path/to/new        ''timestamp''
+    def test_context_header(self):
+        text = """*** /tmp/o   2012-12-22 06:43:35.000000000 -0600
+--- /tmp/n  2012-12-23 20:40:50.000000000 -0600
 ***************"""
+
+        expected = patch.header(old_path = '/tmp/o',
+                old_version = dateutil.parser.parse('2012-12-22 06:43:35.000000000 -0600'),
+                new_path = '/tmp/n',
+                new_version = dateutil.parser.parse('2012-12-23 20:40:50.000000000 -0600'))
+
+        results = patch.parse_context_header(text)
+        assert results == expected
+
+        results_main = patch.parse_header(text)
+        assert results_main == expected
+
+
+    def test_context_diff(self):
         text = """***************
 *** 1,3 ****
 --- 1,9 ----

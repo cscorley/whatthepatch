@@ -8,20 +8,30 @@
 
 from __future__ import print_function
 import re
+from collections import namedtuple
 
-from snippets import split_by_regex
+import dateutil.parser
 
+from snippets import split_by_regex, findall_regex
+
+date_header = namedtuple('date_header',
+        'old_path old_datetime new_path new_datetime')
+revision_header = namedtuple('revision_header',
+        'old_path old_rev new_path new_rev')
+
+header = namedtuple('header',
+        'old_path old_version new_path new_version')
 
 # general diff regex
 diff_command_header = re.compile('^diff ([\s\S]+)$')
-unified_index_header = re.compile('^Index: ([-/._\w ]+)$')
-unified_header_old_line = re.compile('^--- ([-/._\w ]+)[\s]*([\s\S]*)$')
-unified_header_new_line = re.compile('^\+\+\+ ([-/._\w ]+)[\s]*([\s\S]*)$')
+unified_index_header = re.compile('^Index: ([\s\S]+)$')
+unified_header_old_line = re.compile('^--- ([-/._\w]+)\s+([\s\S]*)$')
+unified_header_new_line = re.compile('^\+\+\+ ([-/._\w]+)\s+([\s\S]*)$')
 unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@$')
 unified_change = re.compile('^([-+ ])([\s\S]*)$')
 
-context_header_old_line = re.compile('^\*\*\* ([-/._\w ]+)[\s]*([\s\S]*)$')
-context_header_new_line = unified_header_new_line
+context_header_old_line = re.compile('^\*\*\* ([-/._\w]+)\s+([\s\S]*)$')
+context_header_new_line = unified_header_old_line
 context_hunk_start = re.compile('^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
 context_hunk_old = re.compile('^\*\*\* (\d+),(\d+) \*\*\*\*$')
 context_hunk_new = re.compile('^--- (\d+),(\d+) ----$')
@@ -40,8 +50,12 @@ default_change = re.compile('^([><]) ([\s\S]*)$')
 
 # git has a special index header and no end part
 git_index_header = re.compile('index ([\w]{7})..([\w]{7}) \d+')
-git_header_old_line = unified_header_old_line
-git_header_new_line = unified_header_new_line
+git_header_old_line = re.compile('^--- a/([\s\S]+)$')
+git_header_new_line = re.compile('^\+\+\+ b/([\s\S]+)$')
+
+bzr_index_header = re.compile("=== ([\s\S]+)")
+bzr_header_old_line = unified_header_old_line
+bzr_header_new_line = unified_header_new_line
 
 svn_index_header = unified_index_header
 svn_header_old_line = unified_header_old_line
@@ -49,10 +63,10 @@ svn_header_new_line = unified_header_new_line
 svn_header_end_part = re.compile('\((?:working copy|revision (\d+))\)')
 
 cvs_index_header = unified_index_header
-cvs_rcs_header = re.compile('^RCS file: ([-/._\w ]+),\w{1}$')
+cvs_rcs_header = re.compile('^RCS file: ([\s\S]+),\w{1}$')
 cvs_header_old_line = unified_header_old_line
 cvs_header_new_line = unified_header_new_line
-cvs_header_end_part = re.compile('([\s\S]+)[\s]+[\d.]+')
+cvs_header_end_part = re.compile('([\s\S]+)\s+([\d.]+)')
 
 # old date regex -- will try to replace with datetime parsing
 cvs_header_end_part1 = re.compile('(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')
@@ -79,7 +93,7 @@ def parse_patch(text):
 
 
 def parse_header(text):
-    parsers = [parse_git_header, parse_svn_header, parse_cvs_header,
+    parsers = [parse_cvs_header, parse_git_header, parse_svn_header,
             parse_unified_header, parse_context_header]
 
     return parse_things(parsers, text)
@@ -102,15 +116,136 @@ def parse_things(parsers, text):
     return None
 
 def parse_git_header(text):
-    pass
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, git_index_header)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        g = git_index_header.match(lines[0])
+        o = git_header_old_line.match(lines[0])
+        del lines[0]
+        if g:
+            over = g.group(1)
+            nver = g.group(2)
+            g = None
+        if o:
+            n = git_header_new_line.match(lines[0])
+            del lines[0]
+            if n:
+                return header(old_path = o.group(1),
+                        old_version = over,
+                        new_path = n.group(1),
+                        new_version = nver)
+
+    return None
+
 def parse_svn_header(text):
-    pass
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, svn_index_header)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        o = svn_header_old_line.match(lines[0])
+        del lines[0]
+        if o:
+            n = svn_header_new_line.match(lines[0])
+            del lines[0]
+            if n:
+                oend = svn_header_end_part.match(o.group(2))
+                nend = svn_header_end_part.match(n.group(2))
+                if oend and nend:
+                    return header(old_path = o.group(1),
+                            old_version = int(oend.group(1)),
+                            new_path = n.group(1),
+                            new_version = int(nend.group(1)))
+
+    return None
+
 def parse_cvs_header(text):
-    pass
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, cvs_rcs_header)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        o = cvs_header_old_line.match(lines[0])
+        del lines[0]
+        if o:
+            n = cvs_header_new_line.match(lines[0])
+            del lines[0]
+            if n:
+                oend = cvs_header_end_part.match(o.group(2))
+                nend = cvs_header_end_part.match(n.group(2))
+                if oend and nend:
+                    return header(old_path = o.group(1),
+                            old_version = oend.group(2),
+                            new_path = n.group(1),
+                            new_version = nend.group(2))
+
+    return None
+
 def parse_unified_header(text):
-    pass
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, unified_header_old_line)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        o = unified_header_old_line.match(lines[0])
+        del lines[0]
+        if o:
+            n = unified_header_new_line.match(lines[0])
+            del lines[0]
+            if n:
+                return header(old_path = o.group(1),
+                        old_version = dateutil.parser.parse(o.group(2)),
+                        new_path = n.group(1),
+                        new_version = dateutil.parser.parse(n.group(2)))
+
+    return None
+
 def parse_context_header(text):
-    pass
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, context_header_old_line)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        o = context_header_old_line.match(lines[0])
+        del lines[0]
+        if o:
+            n = context_header_new_line.match(lines[0])
+            del lines[0]
+            if n:
+                return header(old_path = o.group(1),
+                        old_version = dateutil.parser.parse(o.group(2)),
+                        new_path = n.group(1),
+                        new_version = dateutil.parser.parse(n.group(2)))
+
+    return None
+
 
 def parse_default_diff(text):
     if type(text) == str:
