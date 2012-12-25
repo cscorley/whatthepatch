@@ -1,0 +1,32 @@
+Index: bugtrace/trunk/src/bugtrace/csc.py
+===================================================================
+0a1,3
+> # This is a basic script I wrote to run Bugxplore over the dataset
+> 
+> 
+8,9c11,12
+< from Main import main
+< from Main import _make_dir
+---
+> from Bugxplore import main
+> from Bugxplore import _make_dir
+Index: bugtrace/trunk/src/bugtrace/Diffxplore.py
+===================================================================
+49c49
+<     optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')
+---
+>     optparser.set_defaults(output_dir='/tmp/diffs')
+53c53
+<     optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')
+---
+> 
+Index: bugtrace/trunk/src/bugtrace/Bugxplore.py
+===================================================================
+86c86
+<     optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')
+---
+>     optparser.set_defaults(output_dir='/tmp/bugs')
+91c91
+<     optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')
+---
+> 

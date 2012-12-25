@@ -1,0 +1,48 @@
+diff --git a/novel/src/java/edu/ua/eng/software/novel/NovelFrame.java b/novel/src/java/edu/ua/eng/software/novel/NovelFrame.java
+index aae63fe..5abbc99 100644
+--- a/novel/src/java/edu/ua/eng/software/novel/NovelFrame.java
++++ b/novel/src/java/edu/ua/eng/software/novel/NovelFrame.java
+@@ -135,9 +135,11 @@ public class NovelFrame extends JFrame implements ActionListener
+     public void actionPerformed(ActionEvent e) {
+ 
+         if (e.getActionCommand().equals("OPEN")) {
+-            prefsDialog(prefs.getImportPane());
++            prefs.selectImportPane();
++            prefsDialog();
+         } else if (e.getActionCommand().equals("SET")) {
+-            prefsDialog(prefs.getRepoPane());
++            prefs.selectRepoPane();
++            prefsDialog();
+         } else if (e.getActionCommand().equals("PREFS"))
+             prefsDialog();
+         else if (e.getActionCommand().equals("EXIT"))
+@@ -158,15 +160,9 @@ public class NovelFrame extends JFrame implements ActionListener
+      * Create dialog to handle user preferences
+      */
+     public void prefsDialog() {
+-
+         prefs.setVisible(true);
+     }
+ 
+-    public void prefsDialog(Component c) {
+-        prefs.setSelectedComponent(c);
+-        prefsDialog();
+-    }
+-
+     /**
+      * Open software tutorials, most likely to be hosted online
+      * 
+diff --git a/novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java b/novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java
+index a63b57e..919f413 100644
+--- a/novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java
++++ b/novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java
+@@ -18,6 +18,8 @@ public abstract class NovelPrefPane extends JPanel
+ 
+     public abstract void apply();
+ 
++    public abstract void applyPrefs();
++
+     public abstract boolean isChanged();
+ 
+     protected Preferences prefs;
+\ No newline at end of file

@@ -1,0 +1,59 @@
+Index: bugtrace/trunk/src/bugtrace/csc.py
+===================================================================
+--- bugtrace/trunk/src/bugtrace/csc.py	(revision 12783)
++++ bugtrace/trunk/src/bugtrace/csc.py	(revision 12784)
+@@ -1,3 +1,6 @@
++# This is a basic script I wrote to run Bugxplore over the dataset
++
++
+ import os
+ import sys
+ import pickle
+@@ -5,8 +8,8 @@
+ import copy
+ 
+ from datetime import date
+-from Main import main
+-from Main import _make_dir
++from Bugxplore import main
++from Bugxplore import _make_dir
+ 
+ storageDir = '/tmp/csc/bugs/'
+ argv = []
+Index: bugtrace/trunk/src/bugtrace/Diffxplore.py
+===================================================================
+--- bugtrace/trunk/src/bugtrace/Diffxplore.py	(revision 12783)
++++ bugtrace/trunk/src/bugtrace/Diffxplore.py	(revision 12784)
+@@ -46,11 +46,11 @@
+ 
+     # Configure option parser
+     optparser = OptionParser(usage='%prog [options] DIFF_FILE', version='0.1')
+-    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')
++    optparser.set_defaults(output_dir='/tmp/diffs')
+     optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')
+     optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')
+     optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')
+-    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')
++
+     # Invoke option parser
+     (options,args) = optparser.parse_args(argv)
+ 
+Index: bugtrace/trunk/src/bugtrace/Bugxplore.py
+===================================================================
+--- bugtrace/trunk/src/bugtrace/Bugxplore.py	(revision 12783)
++++ bugtrace/trunk/src/bugtrace/Bugxplore.py	(revision 12784)
+@@ -83,12 +83,12 @@
+ 
+     # Configure option parser
+     optparser = OptionParser(usage='%prog [options] BUG_IDS', version='0.1')
+-    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')
++    optparser.set_defaults(output_dir='/tmp/bugs')
+     optparser.add_option('-u', '--bugzilla-url', dest='bugzilla_url', help='URL of Bugzilla installation root')
+     optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')
+     optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')
+     optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')
+-    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')
++
+     # Invoke option parser
+     (options,args) = optparser.parse_args(argv)
+     

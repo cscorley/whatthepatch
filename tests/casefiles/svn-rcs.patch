@@ -1,0 +1,26 @@
+Index: bugtrace/trunk/src/bugtrace/csc.py
+===================================================================
+a0 3
+# This is a basic script I wrote to run Bugxplore over the dataset
+
+
+d8 2
+a9 2
+from Bugxplore import main
+from Bugxplore import _make_dir
+Index: bugtrace/trunk/src/bugtrace/Diffxplore.py
+===================================================================
+d49 1
+a49 1
+    optparser.set_defaults(output_dir='/tmp/diffs')
+d53 1
+a53 1
+
+Index: bugtrace/trunk/src/bugtrace/Bugxplore.py
+===================================================================
+d86 1
+a86 1
+    optparser.set_defaults(output_dir='/tmp/bugs')
+d91 1
+a91 1
+

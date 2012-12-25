@@ -71,6 +71,71 @@ class PatchTestSuite(unittest.TestCase):
         results_main = [x for x in patch.parse_diff(text)]
         assert results_main == expected
 
+    def test_git_patch(self):
+        with open('tests/casefiles/git.patch') as f:
+            text = f.read()
+
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        old_path='novel/src/java/edu/ua/eng/software/novel/NovelFrame.java',
+                        old_version='aae63fe',
+                        new_path='novel/src/java/edu/ua/eng/software/novel/NovelFrame.java',
+                        new_version='5abbc99'
+                        ),
+                    changes=[
+                        (135, 135, '    public void actionPerformed(ActionEvent e) {'),
+                        (136, 136, ''),
+                        (137, 137, '        if (e.getActionCommand().equals("OPEN")) {'),
+                        (138, None, '            prefsDialog(prefs.getImportPane());'),
+                        (None, 138, '            prefs.selectImportPane();'),
+                        (None, 139, '            prefsDialog();'),
+                        (139, 140, '        } else if (e.getActionCommand().equals("SET")) {'),
+                        (140, None, '            prefsDialog(prefs.getRepoPane());'),
+                        (None, 141, '            prefs.selectRepoPane();'),
+                        (None, 142, '            prefsDialog();'),
+                        (141, 143, '        } else if (e.getActionCommand().equals("PREFS"))'),
+                        (142, 144, '            prefsDialog();'),
+                        (143, 145, '        else if (e.getActionCommand().equals("EXIT"))'),
+                        (158, 160, '     * Create dialog to handle user preferences'),
+                        (159, 161, '     */'),
+                        (160, 162, '    public void prefsDialog() {'),
+                        (161, None, ''),
+                        (162, 163, '        prefs.setVisible(true);'),
+                        (163, 164, '    }'),
+                        (164, 165, ''),
+                        (165, None, '    public void prefsDialog(Component c) {'),
+                        (166, None, '        prefs.setSelectedComponent(c);'),
+                        (167, None, '        prefsDialog();'),
+                        (168, None, '    }'),
+                        (169, None, ''),
+                        (170, 166, '    /**'),
+                        (171, 167, '     * Open software tutorials, most likely to be hosted online'),
+                        (172, 168, '     * ')]),
+                    patch.diffobj(
+                        header=patch.header(
+                            old_path='novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java',
+                            old_version='a63b57e',
+                            new_path='novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java',
+                            new_version='919f413'
+                            ),
+                        changes=[
+                            (18, 18, ''),
+                            (19, 19, '    public abstract void apply();'),
+                            (20, 20, ''),
+                            (None, 21, '    public abstract void applyPrefs();'),
+                            (None, 22, ''),
+                            (21, 23, '    public abstract boolean isChanged();'),
+                            (22, 24, ''),
+                            (23, 25, '    protected Preferences prefs;')]
+                        )
+                    ]
+
+        results = [x for x in patch.parse_patch(text)]
+
+        assert results == expected
+
+
     def test_git_header(self):
         text = """
 diff --git a/bugtrace/patch.py b/bugtrace/patch.py
@@ -85,9 +150,6 @@ index 8910dfd..456e34f 100644
                 new_version = '456e34f')
 
         results = patch.parse_git_header(text)
-        print(expected)
-        print('~~~~~~')
-        print(results)
         assert results == expected
 
         results_main = patch.parse_header(text)
@@ -146,9 +208,6 @@ diff -u -r1.6.4.1 -r1.8
         assert results == expected
 
         results_main = patch.parse_header(text)
-        print(expected)
-        print('~~~~~~')
-        print(results)
         assert results_main == expected
 
 
