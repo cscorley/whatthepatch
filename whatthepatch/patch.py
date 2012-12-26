@@ -77,7 +77,6 @@ def parse_patch(text):
         lines = text
 
     check = [
-            git_diff_command_header,
             git_index_header,
             svn_index_header,
             cvs_rcs_header,
@@ -115,7 +114,28 @@ def parse_scm_header(text):
     for c in check:
         diffs = findall_regex(lines, c[0])
         if len(diffs) > 0:
-            return c[1](lines)
+            git_opt = findall_regex(lines, git_diff_command_header)
+            if len(git_opt) > 0:
+                res = c[1](lines)
+                old_path = res.old_path
+                new_path = res.new_path
+                if old_path.startswith('a/'):
+                    old_path = old_path[2:]
+
+                if new_path.startswith('b/'):
+                    new_path = new_path[2:]
+
+                return header(
+                        index_path=res.index_path,
+                        old_path = old_path,
+                        old_version = res.old_version,
+                        new_path = new_path,
+                        new_version = res.new_version
+                        )
+            else:
+                res = c[1](lines)
+
+            return res
 
 def parse_diff_header(text):
     if type(text) == str:
@@ -212,8 +232,6 @@ def parse_svn_header(text):
                 oend = svn_header_timestamp.match(diff_header.old_version)
                 nend = svn_header_timestamp.match(diff_header.new_version)
                 if oend and nend:
-                    print(oend.groups())
-                    print(nend.groups())
                     return header(
                             index_path = i.group(1),
                             old_path = diff_header.old_path,
@@ -624,25 +642,27 @@ def parse_rcs_ed_diff(text):
     changes = list()
 
     hunks = split_by_regex(lines, rcs_ed_hunk_start)
+    print(hunks)
     for hunk in hunks:
         if len(hunk):
             j = 0
-            k = 0
             while len(hunk) > 0:
                 o = rcs_ed_hunk_start.match(hunk[0])
                 del hunk[0]
                 if o:
+                    hunk_kind = o.group(1)
                     old = int(o.group(2))
                     size = int(o.group(3))
 
-                    hunk_kind = o.group(1)
                     if hunk_kind == 'a':
-                        while len(hunk) > 0:
+                        print(hunk)
+                        while size > 0 and len(hunk) > 0:
                             if just_deleted:
                                 changes.append((None, old + j, hunk[0]))
                             else:
                                 changes.append((None, old + j+1, hunk[0]))
                             j += 1
+                            size -= 1
 
                             del hunk[0]
                         just_deleted = False

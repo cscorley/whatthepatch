@@ -71,9 +71,6 @@ class PatchTestSuite(unittest.TestCase):
         assert results_main == expected
 
     def test_svn_unified_patch(self):
-        with open('tests/casefiles/svn-unified.patch') as f:
-            text = f.read()
-
         expected = [
                 patch.diffobj(
                     header=patch.header(
@@ -153,6 +150,9 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
+        with open('tests/casefiles/svn-unified.patch') as f:
+            text = f.read()
+
         results = [x for x in patch.parse_patch(text)]
 
         assert results == expected
@@ -162,6 +162,152 @@ class PatchTestSuite(unittest.TestCase):
         results = [x for x in patch.parse_patch(text)]
 
         assert results == expected
+
+    def test_svn_git_patch(self):
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
+                        old_version=12783,
+                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
+                        new_version=12784,
+                        ),
+                    changes=[
+                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
+                        (None, 2, ''),
+                        (None, 3, ''),
+                        (1, 4, 'import os'),
+                        (2, 5, 'import sys'),
+                        (3, 6, 'import pickle'),
+                        (5, 8, 'import copy'),
+                        (6, 9, ''),
+                        (7, 10, 'from datetime import date'),
+                        (8, None, 'from Main import main'),
+                        (9, None, 'from Main import _make_dir'),
+                        (None, 11, 'from Bugxplore import main'),
+                        (None, 12, 'from Bugxplore import _make_dir'),
+                        (10, 13, ''),
+                        (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
+                        (12, 15, 'argv = []'),
+                        ]
+                   ),
+                patch.diffobj(
+                    header=patch.header(
+                        index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        old_version=12783,
+                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        new_version=12784,
+                        ),
+                    changes=[
+                        (46, 46, ''),
+                        (47, 47, '    # Configure option parser'),
+                        (48, 48, "    optparser = OptionParser(usage='%prog [options] DIFF_FILE', version='0.1')"),
+                        (49, None, "    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')"),
+                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
+                        (50, 50, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
+                        (51, 51, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
+                        (52, 52, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
+                        (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
+                        (None, 53, ''),
+                        (54, 54, '    # Invoke option parser'),
+                        (55, 55, '    (options,args) = optparser.parse_args(argv)'),
+                        (56, 56, ''),
+                        ]
+                    ),
+                patch.diffobj(
+                    header=patch.header(
+                        index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        old_version=12783,
+                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        new_version=12784,
+                        ),
+                    changes=[
+                        (83, 83, ''),
+                        (84, 84, '    # Configure option parser'),
+                        (85, 85, "    optparser = OptionParser(usage='%prog [options] BUG_IDS', version='0.1')"),
+                        (86, None, "    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')"),
+                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
+                        (87, 87, "    optparser.add_option('-u', '--bugzilla-url', dest='bugzilla_url', help='URL of Bugzilla installation root')"),
+                        (88, 88, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
+                        (89, 89, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
+                        (90, 90, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
+                        (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
+                        (None, 91, ''),
+                        (92, 92, '    # Invoke option parser'),
+                        (93, 93, '    (options,args) = optparser.parse_args(argv)'),
+                        (94, 94, '    '),
+                        ]
+                    )
+                    ]
+
+        with open('tests/casefiles/svn-git.patch') as f:
+            text = f.read()
+        results = [x for x in patch.parse_patch(text)]
+
+        assert results == expected
+
+    def test_svn_rcs_patch(self):
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
+                        old_path='bugtrace/trunk/src/bugtrace/csc.py',
+                        old_version=None,
+                        new_path='bugtrace/trunk/src/bugtrace/csc.py',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
+                        (None, 2, ''),
+                        (None, 3, ''),
+                        (8, None, None),
+                        (9, None, None),
+                        (None, 9, 'from Bugxplore import main'),
+                        (None, 10, 'from Bugxplore import _make_dir'),
+                        ]
+                   ),
+                patch.diffobj(
+                    header=patch.header(
+                        index_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        old_version=None,
+                        new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (49, None, None),
+                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
+                        (53, None, None),
+                        (None, 53, ''),
+                        ]
+                    ),
+                patch.diffobj(
+                    header=patch.header(
+                        index_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        old_version=None,
+                        new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (86, None, None),
+                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
+                        (91, None, None),
+                        (None, 91, ''),
+                        ]
+                    )
+                    ]
+        with open('tests/casefiles/svn-rcs.patch') as f:
+            text = f.read()
+        results = [x for x in patch.parse_patch(text)]
+        print(expected)
+        print('~~~~~~')
+        print(results)
+        assert results == expected
+
 
     def test_svn_default_patch(self):
         expected = [
@@ -218,6 +364,7 @@ class PatchTestSuite(unittest.TestCase):
             text = f.read()
         results = [x for x in patch.parse_patch(text)]
         assert results == expected
+
 
     def test_git_patch(self):
         with open('tests/casefiles/git.patch') as f:
@@ -345,9 +492,6 @@ diff -u -r1.6.4.1 -r1.8
                 new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 new_version = '1.8')
         results = patch.parse_cvs_header(text)
-        print(expected)
-        print('~~~~~~')
-        print(results)
         assert results == expected
 
         results_main = patch.parse_scm_header(text)
