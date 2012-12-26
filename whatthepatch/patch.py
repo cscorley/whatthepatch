@@ -636,13 +636,13 @@ def parse_rcs_ed_diff(text):
     old = 0
     new = 0
     j = 0
-    k = 0
-    just_deleted = False
+    size = 0
+    total_change_size = 0
 
     changes = list()
 
+
     hunks = split_by_regex(lines, rcs_ed_hunk_start)
-    print(hunks)
     for hunk in hunks:
         if len(hunk):
             j = 0
@@ -654,24 +654,23 @@ def parse_rcs_ed_diff(text):
                     old = int(o.group(2))
                     size = int(o.group(3))
 
+
                     if hunk_kind == 'a':
-                        print(hunk)
+                        old += total_change_size + 1
+                        total_change_size += size
                         while size > 0 and len(hunk) > 0:
-                            if just_deleted:
-                                changes.append((None, old + j, hunk[0]))
-                            else:
-                                changes.append((None, old + j+1, hunk[0]))
+                            changes.append((None, old + j, hunk[0]))
                             j += 1
                             size -= 1
 
                             del hunk[0]
-                        just_deleted = False
+
                     elif hunk_kind == 'd':
+                        total_change_size -= size
                         while size > 0:
                             changes.append((old + j, None, None))
                             j += 1
                             size -= 1
-                        just_deleted = True # lol joke diffs
 
     if len(changes) > 0:
         return changes

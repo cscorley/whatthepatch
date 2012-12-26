@@ -265,8 +265,8 @@ class PatchTestSuite(unittest.TestCase):
                         (None, 3, ''),
                         (8, None, None),
                         (9, None, None),
-                        (None, 9, 'from Bugxplore import main'),
-                        (None, 10, 'from Bugxplore import _make_dir'),
+                        (None, 11, 'from Bugxplore import main'),
+                        (None, 12, 'from Bugxplore import _make_dir'),
                         ]
                    ),
                 patch.diffobj(
