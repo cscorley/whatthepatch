@@ -451,7 +451,7 @@ index 8910dfd..456e34f 100644
         results = patch.parse_git_header(text)
         assert results == expected
 
-        results_main = patch.parse_scm_header(text)
+        results_main = patch.parse_header(text)
         assert results_main == expected
 
     def test_svn_header(self):
@@ -471,7 +471,7 @@ Index: bugtrace/trunk/src/bugtrace/csc.py
         results = patch.parse_svn_header(text)
         assert results == expected
 
-        results_main = patch.parse_scm_header(text)
+        results_main = patch.parse_header(text)
         assert results_main == expected
 
     def test_cvs_header(self):
@@ -494,7 +494,7 @@ diff -u -r1.6.4.1 -r1.8
         results = patch.parse_cvs_header(text)
         assert results == expected
 
-        results_main = patch.parse_scm_header(text)
+        results_main = patch.parse_header(text)
         assert results_main == expected
 
     def test_unified_header(self):
@@ -512,7 +512,7 @@ diff -u -r1.6.4.1 -r1.8
         results = patch.parse_unified_header(text)
         assert results == expected
 
-        results_main = patch.parse_diff_header(text)
+        results_main = patch.parse_header(text)
         assert results_main == expected
 
 
@@ -615,7 +615,7 @@ diff -u -r1.6.4.1 -r1.8
         results = patch.parse_context_header(text)
         assert results == expected
 
-        results_main = patch.parse_diff_header(text)
+        results_main = patch.parse_header(text)
         assert results_main == expected
 
 

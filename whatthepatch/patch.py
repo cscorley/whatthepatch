@@ -18,7 +18,7 @@ header = namedtuple('header',
 diffobj = namedtuple('diff', 'header changes')
 
 # general diff regex
-diff_command_header = re.compile('^diff ([\s\S]+)$')
+diff_command_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
 unified_index_header = re.compile('^Index: ([\s\S]+)$')
 unified_header_old_line = re.compile('^--- ([-/._\w]+)\s+([\s\S]*)$')
 unified_header_new_line = re.compile('^\+\+\+ ([-/._\w]+)\s+([\s\S]*)$')
@@ -77,10 +77,9 @@ def parse_patch(text):
         lines = text
 
     check = [
-            git_index_header,
-            svn_index_header,
-            cvs_rcs_header,
             unified_index_header,
+            git_index_header,
+            cvs_rcs_header,
             diff_command_header,
             context_header_old_line,
             unified_header_old_line,
@@ -92,13 +91,16 @@ def parse_patch(text):
             break
 
     for diff in diffs:
-        h = parse_scm_header(diff)
-        if h is None:
-            h = parse_diff_header(diff)
+        h = parse_header(diff)
         d = parse_diff(diff)
         if h and d:
             yield diffobj(header=h, changes=d)
 
+def parse_header(text):
+    h = parse_scm_header(text)
+    if h is None:
+        h = parse_diff_header(text)
+    return h
 
 def parse_scm_header(text):
     if type(text) == str:
@@ -145,6 +147,7 @@ def parse_diff_header(text):
     check = [
             (unified_header_new_line, parse_unified_header),
             (context_header_old_line, parse_context_header),
+            (diff_command_header, parse_diff_command_header),
             ]
 
     for c in check:
@@ -292,6 +295,30 @@ def parse_cvs_header(text):
                     old_path = i.group(1),
                     old_version = None,
                     new_path = i.group(1),
+                    new_version = None,
+                    )
+
+    return None
+
+def parse_diff_command_header(text):
+    if type(text) == str:
+        lines = text.split('\n')
+    else:
+        lines = text
+
+    headers = findall_regex(lines, diff_command_header)
+    if len(headers) == 0:
+        return None
+
+    while len(lines) > 0:
+        d = diff_command_header.match(lines[0])
+        del lines[0]
+        if d:
+            return header(
+                    index_path = None,
+                    old_path = d.group(1),
+                    old_version = None,
+                    new_path = d.group(2),
                     new_version = None,
                     )
 
