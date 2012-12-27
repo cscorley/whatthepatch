@@ -18,6 +18,19 @@ setup(
     author_email='cscorley@ua.edu',
     url='https://github.com/cscorley/whatthepatch',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs')),
+    keywords = [],
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Operating System :: OS Independent",
+        "License :: OSI Approved :: BSD License",
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Science/Research",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Software Development :: Version Control",
+        "Topic :: Text Processing",
+        ],
 )
 
