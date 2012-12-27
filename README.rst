@@ -9,8 +9,11 @@ Features
 ---------
 
 - Parsing of all ``diff`` formats (except forwarded ed):
+
   - normal, context, unified, ed script, and rcs ed script
+
 - Parsing of several SCM patches:
+
   - CVS
   - SVN
   - Git
@@ -89,4 +92,14 @@ Let us say we have a patch file containing some changes, aptly named
 
 *Edited to show structure of the results*
 
+The changes are listed as they are in the patch, but instead of the +/- syntax
+of the patch, we get a tuple of two numbers and the text of the line.
+What these numbers indicate are as follows:
+
+#. ``( 1, None, ... )`` indicates line 1 of the file lao was **removed**.
+#. ``( None, 2, ... )`` indicates line 2 of the file tzu was **inserted**.
+#. ``( 5, 4, ... )`` indicates that line 5 of lao, and line 4 of tzu are **equal**.
+
+Please note that not all patch formats provide the actual lines modified, so some 
+results will have the text portion of the tuple set to ``None``.
 
