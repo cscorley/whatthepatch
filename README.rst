@@ -8,9 +8,13 @@ usable form by other programs.
 Features
 ---------
 
-- Parsing of all ``diff`` formats (except forwarded ed):
+- Parsing of almost all ``diff`` formats (except forwarded ed):
 
-  - normal, context, unified, ed script, and rcs ed script
+  - normal (default, --normal)
+  - copied context (-c, --context)
+  - unified context (-u, --unified)
+  - ed script (-e, --ed)
+  - rcs ed script (-n, --rcs)
 
 - Parsing of several SCM patches:
 
@@ -56,6 +60,8 @@ Let us say we have a patch file containing some changes, aptly named
     +The door of all subtleties!
 
 
+Here is how we would use What The Patch!? in Python to get the changeset for each diff in the patch:
+
 .. code-block:: python
 
     >>> import whatthepatch.patch
@@ -98,8 +104,16 @@ What these numbers indicate are as follows:
 
 #. ``( 1, None, ... )`` indicates line 1 of the file lao was **removed**.
 #. ``( None, 2, ... )`` indicates line 2 of the file tzu was **inserted**.
-#. ``( 5, 4, ... )`` indicates that line 5 of lao, and line 4 of tzu are **equal**.
+#. ``( 5, 4, ... )`` indicates that line 5 of lao and line 4 of tzu are **equal**.
 
 Please note that not all patch formats provide the actual lines modified, so some 
 results will have the text portion of the tuple set to ``None``.
+
+Contribute
+----------
+
+#. Fork this repository
+#. Create a new branch to work on
+#. Commit your tests and/or changes
+#. Push and create a pull request here!
 
