@@ -64,11 +64,11 @@ Here is how we would use What The Patch!? in Python to get the changeset for eac
 
 .. code-block:: python
 
-    >>> import whatthepatch.patch
+    >>> import whatthepatch
     >>> with open('somechanges.patch') as f:
     ...     text = f.read()
     ...
-    >>> for diff in whatthepatch.patch.parse_patch(text):
+    >>> for diff in whatthepatch.parse_patch(text):
     ...     print(diff)
     ...
     diff(header=header(index_path=None,

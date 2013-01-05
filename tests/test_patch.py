@@ -153,13 +153,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-unified.patch') as f:
             text = f.read()
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
 
         assert results == expected
 
         with open('tests/casefiles/svn-context.patch') as f:
             text = f.read()
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
 
         assert results == expected
 
@@ -245,7 +245,7 @@ class PatchTestSuite(unittest.TestCase):
 
         with open('tests/casefiles/svn-git.patch') as f:
             text = f.read()
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
 
         assert results == expected
 
@@ -302,7 +302,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
         with open('tests/casefiles/svn-rcs.patch') as f:
             text = f.read()
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
         print(expected)
         print('~~~~~~')
         print(results)
@@ -362,7 +362,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
         with open('tests/casefiles/svn-default.patch') as f:
             text = f.read()
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
         assert results == expected
 
 
@@ -428,7 +428,7 @@ class PatchTestSuite(unittest.TestCase):
                         )
                     ]
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in whatthepatch.parse_patch(text)]
 
         assert results == expected
 
