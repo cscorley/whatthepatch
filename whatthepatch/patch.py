@@ -93,7 +93,7 @@ def parse_patch(text):
     for diff in diffs:
         h = parse_header(diff)
         d = parse_diff(diff)
-        if h and d:
+        if d:
             yield diffobj(header=h, changes=d)
 
 def parse_header(text):
@@ -139,6 +139,8 @@ def parse_scm_header(text):
 
             return res
 
+    return None
+
 def parse_diff_header(text):
     if type(text) == str:
         lines = text.split('\n')
@@ -154,6 +156,8 @@ def parse_diff_header(text):
         diffs = findall_regex(lines, c[0])
         if len(diffs) > 0:
             return c[1](lines)
+
+    return None # no header?
 
 
 def parse_diff(text):

@@ -67,8 +67,9 @@ class PatchTestSuite(unittest.TestCase):
         results = [x for x in patch.parse_default_diff(text)]
         assert results == expected
 
-        results_main = [x for x in patch.parse_diff(text)]
-        assert results_main == expected
+        expected_main = [patch.diffobj(header=None, changes=expected)]
+        results_main = [x for x in patch.parse_patch(text)]
+        assert results_main == expected_main
 
     def test_svn_unified_patch(self):
         expected = [
@@ -597,8 +598,9 @@ diff -u -r1.6.4.1 -r1.8
         results = [x for x in patch.parse_unified_diff(text)]
         assert results == expected
 
-        results_main = [x for x in patch.parse_diff(text)]
-        assert results_main == expected
+        expected_main = [patch.diffobj(header=None, changes=expected)]
+        results_main = [x for x in patch.parse_patch(text)]
+        assert results_main == expected_main
 
     def test_context_header(self):
         text = """*** /tmp/o   2012-12-22 06:43:35.000000000 -0600
@@ -717,8 +719,9 @@ diff -u -r1.6.4.1 -r1.8
         results = [x for x in patch.parse_context_diff(text)]
         assert results == expected
 
-        results_main = [x for x in patch.parse_diff(text)]
-        assert results_main == expected
+        expected_main = [patch.diffobj(header=None, changes=expected)]
+        results_main = [x for x in patch.parse_patch(text)]
+        assert results_main == expected_main
 
     def test_ed_diff(self):
         text = """24a
@@ -778,8 +781,9 @@ document!
         results = [x for x in patch.parse_ed_diff(text)]
         assert results == expected
 
-        results_main = [x for x in patch.parse_diff(text)]
-        assert results_main == expected
+        expected_main = [patch.diffobj(header=None, changes=expected)]
+        results_main = [x for x in patch.parse_patch(text)]
+        assert results_main == expected_main
 
     def test_rcs_ed_diff(self):
         text="""a0 6
@@ -832,8 +836,9 @@ to this document."""
         results = [x for x in patch.parse_rcs_ed_diff(text)]
         assert results == expected
 
-        results_main = [x for x in patch.parse_diff(text)]
-        assert results_main == expected
+        expected_main = [patch.diffobj(header=None, changes=expected)]
+        results_main = [x for x in patch.parse_patch(text)]
+        assert results_main == expected_main
 
 
 if __name__ == '__main__':
