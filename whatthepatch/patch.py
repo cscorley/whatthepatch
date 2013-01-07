@@ -15,7 +15,7 @@ from snippets import split_by_regex, findall_regex
 header = namedtuple('header',
         'index_path old_path old_version new_path new_version')
 
-diffobj = namedtuple('diff', 'header changes')
+diffobj = namedtuple('diff', 'header changes text')
 
 # general diff regex
 diff_command_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
@@ -78,9 +78,9 @@ def parse_patch(text):
 
     check = [
             unified_index_header,
-            git_index_header,
-            cvs_rcs_header,
             diff_command_header,
+            cvs_rcs_header,
+            git_index_header,
             context_header_old_line,
             unified_header_old_line,
             ]
@@ -91,10 +91,11 @@ def parse_patch(text):
             break
 
     for diff in diffs:
+        difftext = '\n'.join(diff)
         h = parse_header(diff)
         d = parse_diff(diff)
         if d:
-            yield diffobj(header=h, changes=d)
+            yield diffobj(header=h, changes=d, text=difftext)
 
 def parse_header(text):
     h = parse_scm_header(text)
