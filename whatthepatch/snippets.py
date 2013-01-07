@@ -9,10 +9,11 @@
 from __future__ import print_function
 
 import os
+from shutil import rmtree
 
 
 # order preserving uniq for lists
-def _uniq(L):
+def uniq(L):
     seen = {}
     result = []
     for item in L:
@@ -24,7 +25,7 @@ def _uniq(L):
 
 
 # exception handling mkdir -p
-def _make_dir(dir):
+def make_dir(dir):
     try:
         os.makedirs(dir)
     except os.error as e:
@@ -35,9 +36,15 @@ def _make_dir(dir):
             print('Failed to create "%s" directory!' % dir)
             sys.exit(e.errno)
 
+def remove(path):
+    if os.path.exists(path):
+        if os.path.isdir(path):
+            rmtree(path)
+        else:
+            os.remove(path)
 
 # file line length
-def _file_len(fname):
+def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass

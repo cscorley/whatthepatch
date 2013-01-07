@@ -11,7 +11,7 @@ import re
 import subprocess
 
 import patch
-from snippets import which
+from snippets import which, remove
 
 def apply_patch(diffs):
     if type(diffs) == patch.diff:
@@ -42,25 +42,46 @@ def apply_diff(diff, text, use_patch=False):
             raise Exception("Could not find 'patch' executable")
 
         filepath = '/tmp/wtp-' + str(hash(diff.header))
-        with open(filepath + '.old', 'w') as f:
+        oldfilepath = filepath + '.old'
+        newfilepath = filepath + '.new'
+        rejfilepath = filepath + '.rej'
+        patchfilepath = filepath + '.patch'
+        with open(oldfilepath, 'w') as f:
             f.write('\n'.join(lines))
 
-        with open(filepath + '.patch', 'w') as f:
+        with open(patchfilepath, 'w') as f:
             f.write(diff.text)
 
         args = [patchexec,
-                '-o', filepath +  '.new',
-                '-i', filepath +  '.patch',
-                '-r', filepath +  '.rej',
-                filepath + '.old']
+                '-o', newfilepath,
+                '-i', patchfilepath,
+                '-r', rejfilepath,
+                oldfilepath
+                ]
         ret = subprocess.call(args)
 
         # only return if a patch was successfully applied
         if ret:
             raise Exception(patchexec + ' could not patch file')
         else:
-            with open(filepath + '.new') as f:
-                return f.read().split('\n')
+            with open(newfilepath) as f:
+                lines = f.read().split('\n')
+
+            try:
+                with open(rejfilepath) as f:
+                    rejlines = f.read().split('\n')
+            except IOError:
+                rejlines = None
+
+            remove(oldfilepath)
+            remove(newfilepath)
+            remove(rejfilepath)
+            remove(patchfilepath)
+
+            if rejlines:
+                return lines, rejlines
+
+            return lines
 
     # check that the source text matches the context of the diff
     for old, new, line in diff.changes:
