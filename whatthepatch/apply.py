@@ -8,8 +8,10 @@
 
 from __future__ import print_function
 import re
+import subprocess
 
 import patch
+from snippets import which
 
 def apply_patch(diffs):
     if type(diffs) == patch.diff:
@@ -26,11 +28,39 @@ def apply_patch(diffs):
         with open(diff.header.new_path, 'w') as f:
             f.write(new_text)
 
-def apply_diff(diff, text):
+def apply_diff(diff, text, use_patch=False):
     if type(text) == str:
         lines = text.split('\n')
     else:
-        lines = text
+        lines = list(text)
+
+    if use_patch:
+        # call out to patch program
+        patchexec = which('patch')
+        if patchexec is None:
+            # patch program does not exist
+            raise Exception("Could not find 'patch' executable")
+
+        filepath = '/tmp/wtp-' + str(hash(diff.header))
+        with open(filepath + '.old', 'w') as f:
+            f.write('\n'.join(lines))
+
+        with open(filepath + '.patch', 'w') as f:
+            f.write(diff.text)
+
+        args = [patchexec,
+                '-o', filepath +  '.new',
+                '-i', filepath +  '.patch',
+                '-r', filepath +  '.rej',
+                filepath + '.old']
+        ret = subprocess.call(args)
+
+        # only return if a patch was successfully applied
+        if ret:
+            raise Exception(patchexec + ' could not patch file')
+        else:
+            with open(filepath + '.new') as f:
+                return f.read().split('\n')
 
     # check that the source text matches the context of the diff
     for old, new, line in diff.changes:
