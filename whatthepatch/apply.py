@@ -78,10 +78,7 @@ def apply_diff(diff, text, use_patch=False):
             remove(rejfilepath)
             remove(patchfilepath)
 
-            if rejlines:
-                return lines, rejlines
-
-            return lines
+            return lines, rejlines
 
     # check that the source text matches the context of the diff
     for old, new, line in diff.changes:
@@ -105,7 +102,6 @@ def apply_diff(diff, text, use_patch=False):
             assert new == old - r + i
 
     return lines
-
 
 
 

@@ -65,11 +65,11 @@ class PatchTestSuite(unittest.TestCase):
                 ]
 
         results = [x for x in patch.parse_default_diff(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
         expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in patch.parse_patch(text)]
-        assert results_main == expected_main
+        self.assertEquals(results_main, expected_main)
 
     def test_svn_unified_patch(self):
         with open('tests/casefiles/svn-unified.patch') as f:
@@ -161,7 +161,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in whatthepatch.parse_patch(text)]
 
-        assert results == expected
+        self.assertEquals(results, expected)
 
     def test_svn_context_patch(self):
         with open('tests/casefiles/svn-context.patch') as f:
@@ -253,7 +253,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in whatthepatch.parse_patch(text)]
 
-        assert results == expected
+        self.assertEquals(results, expected)
 
     def test_svn_git_patch(self):
         with open('tests/casefiles/svn-git.patch') as f:
@@ -346,7 +346,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in whatthepatch.parse_patch(text)]
 
-        assert results == expected
+        self.assertEquals(results, expected)
 
     def test_svn_rcs_patch(self):
         with open('tests/casefiles/svn-rcs.patch') as f:
@@ -408,7 +408,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
 
         results = [x for x in whatthepatch.parse_patch(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
 
     def test_svn_default_patch(self):
@@ -471,7 +471,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
         results = [x for x in whatthepatch.parse_patch(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
 
     def test_git_patch(self):
@@ -543,7 +543,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in whatthepatch.parse_patch(text)]
 
-        assert results == expected
+        self.assertEquals(results, expected)
 
 
     def test_git_header(self):
@@ -562,10 +562,10 @@ index 8910dfd..456e34f 100644
                 new_version = '456e34f')
 
         results = patch.parse_git_header(text)
-        assert results == expected
+        self.assertEquals(results, expected)
 
         results_main = patch.parse_header(text)
-        assert results_main == expected
+        self.assertEquals(results_main, expected)
 
     def test_svn_header(self):
         text = """
@@ -582,10 +582,10 @@ Index: bugtrace/trunk/src/bugtrace/csc.py
                 new_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 new_version = 12784)
         results = patch.parse_svn_header(text)
-        assert results == expected
+        self.assertEquals(results, expected)
 
         results_main = patch.parse_header(text)
-        assert results_main == expected
+        self.assertEquals(results_main, expected)
 
     def test_cvs_header(self):
         text = """Index: org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java
@@ -605,10 +605,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 new_version = '1.8')
         results = patch.parse_cvs_header(text)
-        assert results == expected
+        self.assertEquals(results, expected)
 
         results_main = patch.parse_header(text)
-        assert results_main == expected
+        self.assertEquals(results_main, expected)
 
     def test_unified_header(self):
         text = """--- /tmp/o  2012-12-22 06:43:35.000000000 -0600
@@ -623,10 +623,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
         results = patch.parse_unified_header(text)
-        assert results == expected
+        self.assertEquals(results, expected)
 
         results_main = patch.parse_header(text)
-        assert results_main == expected
+        self.assertEquals(results_main, expected)
 
 
     def test_unified_diff(self):
@@ -708,11 +708,11 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
         results = [x for x in patch.parse_unified_diff(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
         expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in patch.parse_patch(text)]
-        assert results_main == expected_main
+        self.assertEquals(results_main, expected_main)
 
     def test_context_header(self):
         text = """*** /tmp/o   2012-12-22 06:43:35.000000000 -0600
@@ -727,10 +727,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
         results = patch.parse_context_header(text)
-        assert results == expected
+        self.assertEquals(results, expected)
 
         results_main = patch.parse_header(text)
-        assert results_main == expected
+        self.assertEquals(results_main, expected)
 
 
     def test_context_diff(self):
@@ -829,11 +829,11 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
         results = [x for x in patch.parse_context_diff(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
         expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in patch.parse_patch(text)]
-        assert results_main == expected_main
+        self.assertEquals(results_main, expected_main)
 
     def test_ed_diff(self):
         text = """24a
@@ -891,11 +891,11 @@ document!
                 ]
 
         results = [x for x in patch.parse_ed_diff(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
         expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in patch.parse_patch(text)]
-        assert results_main == expected_main
+        self.assertEquals(results_main, expected_main)
 
     def test_rcs_ed_diff(self):
         text="""a0 6
@@ -946,11 +946,11 @@ to this document."""
                 ]
 
         results = [x for x in patch.parse_rcs_ed_diff(text)]
-        assert results == expected
+        self.assertEquals(results, expected)
 
         expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in patch.parse_patch(text)]
-        assert results_main == expected_main
+        self.assertEquals(results_main, expected_main)
 
 
 if __name__ == '__main__':
