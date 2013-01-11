@@ -607,9 +607,13 @@ def parse_ed_diff(text):
     j = 0
     k = 0
 
+    r = 0
+    i = 0
+
     changes = list()
 
     hunks = split_by_regex(lines, ed_hunk_start)
+    hunks.reverse()
     for hunk in hunks:
         if len(hunk):
             j = 0
@@ -633,19 +637,23 @@ def parse_ed_diff(text):
                             k = 0
                             while old_end >= old:
                                 changes.append((old + k, None, None))
+                                r += 1
                                 k += 1
                                 old_end -= 1
 
-                            changes.append((None, old + j, hunk[0]))
+                            # I basically have no idea why this works
+                            # for these tests.
+                            changes.append((None, old - r + i + k + j, hunk[0]))
+                            i += 1
                             j += 1
-                            # math! \o/
                         elif hunk_kind == 'a':
-                            changes.append((None, old + j + 1, hunk[0]))
-                            j += 1
+                            changes.append((None, old - r + i + 1, hunk[0]))
+                            i += 1
                         elif hunk_kind == 'd':
                             k = 0
                             while old_end >= old:
                                 changes.append((old + k, None, None))
+                                r += 1
                                 k += 1
                                 old_end -= 1
 

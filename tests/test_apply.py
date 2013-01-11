@@ -90,11 +90,12 @@ class ApplyTestSuite(unittest.TestCase):
         diff = [x for x in whatthepatch.parse_patch(diff_text)]
         diff = diff[0]
 
+        print(diff)
         new_text = apply.apply_diff(diff, self.lao)
-        assert new_text != self.tzu
+        self.assertEquals(self.tzu,new_text)
 
         new_text = apply.apply_diff(diff, self.lao, use_patch=True)
-        self.assertEquals(new_text, self.tzu)
+        self.assertEquals(new_text, (self.tzu, None))
 
 if __name__ == '__main__':
     unittest.main()

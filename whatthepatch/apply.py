@@ -53,6 +53,7 @@ def apply_diff(diff, text, use_patch=False):
             f.write(diff.text)
 
         args = [patchexec,
+                '--quiet',
                 '-o', newfilepath,
                 '-i', patchfilepath,
                 '-r', rejfilepath,

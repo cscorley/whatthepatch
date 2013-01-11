@@ -857,16 +857,13 @@ document!
 
 ."""
         expected = [
-                # ed, you so cray
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.'),
+                (None, 1, 'This is an important'),
+                (None, 2, 'notice! It should'),
+                (None, 3, 'therefore be located at'),
+                (None, 4, 'the beginning of this'),
+                (None, 5, 'document!'),
+                (None, 6, ''),
 
-                (17, None, None),
-                (None, 17, 'check this document. On'),
-
-                # ed, aka the lossy diff format.
                 (8, None, None),
                 (9, None, None),
                 (10, None, None),
@@ -875,19 +872,16 @@ document!
                 (13, None, None),
                 (14, None, None),
 
-                # This is 14 in the other formats, because we are aware
-                # of the previous changes (incoming blow), which add
-                # the 6 lines (8+6=14)
-                (None, 8, 'compress anything.'),
+                (None, 14, 'compress anything.'),
 
-                # But, not in ed.
+                (17, None, None),
 
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, '')
+                (None, 17, 'check this document. On'),
+
+                (None, 25, ''),
+                (None, 26, 'This paragraph contains'),
+                (None, 27, 'important new additions'),
+                (None, 28, 'to this document.')
                 ]
 
         results = [x for x in patch.parse_ed_diff(text)]
