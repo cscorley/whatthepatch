@@ -115,8 +115,7 @@ results will have the text portion of the tuple set to ``None``.
 Applying
 --------
 
-To apply a diff to some lines of text, first read in and parse the patch
-file and the lines of code needing changed
+To apply a diff to some lines of text, first read the patch and parse it.
 
 .. code-block:: python
 
