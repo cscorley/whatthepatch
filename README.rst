@@ -60,6 +60,8 @@ Let us say we have a patch file containing some changes, aptly named
     +The door of all subtleties!
 
 
+### Parsing
+
 Here is how we would use What The Patch!? in Python to get the changeset for each diff in the patch:
 
 .. code-block:: python
@@ -108,6 +110,25 @@ What these numbers indicate are as follows:
 
 Please note that not all patch formats provide the actual lines modified, so some 
 results will have the text portion of the tuple set to ``None``.
+
+### Applying
+
+To apply a diff to some lines of text, first read in and parse the patch
+file and the lines of code needing changed
+
+.. code-block:: python
+
+    >>> import whatthepatch
+    >>> with open('somechanges.patch') as f:
+    ...     text = f.read()
+    ...
+    >>> with open('lao') as f:
+    ...     lao = f.read()
+    ...
+    >>> diff = [x for x in whatthepatch.parse_patch(text)]
+    >>> diff = diff[0]
+    >>> tzu = whatthepatch.apply_diff(diff, lao)
+
 
 Contribute
 ----------
