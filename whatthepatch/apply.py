@@ -14,6 +14,9 @@ import patch
 from snippets import which, remove
 
 def apply_patch(diffs):
+    """ Not ready for use yet """
+    pass
+
     if type(diffs) == patch.diff:
         diffs = [diffs]
 
@@ -37,9 +40,7 @@ def apply_diff(diff, text, use_patch=False):
     if use_patch:
         # call out to patch program
         patchexec = which('patch')
-        if patchexec is None:
-            # patch program does not exist
-            raise Exception("Could not find 'patch' executable")
+        assert patchexec # patch program does not exist
 
         filepath = '/tmp/wtp-' + str(hash(diff.header))
         oldfilepath = filepath + '.old'
@@ -61,25 +62,23 @@ def apply_diff(diff, text, use_patch=False):
                 ]
         ret = subprocess.call(args)
 
-        # only return if a patch was successfully applied
-        if ret:
-            raise Exception(patchexec + ' could not patch file')
-        else:
-            with open(newfilepath) as f:
-                lines = f.read().split('\n')
+        assert ret == 0 # patch return code is success
 
-            try:
-                with open(rejfilepath) as f:
-                    rejlines = f.read().split('\n')
-            except IOError:
-                rejlines = None
+        with open(newfilepath) as f:
+            lines = f.read().split('\n')
 
-            remove(oldfilepath)
-            remove(newfilepath)
-            remove(rejfilepath)
-            remove(patchfilepath)
+        try:
+            with open(rejfilepath) as f:
+                rejlines = f.read().split('\n')
+        except IOError:
+            rejlines = None
 
-            return lines, rejlines
+        remove(oldfilepath)
+        remove(newfilepath)
+        remove(rejfilepath)
+        remove(patchfilepath)
+
+        return lines, rejlines
 
     # check that the source text matches the context of the diff
     for old, new, line in diff.changes:
