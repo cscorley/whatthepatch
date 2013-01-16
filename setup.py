@@ -11,7 +11,7 @@ with open('LICENSE') as f:
 
 setup(
     name='whatthepatch',
-    version='0.0.1',
+    version='0.0.2',
     description='A patch parsing library',
     long_description=readme,
     author='Christopher S. Corley',
