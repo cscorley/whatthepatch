@@ -32,7 +32,7 @@ To install What The Patch!?, simply:
     $ pip install whatthepatch
 
 Usage
------
+=====
 
 Let us say we have a patch file containing some changes, aptly named
 'somechanges.patch':
@@ -60,7 +60,8 @@ Let us say we have a patch file containing some changes, aptly named
     +The door of all subtleties!
 
 
-### Parsing
+Parsing
+-------
 
 Here is how we would use What The Patch!? in Python to get the changeset for each diff in the patch:
 
@@ -111,10 +112,10 @@ What these numbers indicate are as follows:
 Please note that not all patch formats provide the actual lines modified, so some 
 results will have the text portion of the tuple set to ``None``.
 
-### Applying
+Applying
+--------
 
-To apply a diff to some lines of text, first read in and parse the patch
-file and the lines of code needing changed
+To apply a diff to some lines of text, first read the patch and parse it.
 
 .. code-block:: python
 
@@ -131,7 +132,7 @@ file and the lines of code needing changed
 
 
 Contribute
-----------
+==========
 
 #. Fork this repository
 #. Create a new branch to work on
