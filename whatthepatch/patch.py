@@ -191,7 +191,7 @@ def parse_git_header(text):
 
     over = None
     nver = None
-    while len(lines) > 0:
+    while len(lines) > 1:
         g = git_index_header.match(lines[0])
         # git always has it's own special headers
         o = git_header_old_line.match(lines[0])
@@ -339,7 +339,7 @@ def parse_unified_header(text):
     if len(headers) == 0:
         return None
 
-    while len(lines) > 0:
+    while len(lines) > 1:
         o = unified_header_old_line.match(lines[0])
         del lines[0]
         if o:
@@ -366,7 +366,7 @@ def parse_context_header(text):
     if len(headers) == 0:
         return None
 
-    while len(lines) > 0:
+    while len(lines) > 1:
         o = context_header_old_line.match(lines[0])
         del lines[0]
         if o:
