@@ -45,7 +45,7 @@ default_change = re.compile('^([><]) ([\s\S]*)$')
 
 # git has a special index header and no end part
 git_diff_command_header = re.compile('^diff --git a/([\s\S]+) b/([\s\S]+)$')
-git_index_header = re.compile('index ([\w]{7})..([\w]{7}) \d+')
+git_index_header = re.compile('^index ([\w]{7})..([\w]{7}) ?(\d*)$')
 git_header_old_line = re.compile('^--- ([\s\S]+)$')
 git_header_new_line = re.compile('^\+\+\+ ([\s\S]+)$')
 git_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
