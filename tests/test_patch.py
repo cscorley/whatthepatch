@@ -36,7 +36,8 @@ class PatchTestSuite(unittest.TestCase):
 > 
 > This paragraph contains
 > important new additions
-> to this document."""
+> to this document.
+"""
 
         expected = [
                 (None, 1, 'This is an important'),
@@ -75,7 +76,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-unified.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
 
         expected = [
                 patch.diffobj(
@@ -104,7 +105,7 @@ class PatchTestSuite(unittest.TestCase):
                         (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
                         (12, 15, 'argv = []'),
                         ],
-                    text = '\n'.join(lines[:22])
+                    text = '\n'.join(lines[:22]) + '\n'
                    ),
                 patch.diffobj(
                     header=patch.header(
@@ -129,7 +130,7 @@ class PatchTestSuite(unittest.TestCase):
                         (55, 55, '    (options,args) = optparser.parse_args(argv)'),
                         (56, 56, ''),
                         ],
-                    text = '\n'.join(lines[22:40])
+                    text = '\n'.join(lines[22:40]) + '\n'
                     ),
                 patch.diffobj(
                     header=patch.header(
@@ -155,7 +156,7 @@ class PatchTestSuite(unittest.TestCase):
                         (93, 93, '    (options,args) = optparser.parse_args(argv)'),
                         (94, 94, '    '),
                         ],
-                    text = '\n'.join(lines[40:])
+                    text = '\n'.join(lines[40:]) + '\n'
                     )
                     ]
 
@@ -167,7 +168,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-context.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
 
         expected = [
                 patch.diffobj(
@@ -196,7 +197,7 @@ class PatchTestSuite(unittest.TestCase):
                         (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
                         (12, 15, 'argv = []'),
                         ],
-                    text = '\n'.join(lines[:32])
+                    text = '\n'.join(lines[:32]) + '\n'
                    ),
                 patch.diffobj(
                     header=patch.header(
@@ -221,7 +222,7 @@ class PatchTestSuite(unittest.TestCase):
                         (55, 55, '    (options,args) = optparser.parse_args(argv)'),
                         (56, 56, ''),
                         ],
-                    text = '\n'.join(lines[32:61])
+                    text = '\n'.join(lines[32:61]) + '\n'
                     ),
                 patch.diffobj(
                     header=patch.header(
@@ -247,7 +248,7 @@ class PatchTestSuite(unittest.TestCase):
                         (93, 93, '    (options,args) = optparser.parse_args(argv)'),
                         (94, 94, '    '),
                         ],
-                    text = '\n'.join(lines[61:])
+                    text = '\n'.join(lines[61:]) + '\n'
                     )
                     ]
 
@@ -259,7 +260,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-git.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
 
         expected = [
                 patch.diffobj(
@@ -288,7 +289,7 @@ class PatchTestSuite(unittest.TestCase):
                         (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
                         (12, 15, 'argv = []'),
                         ],
-                    text = '\n'.join(lines[:23])
+                    text = '\n'.join(lines[:23]) + '\n'
                    ),
                 patch.diffobj(
                     header=patch.header(
@@ -313,7 +314,7 @@ class PatchTestSuite(unittest.TestCase):
                         (55, 55, '    (options,args) = optparser.parse_args(argv)'),
                         (56, 56, ''),
                         ],
-                    text = '\n'.join(lines[23:42])
+                    text = '\n'.join(lines[23:42]) + '\n'
                     ),
                 patch.diffobj(
                     header=patch.header(
@@ -339,7 +340,7 @@ class PatchTestSuite(unittest.TestCase):
                         (93, 93, '    (options,args) = optparser.parse_args(argv)'),
                         (94, 94, '    '),
                         ],
-                    text = '\n'.join(lines[42:])
+                    text = '\n'.join(lines[42:]) + '\n'
                     )
                     ]
 
@@ -352,7 +353,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-rcs.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
         expected = [
                 patch.diffobj(
                     header=patch.header(
@@ -371,7 +372,7 @@ class PatchTestSuite(unittest.TestCase):
                         (None, 11, 'from Bugxplore import main'),
                         (None, 12, 'from Bugxplore import _make_dir'),
                         ],
-                    text = '\n'.join(lines[:10])
+                    text = '\n'.join(lines[:10]) + '\n'
                    ),
                 patch.diffobj(
                     header=patch.header(
@@ -387,7 +388,7 @@ class PatchTestSuite(unittest.TestCase):
                         (53, None, None),
                         (None, 53, ''),
                         ],
-                    text = '\n'.join(lines[10:18])
+                    text = '\n'.join(lines[10:18]) + '\n'
                     ),
                 patch.diffobj(
                     header=patch.header(
@@ -403,7 +404,7 @@ class PatchTestSuite(unittest.TestCase):
                         (91, None, None),
                         (None, 91, ''),
                         ],
-                    text = '\n'.join(lines[18:])
+                    text = '\n'.join(lines[18:]) + '\n'
                     )
                     ]
 
@@ -415,7 +416,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-default.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
 
         expected = [
                 patch.diffobj(
@@ -435,7 +436,7 @@ class PatchTestSuite(unittest.TestCase):
                         (None, 11, 'from Bugxplore import main'),
                         (None, 12, 'from Bugxplore import _make_dir'),
                         ],
-                    text = '\n'.join(lines[:12])
+                    text = '\n'.join(lines[:12]) + '\n'
                    ),
                 patch.diffobj(
                     header=patch.header(
@@ -451,7 +452,7 @@ class PatchTestSuite(unittest.TestCase):
                         (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
                         (None, 53, ''),
                         ],
-                    text = '\n'.join(lines[12:22])
+                    text = '\n'.join(lines[12:22]) + '\n'
                     ),
                 patch.diffobj(
                     header=patch.header(
@@ -467,7 +468,7 @@ class PatchTestSuite(unittest.TestCase):
                         (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
                         (None, 91, ''),
                         ],
-                    text = '\n'.join(lines[22:])
+                    text = '\n'.join(lines[22:]) + '\n'
                     )
                     ]
         results = [x for x in whatthepatch.parse_patch(text)]
@@ -478,7 +479,7 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/git.patch') as f:
             text = f.read()
 
-        lines = text.split('\n')
+        lines = text.splitlines()
 
         expected = [
                 patch.diffobj(
@@ -518,7 +519,7 @@ class PatchTestSuite(unittest.TestCase):
                         (170, 166, '    /**'),
                         (171, 167, '     * Open software tutorials, most likely to be hosted online'),
                         (172, 168, '     * ')],
-                    text = '\n'.join(lines[:34])
+                    text = '\n'.join(lines[:34]) + '\n'
                     ),
                     patch.diffobj(
                         header=patch.header(
@@ -537,7 +538,7 @@ class PatchTestSuite(unittest.TestCase):
                             (21, 23, '    public abstract boolean isChanged();'),
                             (22, 24, ''),
                             (23, 25, '    protected Preferences prefs;')],
-                        text = '\n'.join(lines[34:])
+                        text = '\n'.join(lines[34:]) + '\n'
                         )
                     ]
 
@@ -666,7 +667,8 @@ diff -u -r1.6.4.1 -r1.8
 +
 +This paragraph contains
 +important new additions
-+to this document."""
++to this document.
+"""
 
         expected = [
                 (None, 1, 'This is an important'),
@@ -784,7 +786,8 @@ diff -u -r1.6.4.1 -r1.8
 + 
 + This paragraph contains
 + important new additions
-+ to this document."""
++ to this document.
+"""
 
         expected = [
                 (None, 1, 'This is an important'),
@@ -855,7 +858,8 @@ therefore be located at
 the beginning of this
 document!
 
-."""
+.
+"""
         expected = [
                 (None, 1, 'This is an important'),
                 (None, 2, 'notice! It should'),
@@ -909,7 +913,8 @@ a24 4
 
 This paragraph contains
 important new additions
-to this document."""
+to this document.
+"""
 
         expected = [
                 (None, 1, 'This is an important'),
@@ -950,8 +955,6 @@ to this document."""
         with open('tests/casefiles/embedded-diff.comment') as f:
             text = f.read()
 
-        lines = text.split('\n')
-
         expected = [
                 patch.diffobj(
                     header=patch.header(
@@ -972,13 +975,42 @@ to this document."""
                         (2186, 2189, '              Kit.codeBug("unexpected token: "'),
                         (2187, 2190, '                          + Token.typeToName(node.getType()));'),
                         ],
-                    text = '\n'.join(lines)
+                    text=text
                    ),
                 ]
 
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
+    def test_dos_unified_cvs(self):
+        with open('tests/casefiles/mozilla-560291.diff') as f:
+            text = f.read()
+
+        expected = [
+            patch.diffobj(header=patch.header(
+                index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                old_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                old_version='5 Nov 2008 21:37:25 -0000\t1.1',
+                new_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                new_version='15 Sep 2011 02:26:05 -0000'
+                ),
+            changes=[
+                (79, 79, '    @Override'),
+                (80, 80, '    public String toSource(int depth) {'),
+                (81, 81, '        return makeIndent(depth)'),
+                (82, None, '                + " for ("'),
+                (None, 82, '                + " for " '),
+                (None, 83, '                + (isForEach()?"each ":"")'),
+                (None, 84, '                + "("'),
+                (83, 85, '                + iterator.toSource(0)'),
+                (84, 86, '                + " in "'),
+                (85, 87, '                + iteratedObject.toSource(0)')
+                ],
+                text=text)
+                ]
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
 
 if __name__ == '__main__':
     unittest.main()

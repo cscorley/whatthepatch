@@ -72,7 +72,7 @@ cvs_header_timestamp2 = re.compile('(\d+) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}
 
 def parse_patch(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -91,7 +91,7 @@ def parse_patch(text):
             break
 
     for diff in diffs:
-        difftext = '\n'.join(diff)
+        difftext = '\n'.join(diff) + '\n'
         h = parse_header(diff)
         d = parse_diff(diff)
         if d:
@@ -105,7 +105,7 @@ def parse_header(text):
 
 def parse_scm_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
     check = [
@@ -144,7 +144,7 @@ def parse_scm_header(text):
 
 def parse_diff_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
     check = [
@@ -163,7 +163,7 @@ def parse_diff_header(text):
 
 def parse_diff(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
     check = [
@@ -181,7 +181,7 @@ def parse_diff(text):
 
 def parse_git_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -223,7 +223,7 @@ def parse_git_header(text):
 
 def parse_svn_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -265,7 +265,7 @@ def parse_svn_header(text):
 
 def parse_cvs_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -307,7 +307,7 @@ def parse_cvs_header(text):
 
 def parse_diff_command_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -331,7 +331,7 @@ def parse_diff_command_header(text):
 
 def parse_unified_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -358,7 +358,7 @@ def parse_unified_header(text):
 
 def parse_context_header(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -386,7 +386,7 @@ def parse_context_header(text):
 
 def parse_default_diff(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -428,7 +428,7 @@ def parse_default_diff(text):
 
 def parse_unified_diff(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -478,7 +478,7 @@ def parse_unified_diff(text):
 
 def parse_context_diff(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -598,7 +598,7 @@ def parse_context_diff(text):
 
 def parse_ed_diff(text):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 
@@ -615,6 +615,7 @@ def parse_ed_diff(text):
     hunks = split_by_regex(lines, ed_hunk_start)
     hunks.reverse()
     for hunk in hunks:
+        print(hunk)
         if len(hunk):
             j = 0
             k = 0
@@ -629,35 +630,36 @@ def parse_ed_diff(text):
                         old_end = old
 
                     hunk_kind = o.group(3)
-                    while len(hunk) > 0:
-                        e = ed_hunk_end.match(hunk[0])
-                        if e:
-                            pass
-                        elif hunk_kind == 'c':
-                            k = 0
-                            while old_end >= old:
-                                changes.append((old + k, None, None))
-                                r += 1
-                                k += 1
-                                old_end -= 1
+                    if hunk_kind == 'd':
+                        k = 0
+                        while old_end >= old:
+                            changes.append((old + k, None, None))
+                            r += 1
+                            k += 1
+                            old_end -= 1
+                    else:
+                        while len(hunk) > 0:
+                            e = ed_hunk_end.match(hunk[0])
+                            if e:
+                                pass
+                            elif hunk_kind == 'c':
+                                k = 0
+                                while old_end >= old:
+                                    changes.append((old + k, None, None))
+                                    r += 1
+                                    k += 1
+                                    old_end -= 1
 
-                            # I basically have no idea why this works
-                            # for these tests.
-                            changes.append((None, old - r + i + k + j, hunk[0]))
-                            i += 1
-                            j += 1
-                        elif hunk_kind == 'a':
-                            changes.append((None, old - r + i + 1, hunk[0]))
-                            i += 1
-                        elif hunk_kind == 'd':
-                            k = 0
-                            while old_end >= old:
-                                changes.append((old + k, None, None))
-                                r += 1
-                                k += 1
-                                old_end -= 1
+                                # I basically have no idea why this works
+                                # for these tests.
+                                changes.append((None, old - r + i + k + j, hunk[0]))
+                                i += 1
+                                j += 1
+                            elif hunk_kind == 'a':
+                                changes.append((None, old - r + i + 1, hunk[0]))
+                                i += 1
 
-                        del hunk[0]
+                            del hunk[0]
 
 
 
@@ -669,7 +671,7 @@ def parse_ed_diff(text):
 def parse_rcs_ed_diff(text):
     # much like forward ed, but no 'c' type
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = text
 

@@ -67,11 +67,11 @@ class ApplyTestSuite(unittest.TestCase):
         diff = [x for x in whatthepatch.parse_patch(diff_text)]
         diff = diff[0]
 
-        with self.assertRaises(Exception):
-            new_text = apply.apply_diff(diff, [''] + padded_lao, use_patch=True)
-
         new_text = apply.apply_diff(diff, self.lao, use_patch=True)
         self.assertEquals(new_text, (self.tzu, None))
+
+        with self.assertRaises(Exception):
+            new_text = apply.apply_diff(diff, [''] + self.lao, use_patch=True)
 
     def test_diff_rcs(self):
         with open('tests/casefiles/diff-rcs.diff') as f:
@@ -84,8 +84,11 @@ class ApplyTestSuite(unittest.TestCase):
         self.assertEquals(new_text, self.tzu)
 
     def test_diff_ed(self):
+        self.maxDiff = None
         with open('tests/casefiles/diff-ed.diff') as f:
             diff_text = f.read()
+        print(diff_text)
+        print(diff_text.splitlines())
 
         diff = [x for x in whatthepatch.parse_patch(diff_text)]
         diff = diff[0]

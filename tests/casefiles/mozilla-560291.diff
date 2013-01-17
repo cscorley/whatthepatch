@@ -1,0 +1,20 @@
+### Eclipse Workspace Patch 1.0
+#P rhino-cvs
+Index: src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java
+===================================================================
+RCS file: /cvsroot/mozilla/js/rhino/src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java,v
+retrieving revision 1.1
+diff -u -r1.1 ArrayComprehensionLoop.java
+--- src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java	5 Nov 2008 21:37:25 -0000	1.1
++++ src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java	15 Sep 2011 02:26:05 -0000
+@@ -79,7 +79,9 @@
+     @Override
+     public String toSource(int depth) {
+         return makeIndent(depth)
+-                + " for ("
++                + " for " 
++                + (isForEach()?"each ":"")
++                + "("
+                 + iterator.toSource(0)
+                 + " in "
+                 + iteratedObject.toSource(0)
