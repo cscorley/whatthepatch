@@ -1,0 +1,19 @@
+In order to pass the initial test case of the bug reporter, a simple patch for "IRFactory#decompile(AstNode)" is necessary:
+---
+--- a/src/org/mozilla/javascript/IRFactory.java
++++ b/src/org/mozilla/javascript/IRFactory.java
+@@ -2182,6 +2182,9 @@ public final class IRFactory extends Parser
+           case Token.GETELEM:
+               decompileElementGet((ElementGet) node);
+               break;
++          case Token.THIS:
++              decompiler.addToken(node.getType());
++              break;
+           default:
+               Kit.codeBug("unexpected token: "
+                           + Token.typeToName(node.getType()));
+---
+
+But that change won't be sufficient to cover the other tests of the JUnit test case.
+
+PS: The bug subject should be changed to mention "Destructuring Assignment" instead of "Array comprehension"

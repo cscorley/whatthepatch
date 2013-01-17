@@ -946,6 +946,39 @@ to this document."""
         results_main = [x for x in patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
+    def test_embedded_diff_in_comment(self):
+        with open('tests/casefiles/embedded-diff.comment') as f:
+            text = f.read()
+
+        lines = text.split('\n')
+
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path=None,
+                        old_path='a/src/org/mozilla/javascript/Parser.java',
+                        old_version=None,
+                        new_path='b/src/org/mozilla/javascript/Parser.java',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (2182, 2182, '          case Token.GETELEM:'),
+                        (2183, 2183, '              decompileElementGet((ElementGet) node);'),
+                        (2184, 2184, '              break;'),
+                        (None, 2185, '          case Token.THIS:'),
+                        (None, 2186, '              decompiler.addToken(node.getType());'),
+                        (None, 2187, '              break;'),
+                        (2185, 2188, '          default:'),
+                        (2186, 2189, '              Kit.codeBug("unexpected token: "'),
+                        (2187, 2190, '                          + Token.typeToName(node.getType()));'),
+                        ],
+                    text = '\n'.join(lines)
+                   ),
+                ]
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
