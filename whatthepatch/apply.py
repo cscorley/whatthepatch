@@ -33,7 +33,7 @@ def apply_patch(diffs):
 
 def apply_diff(diff, text, use_patch=False):
     if type(text) == str:
-        lines = text.split('\n')
+        lines = text.splitlines()
     else:
         lines = list(text)
 
@@ -48,7 +48,7 @@ def apply_diff(diff, text, use_patch=False):
         rejfilepath = filepath + '.rej'
         patchfilepath = filepath + '.patch'
         with open(oldfilepath, 'w') as f:
-            f.write('\n'.join(lines))
+            f.write('\n'.join(lines) + '\n')
 
         with open(patchfilepath, 'w') as f:
             f.write(diff.text)
@@ -62,14 +62,13 @@ def apply_diff(diff, text, use_patch=False):
                 ]
         ret = subprocess.call(args)
 
-        assert ret == 0 # patch return code is success
 
         with open(newfilepath) as f:
-            lines = f.read().split('\n')
+            lines = f.read().splitlines()
 
         try:
             with open(rejfilepath) as f:
-                rejlines = f.read().split('\n')
+                rejlines = f.read().splitlines()
         except IOError:
             rejlines = None
 
@@ -77,6 +76,9 @@ def apply_diff(diff, text, use_patch=False):
         remove(newfilepath)
         remove(rejfilepath)
         remove(patchfilepath)
+
+        # do this last to ensure files get cleaned up
+        assert ret == 0 # patch return code is success
 
         return lines, rejlines
 

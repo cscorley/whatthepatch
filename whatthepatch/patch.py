@@ -63,7 +63,7 @@ cvs_index_header = unified_index_header
 cvs_rcs_header = re.compile('^RCS file: ([\s\S]+),\w{1}$')
 cvs_header_old_line = unified_header_old_line
 cvs_header_new_line = unified_header_new_line
-cvs_header_timestamp = re.compile('([\s\S]+)\s+([\d.]+)')
+cvs_header_timestamp = re.compile('([\s\S]+)\t([\d.]+)')
 
 # old date regex -- will try to replace with datetime parsing
 cvs_header_timestamp1 = re.compile('(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')

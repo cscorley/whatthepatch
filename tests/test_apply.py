@@ -13,16 +13,16 @@ class ApplyTestSuite(unittest.TestCase):
 
     def setUp(self):
         with open('tests/casefiles/lao') as f:
-            self.lao = f.read().split('\n')
+            self.lao = f.read().splitlines()
 
         with open('tests/casefiles/tzu') as f:
-            self.tzu = f.read().split('\n')
+            self.tzu = f.read().splitlines()
 
     def test_truth(self):
         self.assertEquals(type(self.lao), list)
         self.assertEquals(type(self.tzu), list)
-        self.assertEquals(len(self.lao), 12)
-        self.assertEquals(len(self.tzu), 14)
+        self.assertEquals(len(self.lao), 11)
+        self.assertEquals(len(self.tzu), 13)
 
     def test_diff_default(self):
         with open('tests/casefiles/diff-default.diff') as f:
@@ -70,7 +70,7 @@ class ApplyTestSuite(unittest.TestCase):
         new_text = apply.apply_diff(diff, self.lao, use_patch=True)
         self.assertEquals(new_text, (self.tzu, None))
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             new_text = apply.apply_diff(diff, [''] + self.lao, use_patch=True)
 
     def test_diff_rcs(self):

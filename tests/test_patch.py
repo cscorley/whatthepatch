@@ -986,6 +986,8 @@ to this document.
         with open('tests/casefiles/mozilla-560291.diff') as f:
             text = f.read()
 
+        lines = text.splitlines()
+
         expected = [
             patch.diffobj(header=patch.header(
                 index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
@@ -1006,8 +1008,9 @@ to this document.
                 (84, 86, '                + " in "'),
                 (85, 87, '                + iteratedObject.toSource(0)')
                 ],
-                text=text)
-                ]
+            text = '\n'.join(lines[2:]) + '\n'
+            )
+            ]
 
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
