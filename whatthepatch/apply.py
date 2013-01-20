@@ -86,6 +86,7 @@ def apply_diff(diff, text, use_patch=False):
     for old, new, line in diff.changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
+            assert len(lines) >= old
             assert lines[old-1] == line
 
     # for calculating the old line
@@ -101,7 +102,11 @@ def apply_diff(diff, text, use_patch=False):
             i += 1
         elif old is not None and new is not None:
             # are we crazy?
-            assert new == old - r + i
+            #assert new == old - r + i
+
+            # Sometimes, people remove hunks from patches, making these
+            # numbers completely unreliable. Because they're jerks.
+            pass
 
     return lines
 
