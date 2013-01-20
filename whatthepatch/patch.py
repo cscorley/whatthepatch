@@ -245,15 +245,12 @@ def parse_svn_header(text):
                 opath = diff_header.old_path
                 over = diff_header.old_version
                 if over:
-                    print('over')
                     oend = svn_header_timestamp_version.match(over)
                     if oend:
                         over = int(oend.group(1))
                 elif opath:
-                    print('opath')
                     ts = svn_header_timestamp.match(opath)
                     if ts:
-                        print('ts')
                         opath = opath[:-len(ts.group(1))]
                         oend = svn_header_timestamp_version.match(ts.group(1))
                         if oend:
@@ -262,15 +259,12 @@ def parse_svn_header(text):
                 npath = diff_header.new_path
                 nver = diff_header.new_version
                 if nver:
-                    print('nver')
                     nend = svn_header_timestamp_version.match(diff_header.new_version)
                     if nend:
                         nver = int(nend.group(1))
                 elif npath:
-                    print('npath')
                     ts = svn_header_timestamp.match(npath)
                     if ts:
-                        print('ts')
                         npath = npath[:-len(ts.group(1))]
                         nend = svn_header_timestamp_version.match(ts.group(1))
                         if nend:
@@ -665,7 +659,6 @@ def parse_ed_diff(text):
     hunks = split_by_regex(lines, ed_hunk_start)
     hunks.reverse()
     for hunk in hunks:
-        print(hunk)
         if len(hunk):
             j = 0
             k = 0
