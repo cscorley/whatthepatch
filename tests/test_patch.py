@@ -982,6 +982,39 @@ to this document.
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
+    def test_mozilla_527452_5_comment(self):
+        with open('tests/casefiles/mozilla-527452-5.comment') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
+                        old_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
+                        old_version=5547,
+                        new_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (112, 112, '        // TODO(stevey):  make sure this unescapes everything properly'),
+                        (113, 113, '        String q = String.valueOf(getQuoteCharacter());'),
+                        (114, 114, '        String rep = "\\\\\\\\" + q;'), # escape the escape that's escaping an escape. wut
+                        (115, None, '        String s = value.replaceAll(q, rep);'),
+                        (None, 115, '        String s = value.replace("\\\\", "\\\\\\\\");'),
+                        (None, 116, '        s = s.replaceAll(q, rep);'),
+                        (116, 117, '        s = s.replaceAll("\\n", "\\\\\\\\n");'),
+                        (117, 118, '        s = s.replaceAll("\\r", "\\\\\\\\r");'),
+                        (118, 119, '        s = s.replaceAll("\\t", "\\\\\\\\t");')
+                        ],
+                    text = '\n'.join(lines[2:]) + '\n'
+                   ),
+                ]
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
     def test_dos_unified_cvs(self):
         with open('tests/casefiles/mozilla-560291.diff') as f:
             text = f.read()

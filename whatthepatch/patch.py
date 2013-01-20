@@ -57,7 +57,8 @@ bzr_header_new_line = unified_header_new_line
 svn_header_index = unified_header_index
 svn_header_old_line = unified_header_old_line
 svn_header_new_line = unified_header_new_line
-svn_header_timestamp = re.compile('\(revision (\d+)\)')
+svn_header_timestamp_version = re.compile('\(revision (\d+)\)')
+svn_header_timestamp = re.compile('[\s\S]*(\([\s\S]*\))$')
 
 cvs_header_index = unified_header_index
 cvs_header_rcs = re.compile('^RCS file: ([\s\S]+),\w{1}$')
@@ -241,23 +242,45 @@ def parse_svn_header(text):
         if i:
             diff_header = parse_diff_header(lines)
             if diff_header:
+                opath = diff_header.old_path
                 over = diff_header.old_version
                 if over:
-                    oend = svn_header_timestamp.match(over)
+                    print('over')
+                    oend = svn_header_timestamp_version.match(over)
                     if oend:
                         over = int(oend.group(1))
+                elif opath:
+                    print('opath')
+                    ts = svn_header_timestamp.match(opath)
+                    if ts:
+                        print('ts')
+                        opath = opath[:-len(ts.group(1))]
+                        oend = svn_header_timestamp_version.match(ts.group(1))
+                        if oend:
+                            over = int(oend.group(1))
 
+                npath = diff_header.new_path
                 nver = diff_header.new_version
                 if nver:
-                    nend = svn_header_timestamp.match(diff_header.new_version)
+                    print('nver')
+                    nend = svn_header_timestamp_version.match(diff_header.new_version)
                     if nend:
                         nver = int(nend.group(1))
+                elif npath:
+                    print('npath')
+                    ts = svn_header_timestamp.match(npath)
+                    if ts:
+                        print('ts')
+                        npath = npath[:-len(ts.group(1))]
+                        nend = svn_header_timestamp_version.match(ts.group(1))
+                        if nend:
+                            nver = int(nend.group(1))
 
                 return header(
                         index_path = i.group(1),
-                        old_path = diff_header.old_path,
+                        old_path = opath, 
                         old_version = over,
-                        new_path = diff_header.new_path,
+                        new_path = npath,
                         new_version = nver,
                         )
             return header(
