@@ -1,0 +1,16 @@
+This patch works:
+
+Index: js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java
+===================================================================
+--- js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java(revision 5547)
++++ js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java(working copy)
+@@ -112,7 +112,8 @@
+         // TODO(stevey):  make sure this unescapes everything properly
+         String q = String.valueOf(getQuoteCharacter());
+         String rep = "\\\\" + q;
+-        String s = value.replaceAll(q, rep);
++        String s = value.replace("\\", "\\\\");
++        s = s.replaceAll(q, rep);
+         s = s.replaceAll("\n", "\\\\n");
+         s = s.replaceAll("\r", "\\\\r");
+         s = s.replaceAll("\t", "\\\\t");
