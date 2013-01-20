@@ -25,11 +25,11 @@ unified_header_new_line = re.compile('^\+\+\+ ([-/._\w]+)\s+([\s\S]*)$')
 unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@([\s\S]*)$')
 unified_change = re.compile('^([-+ ])([\s\S]*)$')
 
-context_header_old_line = re.compile('^\*\*\* ([-/._\w]+)\s+([\s\S]*)$')
+context_header_old_line = re.compile('^\*\*\* ([-/._\w]+)(?::|\s+)([\s\S]*)$')
 context_header_new_line = unified_header_old_line
 context_hunk_start = re.compile('^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
-context_hunk_old = re.compile('^\*\*\* (\d+),(\d+) \*\*\*\*$')
-context_hunk_new = re.compile('^--- (\d+),(\d+) ----$')
+context_hunk_old = re.compile('^\*\*\* (\d+),?(\d*) \*\*\*\*$')
+context_hunk_new = re.compile('^--- (\d+),?(\d*) ----$')
 context_change = re.compile('^([-+ !]) ([\s\S]*)$')
 
 ed_hunk_start = re.compile('^(\d+),?(\d*)([acd])$')
@@ -65,10 +65,7 @@ cvs_header_rcs = re.compile('^RCS file: ([\s\S]+),\w{1}$')
 cvs_header_old_line = unified_header_old_line
 cvs_header_new_line = unified_header_new_line
 cvs_header_timestamp = re.compile('([\s\S]+)\t([\d.]+)')
-
-# old date regex -- will try to replace with datetime parsing
-cvs_header_timestamp1 = re.compile('(\d{4})[-/](\d{2})[-/](\d{2}) (\d{2}):(\d{2}):(\d{2})')
-cvs_header_timestamp2 = re.compile('(\d+) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})')
+cvs_header_timestamp_colon = re.compile(':([\d.]+)\t([\s\S]+)')
 
 
 def parse_patch(text):
@@ -306,14 +303,20 @@ def parse_cvs_header(text):
                 over = diff_header.old_version
                 if over:
                     oend = cvs_header_timestamp.match(over)
+                    oend_c = cvs_header_timestamp_colon.match(over)
                     if oend:
                         over = oend.group(2)
+                    elif oend_c:
+                        over = oend_c.group(1)
 
                 nver = diff_header.new_version
                 if nver:
-                    nend = cvs_header_timestamp.match(diff_header.new_version)
+                    nend = cvs_header_timestamp.match(nver)
+                    nend_c = cvs_header_timestamp_colon.match(nver)
                     if nend:
                         nver = nend.group(2)
+                    elif nend_c:
+                        nver = nend_c.group(1)
 
                 return header(
                         index_path = i.group(1),

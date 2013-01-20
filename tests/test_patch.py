@@ -1048,5 +1048,32 @@ to this document.
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
+
+    def test_old_style_cvs(self):
+        with open('tests/casefiles/mozilla-252983.diff') as f:
+            text = f.read()
+
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path='mozilla/js/rhino/CHANGELOG',
+                        old_path='mozilla/js/rhino/CHANGELOG',
+                        old_version='1.1.1.1',
+                        new_path='mozilla/js/rhino/CHANGELOG',
+                        new_version='1.1', # or 'Thu Jan 25 10:59:02 2007'
+                        ),
+                    changes=[
+                        (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 2007/01/25 15:59:02 inonit Exp $'),
+                        (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 2007/01/25 15:59:02 inonit Exp $'),
+                        (2, 2, ''),
+                        (3, 3, 'Changes since Rhino 1.6R5'),
+                        (4, 4, '========================='),
+                        ],
+                    text=text
+                   ),
+                ]
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
 if __name__ == '__main__':
     unittest.main()
