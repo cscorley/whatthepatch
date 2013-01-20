@@ -18,8 +18,8 @@ header = namedtuple('header',
 diffobj = namedtuple('diff', 'header changes text')
 
 # general diff regex
-diff_command_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
-unified_index_header = re.compile('^Index: ([\s\S]+)$')
+diffcmd_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
+unified_header_index = re.compile('^Index: ([\s\S]+)$')
 unified_header_old_line = re.compile('^--- ([-/._\w]+)\s+([\s\S]*)$')
 unified_header_new_line = re.compile('^\+\+\+ ([-/._\w]+)\s+([\s\S]*)$')
 unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@([\s\S]*)$')
@@ -44,23 +44,23 @@ default_change = re.compile('^([><]) ([\s\S]*)$')
 # Headers
 
 # git has a special index header and no end part
-git_diff_command_header = re.compile('^diff --git a/([\s\S]+) b/([\s\S]+)$')
-git_index_header = re.compile('^index ([\w]{7})..([\w]{7}) ?(\d*)$')
+git_diffcmd_header = re.compile('^diff --git a/([\s\S]+) b/([\s\S]+)$')
+git_header_index = re.compile('^index ([\w]{7})..([\w]{7}) ?(\d*)$')
 git_header_old_line = re.compile('^--- ([\s\S]+)$')
 git_header_new_line = re.compile('^\+\+\+ ([\s\S]+)$')
-git_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
+git_header_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
 
-bzr_index_header = re.compile("=== ([\s\S]+)")
+bzr_header_index = re.compile("=== ([\s\S]+)")
 bzr_header_old_line = unified_header_old_line
 bzr_header_new_line = unified_header_new_line
 
-svn_index_header = unified_index_header
+svn_header_index = unified_header_index
 svn_header_old_line = unified_header_old_line
 svn_header_new_line = unified_header_new_line
-svn_header_timestamp = re.compile('\((?:working copy|revision (\d+))\)')
+svn_header_timestamp = re.compile('\(revision (\d+)\)')
 
-cvs_index_header = unified_index_header
-cvs_rcs_header = re.compile('^RCS file: ([\s\S]+),\w{1}$')
+cvs_header_index = unified_header_index
+cvs_header_rcs = re.compile('^RCS file: ([\s\S]+),\w{1}$')
 cvs_header_old_line = unified_header_old_line
 cvs_header_new_line = unified_header_new_line
 cvs_header_timestamp = re.compile('([\s\S]+)\t([\d.]+)')
@@ -77,10 +77,10 @@ def parse_patch(text):
         lines = text
 
     check = [
-            unified_index_header,
-            diff_command_header,
-            cvs_rcs_header,
-            git_index_header,
+            unified_header_index,
+            diffcmd_header,
+            cvs_header_rcs,
+            git_header_index,
             context_header_old_line,
             unified_header_old_line,
             ]
@@ -109,15 +109,15 @@ def parse_scm_header(text):
     else:
         lines = text
     check = [
-            (git_index_header, parse_git_header),
-            (cvs_rcs_header, parse_cvs_header),
-            (svn_index_header, parse_svn_header),
+            (git_header_index, parse_git_header),
+            (cvs_header_rcs, parse_cvs_header),
+            (svn_header_index, parse_svn_header),
             ]
 
     for c in check:
         diffs = findall_regex(lines, c[0])
         if len(diffs) > 0:
-            git_opt = findall_regex(lines, git_diff_command_header)
+            git_opt = findall_regex(lines, git_diffcmd_header)
             if len(git_opt) > 0:
                 res = c[1](lines)
                 old_path = res.old_path
@@ -150,7 +150,11 @@ def parse_diff_header(text):
     check = [
             (unified_header_new_line, parse_unified_header),
             (context_header_old_line, parse_context_header),
-            (diff_command_header, parse_diff_command_header),
+            (diffcmd_header, parse_diffcmd_header),
+            # TODO:
+            # git_header can handle version-less unified headers, but
+            # will trim a/ and b/ in the paths if they exist...
+            (git_header_new_line, parse_git_header),
             ]
 
     for c in check:
@@ -185,14 +189,14 @@ def parse_git_header(text):
     else:
         lines = text
 
-    headers = findall_regex(lines, git_index_header)
+    headers = findall_regex(lines, git_header_old_line)
     if len(headers) == 0:
         return None
 
     over = None
     nver = None
     while len(lines) > 1:
-        g = git_index_header.match(lines[0])
+        g = git_header_index.match(lines[0])
         # git always has it's own special headers
         o = git_header_old_line.match(lines[0])
         del lines[0]
@@ -227,31 +231,34 @@ def parse_svn_header(text):
     else:
         lines = text
 
-    headers = findall_regex(lines, svn_index_header)
+    headers = findall_regex(lines, svn_header_index)
     if len(headers) == 0:
         return None
 
     while len(lines) > 0:
-        i = svn_index_header.match(lines[0])
+        i = svn_header_index.match(lines[0])
         del lines[0]
         if i:
             diff_header = parse_diff_header(lines)
             if diff_header:
-                oend = svn_header_timestamp.match(diff_header.old_version)
-                nend = svn_header_timestamp.match(diff_header.new_version)
-                if oend and nend:
-                    return header(
-                            index_path = i.group(1),
-                            old_path = diff_header.old_path,
-                            old_version = int(oend.group(1)),
-                            new_path = diff_header.new_path,
-                            new_version = int(nend.group(1)))
+                over = diff_header.old_version
+                if over:
+                    oend = svn_header_timestamp.match(over)
+                    if oend:
+                        over = int(oend.group(1))
+
+                nver = diff_header.new_version
+                if nver:
+                    nend = svn_header_timestamp.match(diff_header.new_version)
+                    if nend:
+                        nver = int(nend.group(1))
+
                 return header(
                         index_path = i.group(1),
                         old_path = diff_header.old_path,
-                        old_version = diff_header.old_version,
+                        old_version = over,
                         new_path = diff_header.new_path,
-                        new_version = diff_header.new_version,
+                        new_version = nver,
                         )
             return header(
                     index_path = i.group(1),
@@ -269,31 +276,34 @@ def parse_cvs_header(text):
     else:
         lines = text
 
-    headers = findall_regex(lines, cvs_rcs_header)
+    headers = findall_regex(lines, cvs_header_rcs)
     if len(headers) == 0:
         return None
 
     while len(lines) > 0:
-        i = cvs_index_header.match(lines[0])
+        i = cvs_header_index.match(lines[0])
         del lines[0]
         if i:
             diff_header = parse_diff_header(lines)
             if diff_header:
-                oend = cvs_header_timestamp.match(diff_header.old_version)
-                nend = cvs_header_timestamp.match(diff_header.new_version)
-                if oend and nend:
-                    return header(
-                            index_path = i.group(1),
-                            old_path = diff_header.old_path,
-                            old_version = oend.group(2),
-                            new_path = diff_header.new_path,
-                            new_version = nend.group(2))
+                over = diff_header.old_version
+                if over:
+                    oend = cvs_header_timestamp.match(over)
+                    if oend:
+                        over = oend.group(2)
+
+                nver = diff_header.new_version
+                if nver:
+                    nend = cvs_header_timestamp.match(diff_header.new_version)
+                    if nend:
+                        nver = nend.group(2)
+
                 return header(
                         index_path = i.group(1),
                         old_path = diff_header.old_path,
-                        old_version = diff_header.old_version,
+                        old_version = over,
                         new_path = diff_header.new_path,
-                        new_version = diff_header.new_version,
+                        new_version = nver,
                         )
             return header(
                     index_path = i.group(1),
@@ -305,18 +315,18 @@ def parse_cvs_header(text):
 
     return None
 
-def parse_diff_command_header(text):
+def parse_diffcmd_header(text):
     if type(text) == str:
         lines = text.splitlines()
     else:
         lines = text
 
-    headers = findall_regex(lines, diff_command_header)
+    headers = findall_regex(lines, diffcmd_header)
     if len(headers) == 0:
         return None
 
     while len(lines) > 0:
-        d = diff_command_header.match(lines[0])
+        d = diffcmd_header.match(lines[0])
         del lines[0]
         if d:
             return header(
@@ -434,40 +444,57 @@ def parse_unified_diff(text):
 
     old = 0
     new = 0
-    j = 0
-    k = 0
+    r = 0
+    i = 0
 
     changes = list()
-    while len(lines) > 0:
-        h = unified_hunk_start.match(lines[0])
-        c = unified_change.match(lines[0])
-        if h:
-            old = int(h.group(1))
-            new = int(h.group(3))
-            h = None
 
-            # reset counters
-            j = 0
-            k = 0
-        elif c:
-            kind = c.group(1)
-            line = c.group(2)
-            c = None
+    hunks = split_by_regex(lines, unified_hunk_start)
+    for hunk in hunks:
+        # reset counters
+        r = 0
+        i = 0
+        while len(hunk) > 0:
+            h = unified_hunk_start.match(hunk[0])
+            del hunk[0]
+            if h:
+                old = int(h.group(1))
+                if len(h.group(2)) > 0:
+                    old_len = int(h.group(2))
+                else:
+                    old_len = 0
 
-            if kind == '-':
-                changes.append((old + j, None, line))
-                j += 1
-            elif kind == '+':
-                changes.append((None, new + k, line))
-                k += 1
-            elif kind == ' ':
-                changes.append((old + j, new + k, line))
-                j += 1
-                k += 1
-            else:
-                return None
+                new = int(h.group(3))
+                if len(h.group(4)) > 0:
+                    new_len = int(h.group(4))
+                else:
+                    new_len = 0
 
-        del lines[0]
+                h = None
+                break
+
+        while len(hunk) > 0:
+            c = unified_change.match(hunk[0])
+            if c:
+                kind = c.group(1)
+                line = c.group(2)
+                c = None
+
+                if kind == '-':
+                    if r != old_len:
+                        changes.append((old + r, None, line))
+                        r += 1
+                elif kind == '+':
+                    if i != new_len:
+                        changes.append((None, new + i, line))
+                        i += 1
+                elif kind == ' ':
+                    if r != old_len and i != new_len:
+                        changes.append((old + r, new + i, line))
+                        r += 1
+                        i += 1
+
+            del hunk[0]
 
     if len(changes) > 0:
         return changes

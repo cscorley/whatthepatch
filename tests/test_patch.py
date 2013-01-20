@@ -959,9 +959,9 @@ to this document.
                 patch.diffobj(
                     header=patch.header(
                         index_path=None,
-                        old_path='a/src/org/mozilla/javascript/Parser.java',
+                        old_path='src/org/mozilla/javascript/IRFactory.java',
                         old_version=None,
-                        new_path='b/src/org/mozilla/javascript/Parser.java',
+                        new_path='src/org/mozilla/javascript/IRFactory.java',
                         new_version=None,
                         ),
                     changes=[
@@ -992,7 +992,7 @@ to this document.
             patch.diffobj(header=patch.header(
                 index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
                 old_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                old_version='5 Nov 2008 21:37:25 -0000\t1.1',
+                old_version='1.1',
                 new_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
                 new_version='15 Sep 2011 02:26:05 -0000'
                 ),
