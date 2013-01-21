@@ -1,0 +1,19 @@
+diff --git a/src/script/.ant.swp b/src/script/.ant.swp
+index 7962473..b214d30 100644
+Binary files a/src/script/.ant.swp and b/src/script/.ant.swp differ
+diff --git a/src/script/ant b/src/script/ant
+index 0dc84e0..11c1b59 100644
+--- a/src/script/ant
++++ b/src/script/ant
+@@ -176,10 +176,7 @@ if $rpm_mode && [ -x /usr/bin/build-classpath ] ; then
+         *.rpmnew) ;;
+         *)
+           for dep in `cat "$file"`; do
+-            case "$OPT_JAR_LIST" in
+-            *"$dep"*) ;;
+-            *) OPT_JAR_LIST="$OPT_JAR_LIST${OPT_JAR_LIST:+ }$dep"
+-            esac
++            OPT_JAR_LIST="$OPT_JAR_LIST${OPT_JAR_LIST:+ }$dep"
+           done
+         esac
+       fi
