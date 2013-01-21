@@ -57,7 +57,7 @@ bzr_header_new_line = unified_header_new_line
 svn_header_index = unified_header_index
 svn_header_old_line = unified_header_old_line
 svn_header_new_line = unified_header_new_line
-svn_header_timestamp_version = re.compile('\(revision (\d+)\)')
+svn_header_timestamp_version = re.compile('\((?:working copy|revision (\d+))\)')
 svn_header_timestamp = re.compile('[\s\S]*(\([\s\S]*\))$')
 
 cvs_header_index = unified_header_index
@@ -244,29 +244,35 @@ def parse_svn_header(text):
                 over = diff_header.old_version
                 if over:
                     oend = svn_header_timestamp_version.match(over)
-                    if oend:
+                    if oend and oend.group(1):
                         over = int(oend.group(1))
                 elif opath:
                     ts = svn_header_timestamp.match(opath)
                     if ts:
                         opath = opath[:-len(ts.group(1))]
                         oend = svn_header_timestamp_version.match(ts.group(1))
-                        if oend:
+                        if oend and oend.group(1):
                             over = int(oend.group(1))
 
                 npath = diff_header.new_path
                 nver = diff_header.new_version
                 if nver:
                     nend = svn_header_timestamp_version.match(diff_header.new_version)
-                    if nend:
+                    if nend and nend.group(1):
                         nver = int(nend.group(1))
                 elif npath:
                     ts = svn_header_timestamp.match(npath)
                     if ts:
                         npath = npath[:-len(ts.group(1))]
                         nend = svn_header_timestamp_version.match(ts.group(1))
-                        if nend:
+                        if nend and nend.group(1):
                             nver = int(nend.group(1))
+
+                if type(over) != int:
+                    over = None
+
+                if type(nver) != int:
+                    nver = None
 
                 return header(
                         index_path = i.group(1),
