@@ -20,12 +20,12 @@ diffobj = namedtuple('diff', 'header changes text')
 # general diff regex
 diffcmd_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
 unified_header_index = re.compile('^Index: ([\s\S]+)$')
-unified_header_old_line = re.compile('^--- ([-/._\w]+)\s+([\s\S]*)$')
-unified_header_new_line = re.compile('^\+\+\+ ([-/._\w]+)\s+([\s\S]*)$')
+unified_header_old_line = re.compile('^--- ([-/._\\\\\w]+)\s+([\s\S]*)$')
+unified_header_new_line = re.compile('^\+\+\+ ([-/._\\\\\w]+)\s+([\s\S]*)$')
 unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@([\s\S]*)$')
 unified_change = re.compile('^([-+ ])([\s\S]*)$')
 
-context_header_old_line = re.compile('^\*\*\* ([-/._\w]+)(?::|\s+)([\s\S]*)$')
+context_header_old_line = re.compile('^\*\*\* ([-/._\\\\\w]+)(?::|\s+)([\s\S]*)$')
 context_header_new_line = unified_header_old_line
 context_hunk_start = re.compile('^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
 context_hunk_old = re.compile('^\*\*\* (\d+),?(\d*) \*\*\*\*$')

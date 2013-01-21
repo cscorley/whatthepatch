@@ -1075,5 +1075,40 @@ to this document.
 
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
+
+    def test_apache_attachment_2241(self):
+        with open('tests/casefiles/apache-attachment-2241.diff') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+                patch.diffobj(
+                    header=patch.header(
+                        index_path=None,
+                        old_path='src\\main\\org\\apache\\tools\\ant\\taskdefs\\optional\\pvcs\\Pvcs.orig',
+                        old_version='Sat Jun 22 16:11:58 2002',
+                        new_path='src\\main\\org\\apache\\tools\\ant\\taskdefs\\optional\\pvcs\\Pvcs.java',
+                        new_version='Fri Jun 28 10:55:50 2002'
+                        ),
+                    changes=[
+                        (91, 91, ' *'),
+                        (92, 92, ' * @author <a href="mailto:tchristensen@nordija.com">Thomas Christensen</a>'),
+                        (93, 93, ' * @author <a href="mailto:donj@apogeenet.com">Don Jeffery</a>'),
+                        (94, None, ' * @author <a href="snewton@standard.com">Steven E. Newton</a>'),
+                        (None, 94, ' * @author <a href="mailto:snewton@standard.com">Steven E. Newton</a>'),
+                        (95, 95, ' */'),
+                        (96, 96, 'public class Pvcs extends org.apache.tools.ant.Task {'),
+                        (97, 97, '    private String pvcsbin;')
+                        ],
+                    text= '\n'.join(lines) + '\n'
+                   ),
+                ]
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
+
+
 if __name__ == '__main__':
     unittest.main()
