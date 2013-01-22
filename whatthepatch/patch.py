@@ -17,20 +17,22 @@ header = namedtuple('header',
 
 diffobj = namedtuple('diff', 'header changes text')
 
-# general diff regex
-diffcmd_header = re.compile('^diff [\s\S]* ([\s\S]+) ([\s\S]+)$')
-unified_header_index = re.compile('^Index: ([\s\S]+)$')
-unified_header_old_line = re.compile('^--- ([-/._\\\\\w]+)\s+([\s\S]*)$')
-unified_header_new_line = re.compile('^\+\+\+ ([-/._\\\\\w]+)\s+([\s\S]*)$')
-unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@([\s\S]*)$')
-unified_change = re.compile('^([-+ ])([\s\S]*)$')
+file_timestamp_str = '([^:\t\n\r\f\v]+)[\t:](.*)' # [^ \t\n\r\f\v] == \S
 
-context_header_old_line = re.compile('^\*\*\* ([-/._\\\\\w]+)(?::|\s+)([\s\S]*)$')
-context_header_new_line = unified_header_old_line
+# general diff regex
+diffcmd_header = re.compile('^diff.* (.+) (.+)$')
+unified_header_index = re.compile('^Index: (.+)$')
+unified_header_old_line = re.compile('^--- ' + file_timestamp_str + '$')
+unified_header_new_line = re.compile('^\+\+\+ ' + file_timestamp_str + '$')
+unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)$')
+unified_change = re.compile('^([-+ ])(.*)$')
+
+context_header_old_line = re.compile('^\*\*\* ' + file_timestamp_str + '$')
+context_header_new_line = re.compile('^--- ' + file_timestamp_str + '$')
 context_hunk_start = re.compile('^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
 context_hunk_old = re.compile('^\*\*\* (\d+),?(\d*) \*\*\*\*$')
 context_hunk_new = re.compile('^--- (\d+),?(\d*) ----$')
-context_change = re.compile('^([-+ !]) ([\s\S]*)$')
+context_change = re.compile('^([-+ !]) (.*)$')
 
 ed_hunk_start = re.compile('^(\d+),?(\d*)([acd])$')
 ed_hunk_end = re.compile('^.$')
@@ -39,33 +41,30 @@ rcs_ed_hunk_start = re.compile('^([ad])(\d+) ?(\d*)$')
 
 default_hunk_start = re.compile('^(\d+),?(\d*)([acd])(\d+),?(\d*)$')
 default_hunk_mid = re.compile('^---$')
-default_change = re.compile('^([><]) ([\s\S]*)$')
+default_change = re.compile('^([><]) (.*)$')
 
 # Headers
 
 # git has a special index header and no end part
-git_diffcmd_header = re.compile('^diff --git a/([\s\S]+) b/([\s\S]+)$')
+git_diffcmd_header = re.compile('^diff --git a/(.+) b/(.+)$')
 git_header_index = re.compile('^index ([\w]{7})..([\w]{7}) ?(\d*)$')
-git_header_old_line = re.compile('^--- ([\s\S]+)$')
-git_header_new_line = re.compile('^\+\+\+ ([\s\S]+)$')
+git_header_old_line = re.compile('^--- (.+)$')
+git_header_new_line = re.compile('^\+\+\+ (.+)$')
 git_header_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
 
-bzr_header_index = re.compile("=== ([\s\S]+)")
+bzr_header_index = re.compile("=== (.+)")
 bzr_header_old_line = unified_header_old_line
 bzr_header_new_line = unified_header_new_line
 
 svn_header_index = unified_header_index
-svn_header_old_line = unified_header_old_line
-svn_header_new_line = unified_header_new_line
 svn_header_timestamp_version = re.compile('\((?:working copy|revision (\d+))\)')
-svn_header_timestamp = re.compile('[\s\S]*(\([\s\S]*\))$')
+svn_header_timestamp = re.compile('.*(\(.*\))$')
 
 cvs_header_index = unified_header_index
-cvs_header_rcs = re.compile('^RCS file: ([\s\S]+),\w{1}$')
-cvs_header_old_line = unified_header_old_line
-cvs_header_new_line = unified_header_new_line
-cvs_header_timestamp = re.compile('([\s\S]+)\t([\d.]+)')
-cvs_header_timestamp_colon = re.compile(':([\d.]+)\t([\s\S]+)')
+cvs_header_rcs = re.compile('^RCS file: (.+)(?:,\w{1}$|$)')
+cvs_header_timestamp = re.compile('(.+)\t([\d.]+)')
+cvs_header_timestamp_colon = re.compile(':([\d.]+)\t(.+)')
+old_cvs_diffcmd_header = re.compile('^diff.* (.+):?(.*) (.+):?(.*)$')
 
 
 def parse_patch(text):
@@ -276,7 +275,7 @@ def parse_svn_header(text):
 
                 return header(
                         index_path = i.group(1),
-                        old_path = opath, 
+                        old_path = opath,
                         old_version = over,
                         new_path = npath,
                         new_version = nver,
@@ -298,11 +297,13 @@ def parse_cvs_header(text):
         lines = text
 
     headers = findall_regex(lines, cvs_header_rcs)
-    if len(headers) == 0:
+    headers2 = findall_regex(lines, old_cvs_diffcmd_header)
+    if len(headers) == 0 and len(headers2) == 0:
         return None
 
     while len(lines) > 0:
         i = cvs_header_index.match(lines[0])
+        d = old_cvs_diffcmd_header.match(lines[0])
         del lines[0]
         if i:
             diff_header = parse_diff_header(lines)
@@ -383,12 +384,20 @@ def parse_unified_header(text):
             n = unified_header_new_line.match(lines[0])
             del lines[0]
             if n:
+                over = o.group(2)
+                if len(over) == 0:
+                    over = None
+
+                nver = n.group(2)
+                if len(nver) == 0:
+                    never = None
+
                 return header(
                         index_path = None,
                         old_path = o.group(1),
-                        old_version = o.group(2),
+                        old_version = over,
                         new_path = n.group(1),
-                        new_version = n.group(2),
+                        new_version = nver,
                         )
 
     return None
@@ -410,12 +419,20 @@ def parse_context_header(text):
             n = context_header_new_line.match(lines[0])
             del lines[0]
             if n:
+                over = o.group(2)
+                if len(over) == 0:
+                    over = None
+
+                nver = n.group(2)
+                if len(nver) == 0:
+                    never = None
+
                 return header(
                         index_path = None,
                         old_path = o.group(1),
-                        old_version = o.group(2),
+                        old_version = over,
                         new_path = n.group(1),
-                        new_version = n.group(2),
+                        new_version = nver,
                         )
 
     return None

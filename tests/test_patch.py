@@ -572,8 +572,8 @@ index 8910dfd..456e34f 100644
         text = """
 Index: bugtrace/trunk/src/bugtrace/csc.py
 ===================================================================
---- bugtrace/trunk/src/bugtrace/csc.py  (revision 12783)
-+++ bugtrace/trunk/src/bugtrace/csc.py  (revision 12784)
+--- bugtrace/trunk/src/bugtrace/csc.py	(revision 12783)
++++ bugtrace/trunk/src/bugtrace/csc.py	(revision 12784)
 @@ -1,3 +1,6 @@
 """
         expected = patch.header(
@@ -612,8 +612,8 @@ diff -u -r1.6.4.1 -r1.8
         self.assertEquals(results_main, expected)
 
     def test_unified_header(self):
-        text = """--- /tmp/o  2012-12-22 06:43:35.000000000 -0600
-+++ /tmp/n  2012-12-23 20:40:50.000000000 -0600
+        text = """--- /tmp/o	2012-12-22 06:43:35.000000000 -0600
++++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
 @@ -1,3 +1,9 @@"""
 
         expected = patch.header(
@@ -717,8 +717,8 @@ diff -u -r1.6.4.1 -r1.8
         self.assertEquals(results_main, expected_main)
 
     def test_context_header(self):
-        text = """*** /tmp/o   2012-12-22 06:43:35.000000000 -0600
---- /tmp/n  2012-12-23 20:40:50.000000000 -0600
+        text = """*** /tmp/o	2012-12-22 06:43:35.000000000 -0600
+--- /tmp/n	2012-12-23 20:40:50.000000000 -0600
 ***************"""
 
         expected = patch.header(
@@ -1073,6 +1073,9 @@ to this document.
                    ),
                 ]
 
+        results = patch.parse_cvs_header(text)
+        self.assertEquals(results, expected[0].header)
+
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
@@ -1108,6 +1111,20 @@ to this document.
         results = [x for x in patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
+    def test_space_in_path_header(self):
+        with open('tests/casefiles/eclipse-attachment-126343.header') as f:
+            text = f.read()
+
+        expected = patch.header(
+                index_path = 'test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java',
+                old_path = '/dev/null',
+                old_version = '1 Jan 1970 00:00:00 -0000',
+                new_path = 'test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java',
+                new_version = '1 Jan 1970 00:00:00 -0000'
+                )
+
+        results = patch.parse_header(text)
+        self.assertEquals(results, expected)
 
 
 if __name__ == '__main__':
