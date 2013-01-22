@@ -1,0 +1,7 @@
+Index: test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java
+===================================================================
+RCS file: test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java
+diff -N test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java
+--- /dev/null   1 Jan 1970 00:00:00 -0000
++++ test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java  1 Jan 1970 00:00:00 -0000
+@@ -0,0 +1,53 @@
