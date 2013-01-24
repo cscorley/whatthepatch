@@ -17,7 +17,8 @@ header = namedtuple('header',
 
 diffobj = namedtuple('diff', 'header changes text')
 
-file_timestamp_str = '([^:\t\n\r\f\v]+)[\t:](.*)' # [^ \t\n\r\f\v] == \S
+file_timestamp_str = '(.+?)(?:\t|:|  +)(.*)'
+# .+? was previously [^:\t\n\r\f\v]+
 
 # general diff regex
 diffcmd_header = re.compile('^diff.* (.+) (.+)$')

@@ -629,6 +629,24 @@ diff -u -r1.6.4.1 -r1.8
         results_main = patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
+    def test_unified_header_notab(self):
+        text = """--- /tmp/some file    2012-12-22 06:43:35.000000000 -0600
++++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
+@@ -1,3 +1,9 @@"""
+
+        expected = patch.header(
+                index_path = None,
+                old_path = '/tmp/some file',
+                old_version = '2012-12-22 06:43:35.000000000 -0600',
+                new_path = '/tmp/n',
+                new_version = '2012-12-23 20:40:50.000000000 -0600')
+
+        results = patch.parse_unified_header(text)
+        self.assertEquals(results, expected)
+
+        results_main = patch.parse_header(text)
+        self.assertEquals(results_main, expected)
+
 
     def test_unified_diff(self):
         text = """@@ -1,3 +1,9 @@
