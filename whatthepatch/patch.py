@@ -457,34 +457,46 @@ def parse_default_diff(text):
 
     old = 0
     new = 0
-    j = 0
-    k = 0
+    old_len = 0
+    new_len = 0
+    r = 0
+    i = 0
 
     changes = list()
 
     hunks = split_by_regex(lines, default_hunk_start)
     for hunk in hunks:
         if len(hunk):
-            j = 0
-            k = 0
+            r = 0
+            i = 0
             while len(hunk) > 0:
-                o = default_hunk_start.match(hunk[0])
+                h = default_hunk_start.match(hunk[0])
                 c = default_change.match(hunk[0])
                 del hunk[0]
-                if o:
-                    old = int(o.group(1))
-                    new = int(o.group(4))
-                    hunk_kind = o.group(3)
+                if h:
+                    old = int(h.group(1))
+                    if len(h.group(2)) > 0:
+                        old_len = int(h.group(2)) - old + 1
+                    else:
+                        old_len = 0
+
+                    new = int(h.group(4))
+                    if len(h.group(5)) > 0:
+                        new_len = int(h.group(5)) - new + 1
+                    else:
+                        new_len = 0
+
+                    hunk_kind = h.group(3)
                 elif c:
                     kind = c.group(1)
                     line = c.group(2)
 
-                    if kind == '<':
-                        changes.append((old + j, None, line))
-                        j += 1
-                    elif kind == '>':
-                        changes.append((None, new + k, line))
-                        k += 1
+                    if kind == '<':# and r != old_len:
+                        changes.append((old + r, None, line))
+                        r += 1
+                    elif kind == '>':# and i != new_len:
+                        changes.append((None, new + i, line))
+                        i += 1
 
     if len(changes) > 0:
         return changes
@@ -535,19 +547,16 @@ def parse_unified_diff(text):
                 line = c.group(2)
                 c = None
 
-                if kind == '-':
-                    if r != old_len:
-                        changes.append((old + r, None, line))
-                        r += 1
-                elif kind == '+':
-                    if i != new_len:
-                        changes.append((None, new + i, line))
-                        i += 1
-                elif kind == ' ':
-                    if r != old_len and i != new_len:
-                        changes.append((old + r, new + i, line))
-                        r += 1
-                        i += 1
+                if kind == '-' and r != old_len:
+                    changes.append((old + r, None, line))
+                    r += 1
+                elif kind == '+' and i != new_len:
+                    changes.append((None, new + i, line))
+                    i += 1
+                elif kind == ' ' and r != old_len and i != new_len:
+                    changes.append((old + r, new + i, line))
+                    r += 1
+                    i += 1
 
             del hunk[0]
 
