@@ -74,6 +74,16 @@ def parse_patch(text):
     else:
         lines = text
 
+    # maybe use this to nuke all of those line endings?
+    #lines = [x.splitlines()[0] for x in lines]
+    new_lines = list()
+    for x in lines:
+        if x == '':
+            new_lines.append(x)
+        else:
+            new_lines.append(x.splitlines()[0])
+    lines = new_lines
+
     check = [
             unified_header_index,
             diffcmd_header,
