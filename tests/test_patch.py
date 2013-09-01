@@ -734,6 +734,112 @@ diff -u -r1.6.4.1 -r1.8
         results_main = [x for x in patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
+    def test_diff_unified_blah(self):
+        with open('tests/casefiles/diff-unified-blah.diff') as f:
+            text = f.read()
+
+
+        expected = [
+            patch.diffobj(
+                header=patch.header(
+                    index_path=None,
+                    old_path='lao',
+                    old_version='2013-01-05 16:56:19.000000000 -0600',
+                    new_path='tzu',
+                    new_version='2013-01-05 16:56:35.000000000 -0600'
+                    ),
+                changes=[
+                    (1, None, 'The Way that can be told of is not the eternal Way;'),
+                    (2, None, 'The name that can be named is not the eternal name.'),
+                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+                    (4, None, 'The Named is the mother of all things.'),
+                    (None, 2, 'The named is the mother of all things.'),
+                    (None, 3, ''),
+                    (5, 4, 'Therefore let there always be non-being,'),
+                    (6, 5, '  so we may see their subtlety,'),
+                    (7, 6, 'And let there always be being,'),
+                    (9, 8, 'The two are the same,'),
+                    (10, 9, 'But after they are produced,'),
+                    (11, 10, '  they have different names.'),
+                    (None, 11, 'They both may be called deep and profound.'),
+                    (None, 12, 'Deeper and more profound,'),
+                    (None, 13, 'The door of all subtleties!')],
+                text=text)
+                ]
+
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
+    def test_diff_context_blah(self):
+        with open('tests/casefiles/diff-context-blah.diff') as f:
+            text = f.read()
+
+
+        expected = [
+            patch.diffobj(
+                header=patch.header(
+                    index_path=None,
+                    old_path='lao',
+                    old_version='2013-01-05 16:56:19.000000000 -0600',
+                    new_path='tzu',
+                    new_version='2013-01-05 16:56:35.000000000 -0600'
+                    ),
+                changes=[
+                    (1, None, 'The Way that can be told of is not the eternal Way;'),
+                    (2, None, 'The name that can be named is not the eternal name.'),
+                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+                    (4, None, 'The Named is the mother of all things.'),
+                    (None, 2, 'The named is the mother of all things.'),
+                    (None, 3, ''),
+                    (5, 4, 'Therefore let there always be non-being,'),
+                    (6, 5, '  so we may see their subtlety,'),
+                    (7, 6, 'And let there always be being,'),
+                    (9, 8, 'The two are the same,'),
+                    (10, 9, 'But after they are produced,'),
+                    (11, 10, '  they have different names.'),
+                    (None, 11, 'They both may be called deep and profound.'),
+                    (None, 12, 'Deeper and more profound,'),
+                    (None, 13, 'The door of all subtleties!')],
+                text=text)
+                ]
+
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
+    def test_diff_default_blah(self):
+        with open('tests/casefiles/diff-default-blah.diff') as f:
+            text = f.read()
+
+
+        expected = [
+            patch.diffobj(
+                header=None,
+                changes=[
+                    (1, None, 'The Way that can be told of is not the eternal Way;'),
+                    (2, None, 'The name that can be named is not the eternal name.'),
+                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+                    (4, None, 'The Named is the mother of all things.'),
+                    (None, 2, 'The named is the mother of all things.'),
+                    (None, 3, ''),
+                    (5, 4, 'Therefore let there always be non-being,'),
+                    (6, 5, '  so we may see their subtlety,'),
+                    (7, 6, 'And let there always be being,'),
+                    (9, 8, 'The two are the same,'),
+                    (10, 9, 'But after they are produced,'),
+                    (11, 10, '  they have different names.'),
+                    (None, 11, 'They both may be called deep and profound.'),
+                    (None, 12, 'Deeper and more profound,'),
+                    (None, 13, 'The door of all subtleties!')],
+                text=text)
+                ]
+
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results, expected)
+
+
     def test_context_header(self):
         text = """*** /tmp/o	2012-12-22 06:43:35.000000000 -0600
 --- /tmp/n	2012-12-23 20:40:50.000000000 -0600
@@ -1143,6 +1249,21 @@ to this document.
 
         results = patch.parse_header(text)
         self.assertEquals(results, expected)
+
+    def test_svn_mixed_line_ends(self):
+        with open('tests/casefiles/svn-mixed_line_ends.patch') as f:
+            text = f.read()
+
+        expected_header = patch.header(
+                index_path='java/org/apache/catalina/loader/WebappClassLoader.java',
+                old_path='java/org/apache/catalina/loader/WebappClassLoader.java',
+                old_version=1346371,
+                new_path='java/org/apache/catalina/loader/WebappClassLoader.java',
+                new_version=None)
+
+        results = [x for x in patch.parse_patch(text)]
+        self.assertEquals(results[0].header, expected_header)
+
 
 
 if __name__ == '__main__':

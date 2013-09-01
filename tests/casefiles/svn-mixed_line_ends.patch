@@ -1,0 +1,162 @@
+Index: java/org/apache/catalina/loader/WebappClassLoader.java
+===================================================================
+--- java/org/apache/catalina/loader/WebappClassLoader.java	(revision 1346371)
++++ java/org/apache/catalina/loader/WebappClassLoader.java	(working copy)
+@@ -2177,8 +2177,9 @@
+                     }
+ 
+                     // TimerThread can be stopped safely so treat separately
+-                    if (thread.getClass().getName().equals(
+-                            "java.util.TimerThread") &&
++                    // "java.util.TimerThread" in Sun/Oracle JDK
++                    // "java.util.Timer$TimerImpl" in Apache Harmony and in IBM JDK
++                    if (thread.getClass().getName().startsWith("java.util.Timer") &&
+                             clearReferencesStopTimerThreads) {
+                         clearReferencesStopTimerThread(thread);
+                         continue;
+@@ -2201,13 +2202,29 @@
+                     // If the thread has been started via an executor, try
+                     // shutting down the executor
+                     try {
+-                        Field targetField =
+-                            thread.getClass().getDeclaredField("target");
+-                        targetField.setAccessible(true);
+-                        Object target = targetField.get(thread);
+-                        
++                        // Runnable wrapped by Thread
++                        // "target" in Sun/Oracle JDK
++                        // "runnable" in IBM JDK
++                        // "action" in Apache Harmony
++                        Object target = null;
++                        for (String fieldName : new String[] { "target",
++                                "runnable", "action" }) {
++                            try {
++                                Field targetField = thread.getClass()
++                                        .getDeclaredField(fieldName);
++                                targetField.setAccessible(true);
++                                target = targetField.get(thread);
++                                break;
++                            } catch (NoSuchFieldException nfe) {
++                                continue;
++                            }
++                        }
++
++                        // "java.util.concurrent" code is in public domain,
++                        // so all implementations are similar
+                         if (target != null &&
+-                                target.getClass().getCanonicalName().equals(
++                                target.getClass().getCanonicalName() != null
++                                && target.getClass().getCanonicalName().equals(
+                                 "java.util.concurrent.ThreadPoolExecutor.Worker")) {
+                             Field executorField =
+                                 target.getClass().getDeclaredField("this$0");
+@@ -2276,37 +2293,46 @@
+     
+     
+     private void clearReferencesStopTimerThread(Thread thread) {
+-        
++
+         // Need to get references to:
+-        // - newTasksMayBeScheduled field
++        // in Sun/Oracle JDK:
++        // - newTasksMayBeScheduled field (in java.util.TimerThread)
+         // - queue field
+         // - queue.clear()
++        // in IBM JDK, Apache Harmony:
++        // - cancel() method (in java.util.Timer$TimerImpl)
++
++        try {
++
++            try {
++                Field newTasksMayBeScheduledField =
++                    thread.getClass().getDeclaredField("newTasksMayBeScheduled");
++                newTasksMayBeScheduledField.setAccessible(true);
++                Field queueField = thread.getClass().getDeclaredField("queue");
++                queueField.setAccessible(true);
+         
+-        try {
+-            Field newTasksMayBeScheduledField =
+-                thread.getClass().getDeclaredField("newTasksMayBeScheduled");
+-            newTasksMayBeScheduledField.setAccessible(true);
+-            Field queueField = thread.getClass().getDeclaredField("queue");
+-            queueField.setAccessible(true);
+-    
+-            Object queue = queueField.get(thread);
+-            
+-            Method clearMethod = queue.getClass().getDeclaredMethod("clear");
+-            clearMethod.setAccessible(true);
+-            
+-            synchronized(queue) {
+-                newTasksMayBeScheduledField.setBoolean(thread, false);
+-                clearMethod.invoke(queue);
+-                queue.notify();  // In case queue was already empty.
++                Object queue = queueField.get(thread);
++                
++                Method clearMethod = queue.getClass().getDeclaredMethod("clear");
++                clearMethod.setAccessible(true);
++                
++                synchronized(queue) {
++                    newTasksMayBeScheduledField.setBoolean(thread, false);
++                    clearMethod.invoke(queue);
++                    queue.notify();  // In case queue was already empty.
++                }
++
++            }catch (NoSuchFieldException nfe){
++                Method cancelMethod = thread.getClass().getDeclaredMethod("cancel");
++                synchronized(thread) {
++                    cancelMethod.setAccessible(true);
++                    cancelMethod.invoke(thread);
++                }
+             }
+-            
++
+             log.error(sm.getString("webappClassLoader.warnTimerThread",
+                     contextName, thread.getName()));
+ 
+-        } catch (NoSuchFieldException e) {
+-            log.warn(sm.getString(
+-                    "webappClassLoader.stopTimerThreadFail",
+-                    thread.getName(), contextName), e);
+         } catch (IllegalAccessException e) {
+             log.warn(sm.getString(
+                     "webappClassLoader.stopTimerThreadFail",
+@@ -2340,17 +2366,27 @@
+                 Class.forName("java.lang.ThreadLocal$ThreadLocalMap");
+             Field tableField = tlmClass.getDeclaredField("table");
+             tableField.setAccessible(true);
+-            
++            Method expungeStaleEntriesMethod = tlmClass.getDeclaredMethod("expungeStaleEntries");
++            expungeStaleEntriesMethod.setAccessible(true);
++
+             for (int i = 0; i < threads.length; i++) {
+                 Object threadLocalMap;
+                 if (threads[i] != null) {
++
+                     // Clear the first map
+                     threadLocalMap = threadLocalsField.get(threads[i]);
+-                    clearThreadLocalMap(threadLocalMap, tableField);
++                    if (null != threadLocalMap){
++                        expungeStaleEntriesMethod.invoke(threadLocalMap);
++                        checkThreadLocalMapForLeaks(threadLocalMap, tableField);
++                    }
++
+                     // Clear the second map
+                     threadLocalMap =
+                         inheritableThreadLocalsField.get(threads[i]);
+-                    clearThreadLocalMap(threadLocalMap, tableField);
++                    if (null != threadLocalMap){
++                        expungeStaleEntriesMethod.invoke(threadLocalMap);
++                        checkThreadLocalMapForLeaks(threadLocalMap, tableField);
++                    }
+                 }
+             }
+         } catch (SecurityException e) {
+@@ -2383,7 +2419,7 @@
+      * points to the internal table to save re-calculating it on every
+      * call to this method.
+      */
+-    private void clearThreadLocalMap(Object map, Field internalTableField)
++    private void checkThreadLocalMapForLeaks(Object map, Field internalTableField)
+             throws NoSuchMethodException, IllegalAccessException,
+             NoSuchFieldException, InvocationTargetException {
+         if (map != null) {
