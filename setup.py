@@ -15,7 +15,7 @@ setup(
     description='A patch parsing library',
     long_description=readme,
     author='Christopher S. Corley',
-    author_email='cscorley@ua.edu',
+    author_email='cscorley@crimson.ua.edu',
     url='https://github.com/cscorley/whatthepatch',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
