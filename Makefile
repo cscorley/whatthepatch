@@ -1,6 +1,13 @@
 all:
 	nosetests
 
+clean:
+	find whatthepatch tests -name '*.pyc' -exec rm {} \;
+
+test:
+	. env2/bin/activate && nosetests || true
+	. env3/bin/activate && nosetests || true
+
 init: init2 init3
 
 init2:

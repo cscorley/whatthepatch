@@ -1,12 +1,4 @@
-#!/usr/bin/env python2.6
-#
-# [The "New BSD" license]
-# Copyright (c) 2012 The Board of Trustees of The University of Alabama
-# All rights reserved.
-#
-# See LICENSE for details.
-
-from __future__ import print_function
+# -*- coding: utf-8 -*-
 
 import os
 from shutil import rmtree
@@ -33,8 +25,7 @@ def make_dir(dir):
             # the directory already exists
             pass
         else:
-            print('Failed to create "%s" directory!' % dir)
-            sys.exit(e.errno)
+            raise e
 
 def remove(path):
     if os.path.exists(path):

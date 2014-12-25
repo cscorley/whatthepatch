@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-# test_basic.py
 
-from context import whatthepatch
+import whatthepatch as wtp
 
-from whatthepatch import patch
 
 import unittest
 from io import StringIO
@@ -17,11 +15,11 @@ class PatchTestSuite(unittest.TestCase):
 > therefore be located at
 > the beginning of this
 > document!
-> 
+>
 8,14c14
 < compress the size of the
 < changes.
-< 
+<
 < This paragraph contains
 < text that is outdated.
 < It will be deleted in the
@@ -33,7 +31,7 @@ class PatchTestSuite(unittest.TestCase):
 ---
 > check this document. On
 24a25,28
-> 
+>
 > This paragraph contains
 > important new additions
 > to this document.
@@ -65,11 +63,11 @@ class PatchTestSuite(unittest.TestCase):
                 (None, 28, 'to this document.')
                 ]
 
-        results = [x for x in patch.parse_default_diff(text)]
+        results = [x for x in wtp.patch.parse_default_diff(text)]
         self.assertEquals(results, expected)
 
-        expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in patch.parse_patch(text)]
+        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        results_main = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
     def test_svn_unified_patch(self):
@@ -79,8 +77,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_version=12783,
@@ -107,8 +105,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[:22]) + '\n'
                    ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_version=12783,
@@ -132,8 +130,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[22:40]) + '\n'
                     ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_version=12783,
@@ -160,7 +158,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
 
         self.assertEquals(results, expected)
 
@@ -171,8 +169,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_version=12783,
@@ -199,8 +197,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[:32]) + '\n'
                    ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_version=12783,
@@ -224,8 +222,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[32:61]) + '\n'
                     ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_version=12783,
@@ -252,7 +250,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
 
         self.assertEquals(results, expected)
 
@@ -263,8 +261,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
                         old_version=12783,
@@ -291,8 +289,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[:23]) + '\n'
                    ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_version=12783,
@@ -316,8 +314,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[23:42]) + '\n'
                     ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_version=12783,
@@ -345,7 +343,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
 
 
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
 
         self.assertEquals(results, expected)
 
@@ -355,8 +353,8 @@ class PatchTestSuite(unittest.TestCase):
 
         lines = text.splitlines()
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                         old_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_version=None,
@@ -374,8 +372,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[:10]) + '\n'
                    ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_version=None,
@@ -390,8 +388,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[10:18]) + '\n'
                     ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_version=None,
@@ -408,7 +406,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
         self.assertEquals(results, expected)
 
 
@@ -419,8 +417,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                         old_path='bugtrace/trunk/src/bugtrace/csc.py',
                         old_version=None,
@@ -438,8 +436,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[:12]) + '\n'
                    ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
                         old_version=None,
@@ -454,8 +452,8 @@ class PatchTestSuite(unittest.TestCase):
                         ],
                     text = '\n'.join(lines[12:22]) + '\n'
                     ),
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
                         old_version=None,
@@ -471,7 +469,7 @@ class PatchTestSuite(unittest.TestCase):
                     text = '\n'.join(lines[22:]) + '\n'
                     )
                     ]
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
         self.assertEquals(results, expected)
 
 
@@ -482,8 +480,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path=None,
                         old_path='novel/src/java/edu/ua/eng/software/novel/NovelFrame.java',
                         old_version='aae63fe',
@@ -521,8 +519,8 @@ class PatchTestSuite(unittest.TestCase):
                         (172, 168, '     * ')],
                     text = '\n'.join(lines[:34]) + '\n'
                     ),
-                    patch.diffobj(
-                        header=patch.header(
+                    wtp.patch.diffobj(
+                        header=wtp.patch.header(
                             index_path=None,
                             old_path='novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java',
                             old_version='a63b57e',
@@ -542,7 +540,7 @@ class PatchTestSuite(unittest.TestCase):
                         )
                     ]
 
-        results = [x for x in whatthepatch.parse_patch(text)]
+        results = [x for x in wtp.parse_patch(text)]
 
         self.assertEquals(results, expected)
 
@@ -555,17 +553,17 @@ index 8910dfd..456e34f 100644
 +++ b/bugtrace/patch.py
 @@ -8,20 +8,30 @@
 """
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = None,
                 old_path = 'bugtrace/patch.py',
                 old_version = '8910dfd',
                 new_path = 'bugtrace/patch.py',
                 new_version = '456e34f')
 
-        results = patch.parse_git_header(text)
+        results = wtp.patch.parse_git_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
     def test_svn_header(self):
@@ -576,16 +574,16 @@ Index: bugtrace/trunk/src/bugtrace/csc.py
 +++ bugtrace/trunk/src/bugtrace/csc.py	(revision 12784)
 @@ -1,3 +1,6 @@
 """
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 old_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 old_version = 12783,
                 new_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 new_version = 12784)
-        results = patch.parse_svn_header(text)
+        results = wtp.patch.parse_svn_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
     def test_cvs_header(self):
@@ -599,16 +597,16 @@ diff -u -r1.6.4.1 -r1.8
 +++ org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	17 May 2002 20:27:56 -0000	1.8
 @@ -1 +1 @@
 """
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 old_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 old_version = '1.6.4.1',
                 new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 new_version = '1.8')
-        results = patch.parse_cvs_header(text)
+        results = wtp.patch.parse_cvs_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
     def test_unified_header(self):
@@ -616,17 +614,17 @@ diff -u -r1.6.4.1 -r1.8
 +++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
 @@ -1,3 +1,9 @@"""
 
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = None,
                 old_path = '/tmp/o',
                 old_version = '2012-12-22 06:43:35.000000000 -0600',
                 new_path = '/tmp/n',
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
-        results = patch.parse_unified_header(text)
+        results = wtp.patch.parse_unified_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
     def test_unified_header_notab(self):
@@ -634,17 +632,17 @@ diff -u -r1.6.4.1 -r1.8
 +++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
 @@ -1,3 +1,9 @@"""
 
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = None,
                 old_path = '/tmp/some file',
                 old_version = '2012-12-22 06:43:35.000000000 -0600',
                 new_path = '/tmp/n',
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
-        results = patch.parse_unified_header(text)
+        results = wtp.patch.parse_unified_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
 
@@ -671,7 +669,7 @@ diff -u -r1.6.4.1 -r1.8
 -It will be deleted in the
 -near future.
 +compress anything.
- 
+
  It is important to spell
 -check this dokument. On
 +check this document. On
@@ -727,11 +725,11 @@ diff -u -r1.6.4.1 -r1.8
                 (None, 28, 'to this document.')
                 ]
 
-        results = [x for x in patch.parse_unified_diff(text)]
+        results = [x for x in wtp.patch.parse_unified_diff(text)]
         self.assertEquals(results, expected)
 
-        expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in patch.parse_patch(text)]
+        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        results_main = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
     def test_diff_unified_blah(self):
@@ -740,8 +738,8 @@ diff -u -r1.6.4.1 -r1.8
 
 
         expected = [
-            patch.diffobj(
-                header=patch.header(
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
                     index_path=None,
                     old_path='lao',
                     old_version='2013-01-05 16:56:19.000000000 -0600',
@@ -768,7 +766,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_diff_context_blah(self):
@@ -777,8 +775,8 @@ diff -u -r1.6.4.1 -r1.8
 
 
         expected = [
-            patch.diffobj(
-                header=patch.header(
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
                     index_path=None,
                     old_path='lao',
                     old_version='2013-01-05 16:56:19.000000000 -0600',
@@ -805,7 +803,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_diff_default_blah(self):
@@ -814,7 +812,7 @@ diff -u -r1.6.4.1 -r1.8
 
 
         expected = [
-            patch.diffobj(
+            wtp.patch.diffobj(
                 header=None,
                 changes=[
                     (1, None, 'The Way that can be told of is not the eternal Way;'),
@@ -836,7 +834,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
 
@@ -845,17 +843,17 @@ diff -u -r1.6.4.1 -r1.8
 --- /tmp/n	2012-12-23 20:40:50.000000000 -0600
 ***************"""
 
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = None,
                 old_path = '/tmp/o',
                 old_version = '2012-12-22 06:43:35.000000000 -0600',
                 new_path = '/tmp/n',
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
-        results = patch.parse_context_header(text)
+        results = wtp.patch.parse_context_header(text)
         self.assertEquals(results, expected)
 
-        results_main = patch.parse_header(text)
+        results_main = wtp.patch.parse_header(text)
         self.assertEquals(results_main, expected)
 
 
@@ -868,7 +866,7 @@ diff -u -r1.6.4.1 -r1.8
 + therefore be located at
 + the beginning of this
 + document!
-+ 
++
   This part of the
   document has stayed the
   same from version to
@@ -879,12 +877,12 @@ diff -u -r1.6.4.1 -r1.8
   would not be helping to
 ! compress the size of the
 ! changes.
-! 
+!
 ! This paragraph contains
 ! text that is outdated.
 ! It will be deleted in the
 ! near future.
-  
+
   It is important to spell
 ! check this dokument. On
   the other hand, a
@@ -895,7 +893,7 @@ diff -u -r1.6.4.1 -r1.8
   change.  Otherwise, that
   would not be helping to
 ! compress anything.
-  
+
   It is important to spell
 ! check this document. On
   the other hand, a
@@ -907,7 +905,7 @@ diff -u -r1.6.4.1 -r1.8
   this paragraph needs to
   be changed. Things can
   be added after it.
-+ 
++
 + This paragraph contains
 + important new additions
 + to this document.
@@ -955,11 +953,11 @@ diff -u -r1.6.4.1 -r1.8
                 (None, 28, 'to this document.')
                 ]
 
-        results = [x for x in patch.parse_context_diff(text)]
+        results = [x for x in wtp.patch.parse_context_diff(text)]
         self.assertEquals(results, expected)
 
-        expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in patch.parse_patch(text)]
+        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        results_main = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
     def test_ed_diff(self):
@@ -1012,11 +1010,11 @@ document!
                 (None, 28, 'to this document.')
                 ]
 
-        results = [x for x in patch.parse_ed_diff(text)]
+        results = [x for x in wtp.patch.parse_ed_diff(text)]
         self.assertEquals(results, expected)
 
-        expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in patch.parse_patch(text)]
+        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        results_main = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
     def test_rcs_ed_diff(self):
@@ -1068,11 +1066,11 @@ to this document.
                 (None, 28, 'to this document.')
                 ]
 
-        results = [x for x in patch.parse_rcs_ed_diff(text)]
+        results = [x for x in wtp.patch.parse_rcs_ed_diff(text)]
         self.assertEquals(results, expected)
 
-        expected_main = [patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in patch.parse_patch(text)]
+        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        results_main = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results_main, expected_main)
 
     def test_embedded_diff_in_comment(self):
@@ -1080,8 +1078,8 @@ to this document.
             text = f.read()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path=None,
                         old_path='src/org/mozilla/javascript/IRFactory.java',
                         old_version=None,
@@ -1103,7 +1101,7 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_mozilla_527452_5_comment(self):
@@ -1113,8 +1111,8 @@ to this document.
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
                         old_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
                         old_version=5547,
@@ -1136,7 +1134,7 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_dos_unified_cvs(self):
@@ -1146,30 +1144,31 @@ to this document.
         lines = text.splitlines()
 
         expected = [
-            patch.diffobj(header=patch.header(
-                index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                old_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                old_version='1.1',
-                new_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                new_version='15 Sep 2011 02:26:05 -0000'
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
+                    index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                    old_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                    old_version='1.1',
+                    new_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
+                    new_version='15 Sep 2011 02:26:05 -0000'
                 ),
-            changes=[
-                (79, 79, '    @Override'),
-                (80, 80, '    public String toSource(int depth) {'),
-                (81, 81, '        return makeIndent(depth)'),
-                (82, None, '                + " for ("'),
-                (None, 82, '                + " for " '),
-                (None, 83, '                + (isForEach()?"each ":"")'),
-                (None, 84, '                + "("'),
-                (83, 85, '                + iterator.toSource(0)'),
-                (84, 86, '                + " in "'),
-                (85, 87, '                + iteratedObject.toSource(0)')
+                changes=[
+                    (79, 79, '    @Override'),
+                    (80, 80, '    public String toSource(int depth) {'),
+                    (81, 81, '        return makeIndent(depth)'),
+                    (82, None, '                + " for ("'),
+                    (None, 82, '                + " for " '),
+                    (None, 83, '                + (isForEach()?"each ":"")'),
+                    (None, 84, '                + "("'),
+                    (83, 85, '                + iterator.toSource(0)'),
+                    (84, 86, '                + " in "'),
+                    (85, 87, '                + iteratedObject.toSource(0)')
                 ],
-            text = '\n'.join(lines[2:]) + '\n'
+                text = '\n'.join(lines[2:]) + '\n'
             )
-            ]
+        ]
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
 
@@ -1178,8 +1177,8 @@ to this document.
             text = f.read()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path='mozilla/js/rhino/CHANGELOG',
                         old_path='mozilla/js/rhino/CHANGELOG',
                         old_version='1.1.1.1',
@@ -1197,10 +1196,10 @@ to this document.
                    ),
                 ]
 
-        results = patch.parse_cvs_header(text)
+        results = wtp.patch.parse_cvs_header(text)
         self.assertEquals(results, expected[0].header)
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_apache_attachment_2241(self):
@@ -1210,8 +1209,8 @@ to this document.
         lines = text.splitlines()
 
         expected = [
-                patch.diffobj(
-                    header=patch.header(
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
                         index_path=None,
                         old_path='src\\main\\org\\apache\\tools\\ant\\taskdefs\\optional\\pvcs\\Pvcs.orig',
                         old_version='Sat Jun 22 16:11:58 2002',
@@ -1232,14 +1231,14 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results, expected)
 
     def test_space_in_path_header(self):
         with open('tests/casefiles/eclipse-attachment-126343.header') as f:
             text = f.read()
 
-        expected = patch.header(
+        expected = wtp.patch.header(
                 index_path = 'test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java',
                 old_path = '/dev/null',
                 old_version = '1 Jan 1970 00:00:00 -0000',
@@ -1247,21 +1246,21 @@ to this document.
                 new_version = '1 Jan 1970 00:00:00 -0000'
                 )
 
-        results = patch.parse_header(text)
+        results = wtp.patch.parse_header(text)
         self.assertEquals(results, expected)
 
     def test_svn_mixed_line_ends(self):
         with open('tests/casefiles/svn-mixed_line_ends.patch') as f:
             text = f.read()
 
-        expected_header = patch.header(
+        expected_header = wtp.patch.header(
                 index_path='java/org/apache/catalina/loader/WebappClassLoader.java',
                 old_path='java/org/apache/catalina/loader/WebappClassLoader.java',
                 old_version=1346371,
                 new_path='java/org/apache/catalina/loader/WebappClassLoader.java',
                 new_version=None)
 
-        results = [x for x in patch.parse_patch(text)]
+        results = [x for x in wtp.patch.parse_patch(text)]
         self.assertEquals(results[0].header, expected_header)
 
 
