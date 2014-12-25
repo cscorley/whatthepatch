@@ -1,7 +1,16 @@
 all:
 	nosetests
 
-init:
-	virtualenv --python=python2 env
-	. env/bin/activate && pip install nose
-	. env/bin/activate && pip install -r requirements.txt --use-mirrors
+init: init2 init3
+
+init2:
+	virtualenv --python=python2 env2
+	. env2/bin/activate && pip install nose
+	. env2/bin/activate && pip install -r requirements.txt
+	. env2/bin/activate && pip install --editable .
+
+init3:
+	virtualenv --python=python3 env3
+	. env3/bin/activate && pip install nose
+	. env3/bin/activate && pip install -r requirements.txt
+	. env3/bin/activate && pip install --editable .
