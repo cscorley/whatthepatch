@@ -10,7 +10,7 @@ def apply_patch(diffs):
     """ Not ready for use yet """
     pass
 
-    if type(diffs) == patch.diff:
+    if isinstance(diffs, patch.diff):
         diffs = [diffs]
 
     for diff in diffs:
@@ -25,9 +25,9 @@ def apply_patch(diffs):
             f.write(new_text)
 
 def apply_diff(diff, text, use_patch=False):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = list(text)
 
     if use_patch:

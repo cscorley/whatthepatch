@@ -64,11 +64,11 @@ class PatchTestSuite(unittest.TestCase):
                 ]
 
         results = [x for x in wtp.patch.parse_default_diff(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results_main, expected_main)
+        self.assertEqual(results_main, expected_main)
 
     def test_svn_unified_patch(self):
         with open('tests/casefiles/svn-unified.patch') as f:
@@ -160,7 +160,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in wtp.parse_patch(text)]
 
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_svn_context_patch(self):
         with open('tests/casefiles/svn-context.patch') as f:
@@ -252,7 +252,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in wtp.parse_patch(text)]
 
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_svn_git_patch(self):
         with open('tests/casefiles/svn-git.patch') as f:
@@ -345,7 +345,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in wtp.parse_patch(text)]
 
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_svn_rcs_patch(self):
         with open('tests/casefiles/svn-rcs.patch') as f:
@@ -407,7 +407,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
 
         results = [x for x in wtp.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
 
     def test_svn_default_patch(self):
@@ -470,7 +470,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
         results = [x for x in wtp.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
 
     def test_git_patch(self):
@@ -542,7 +542,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = [x for x in wtp.parse_patch(text)]
 
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
 
     def test_git_header(self):
@@ -561,10 +561,10 @@ index 8910dfd..456e34f 100644
                 new_version = '456e34f')
 
         results = wtp.patch.parse_git_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
     def test_svn_header(self):
         text = """
@@ -581,10 +581,10 @@ Index: bugtrace/trunk/src/bugtrace/csc.py
                 new_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 new_version = 12784)
         results = wtp.patch.parse_svn_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
     def test_cvs_header(self):
         text = """Index: org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java
@@ -604,10 +604,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 new_version = '1.8')
         results = wtp.patch.parse_cvs_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
     def test_unified_header(self):
         text = """--- /tmp/o	2012-12-22 06:43:35.000000000 -0600
@@ -622,10 +622,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
         results = wtp.patch.parse_unified_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
     def test_unified_header_notab(self):
         text = """--- /tmp/some file    2012-12-22 06:43:35.000000000 -0600
@@ -640,10 +640,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
         results = wtp.patch.parse_unified_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
 
     def test_unified_diff(self):
@@ -726,11 +726,11 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
         results = [x for x in wtp.patch.parse_unified_diff(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results_main, expected_main)
+        self.assertEqual(results_main, expected_main)
 
     def test_diff_unified_blah(self):
         with open('tests/casefiles/diff-unified-blah.diff') as f:
@@ -767,7 +767,7 @@ diff -u -r1.6.4.1 -r1.8
 
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_diff_context_blah(self):
         with open('tests/casefiles/diff-context-blah.diff') as f:
@@ -804,7 +804,7 @@ diff -u -r1.6.4.1 -r1.8
 
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_diff_default_blah(self):
         with open('tests/casefiles/diff-default-blah.diff') as f:
@@ -835,7 +835,7 @@ diff -u -r1.6.4.1 -r1.8
 
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
 
     def test_context_header(self):
@@ -851,10 +851,10 @@ diff -u -r1.6.4.1 -r1.8
                 new_version = '2012-12-23 20:40:50.000000000 -0600')
 
         results = wtp.patch.parse_context_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
-        self.assertEquals(results_main, expected)
+        self.assertEqual(results_main, expected)
 
 
     def test_context_diff(self):
@@ -954,11 +954,11 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
         results = [x for x in wtp.patch.parse_context_diff(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results_main, expected_main)
+        self.assertEqual(results_main, expected_main)
 
     def test_ed_diff(self):
         text = """24a
@@ -1011,11 +1011,11 @@ document!
                 ]
 
         results = [x for x in wtp.patch.parse_ed_diff(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results_main, expected_main)
+        self.assertEqual(results_main, expected_main)
 
     def test_rcs_ed_diff(self):
         text="""a0 6
@@ -1067,11 +1067,11 @@ to this document.
                 ]
 
         results = [x for x in wtp.patch.parse_rcs_ed_diff(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
         results_main = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results_main, expected_main)
+        self.assertEqual(results_main, expected_main)
 
     def test_embedded_diff_in_comment(self):
         with open('tests/casefiles/embedded-diff.comment') as f:
@@ -1102,7 +1102,7 @@ to this document.
                 ]
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_mozilla_527452_5_comment(self):
         with open('tests/casefiles/mozilla-527452-5.comment') as f:
@@ -1135,7 +1135,7 @@ to this document.
                 ]
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_dos_unified_cvs(self):
         with open('tests/casefiles/mozilla-560291.diff') as f:
@@ -1169,7 +1169,7 @@ to this document.
         ]
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
 
     def test_old_style_cvs(self):
@@ -1197,10 +1197,10 @@ to this document.
                 ]
 
         results = wtp.patch.parse_cvs_header(text)
-        self.assertEquals(results, expected[0].header)
+        self.assertEqual(results, expected[0].header)
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_apache_attachment_2241(self):
         with open('tests/casefiles/apache-attachment-2241.diff') as f:
@@ -1232,7 +1232,7 @@ to this document.
                 ]
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_space_in_path_header(self):
         with open('tests/casefiles/eclipse-attachment-126343.header') as f:
@@ -1247,7 +1247,7 @@ to this document.
                 )
 
         results = wtp.patch.parse_header(text)
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
 
     def test_svn_mixed_line_ends(self):
         with open('tests/casefiles/svn-mixed_line_ends.patch') as f:
@@ -1261,7 +1261,7 @@ to this document.
                 new_version=None)
 
         results = [x for x in wtp.patch.parse_patch(text)]
-        self.assertEquals(results[0].header, expected_header)
+        self.assertEqual(results[0].header, expected_header)
 
 
 

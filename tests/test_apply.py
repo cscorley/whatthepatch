@@ -17,10 +17,10 @@ class ApplyTestSuite(unittest.TestCase):
             self.tzu = f.read().splitlines()
 
     def test_truth(self):
-        self.assertEquals(type(self.lao), list)
-        self.assertEquals(type(self.tzu), list)
-        self.assertEquals(len(self.lao), 11)
-        self.assertEquals(len(self.tzu), 13)
+        self.assertEqual(type(self.lao), list)
+        self.assertEqual(type(self.tzu), list)
+        self.assertEqual(len(self.lao), 11)
+        self.assertEqual(len(self.tzu), 13)
 
     def test_diff_default(self):
         with open('tests/casefiles/diff-default.diff') as f:
@@ -30,7 +30,7 @@ class ApplyTestSuite(unittest.TestCase):
         diff = diff[0]
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEquals(new_text, self.tzu)
+        self.assertEqual(new_text, self.tzu)
 
     def test_diff_context(self):
         with open('tests/casefiles/diff-context.diff') as f:
@@ -40,7 +40,7 @@ class ApplyTestSuite(unittest.TestCase):
         diff = diff[0]
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEquals(new_text, self.tzu)
+        self.assertEqual(new_text, self.tzu)
 
     def test_diff_unified(self):
         with open('tests/casefiles/diff-unified.diff') as f:
@@ -50,13 +50,8 @@ class ApplyTestSuite(unittest.TestCase):
         diff = diff[0]
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        for e in self.tzu:
-            print(e)
-        print('~~~~')
-        for e in new_text:
-            print(e)
 
-        self.assertEquals(new_text, self.tzu)
+        self.assertEqual(new_text, self.tzu)
 
     def test_diff_unified_patchutil(self):
         with open('tests/casefiles/diff-unified.diff') as f:
@@ -66,7 +61,7 @@ class ApplyTestSuite(unittest.TestCase):
         diff = diff[0]
 
         new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
-        self.assertEquals(new_text, (self.tzu, None))
+        self.assertEqual(new_text, (self.tzu, None))
 
         self.assertRaises(AssertionError, wtp.apply.apply_diff, diff, [''] + self.lao, use_patch=True)
 
@@ -78,24 +73,21 @@ class ApplyTestSuite(unittest.TestCase):
         diff = diff[0]
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEquals(new_text, self.tzu)
+        self.assertEqual(new_text, self.tzu)
 
     def test_diff_ed(self):
         self.maxDiff = None
         with open('tests/casefiles/diff-ed.diff') as f:
             diff_text = f.read()
-        print(diff_text)
-        print(diff_text.splitlines())
 
         diff = [x for x in wtp.parse_patch(diff_text)]
         diff = diff[0]
 
-        print(diff)
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEquals(self.tzu,new_text)
+        self.assertEqual(self.tzu,new_text)
 
         new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
-        self.assertEquals(new_text, (self.tzu, None))
+        self.assertEqual(new_text, (self.tzu, None))
 
 if __name__ == '__main__':
     unittest.main()

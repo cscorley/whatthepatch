@@ -62,9 +62,9 @@ old_cvs_diffcmd_header = re.compile('^diff.* (.+):?(.*) (.+):?(.*)$')
 
 
 def parse_patch(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     # maybe use this to nuke all of those line endings?
@@ -99,10 +99,11 @@ def parse_header(text):
     return h
 
 def parse_scm_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
+
     check = [
             (git_header_index, parse_git_header),
             (cvs_header_rcs, parse_cvs_header),
@@ -139,10 +140,11 @@ def parse_scm_header(text):
     return None
 
 def parse_diff_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
+
     check = [
             (unified_header_new_line, parse_unified_header),
             (context_header_old_line, parse_context_header),
@@ -162,10 +164,11 @@ def parse_diff_header(text):
 
 
 def parse_diff(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
+
     check = [
             (unified_hunk_start, parse_unified_diff),
             (context_hunk_start, parse_context_diff),
@@ -180,9 +183,9 @@ def parse_diff(text):
             return c[1](lines)
 
 def parse_git_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, git_header_old_line)
@@ -222,9 +225,9 @@ def parse_git_header(text):
     return None
 
 def parse_svn_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, svn_header_index)
@@ -289,9 +292,9 @@ def parse_svn_header(text):
     return None
 
 def parse_cvs_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, cvs_header_rcs)
@@ -342,9 +345,9 @@ def parse_cvs_header(text):
     return None
 
 def parse_diffcmd_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, diffcmd_header)
@@ -366,9 +369,9 @@ def parse_diffcmd_header(text):
     return None
 
 def parse_unified_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, unified_header_new_line)
@@ -401,9 +404,9 @@ def parse_unified_header(text):
     return None
 
 def parse_context_header(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     headers = findall_regex(lines, context_header_old_line)
@@ -437,9 +440,9 @@ def parse_context_header(text):
 
 
 def parse_default_diff(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     old = 0
@@ -491,9 +494,9 @@ def parse_default_diff(text):
     return None
 
 def parse_unified_diff(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     old = 0
@@ -555,9 +558,9 @@ def parse_unified_diff(text):
 
 
 def parse_context_diff(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     old = 0
@@ -675,9 +678,9 @@ def parse_context_diff(text):
 
 
 def parse_ed_diff(text):
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     old = 0
@@ -747,9 +750,9 @@ def parse_ed_diff(text):
 
 def parse_rcs_ed_diff(text):
     # much like forward ed, but no 'c' type
-    if type(text) == str:
+    try:
         lines = text.splitlines()
-    else:
+    except AttributeError:
         lines = text
 
     old = 0
