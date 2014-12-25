@@ -19,3 +19,7 @@ init3:
 	virtualenv --python=python3 env3
 	. env3/bin/activate && pip install nose
 	. env3/bin/activate && pip install --editable .
+
+publish:
+	python setup.py sdist upload
+	python setup.py bdist_wheel upload
