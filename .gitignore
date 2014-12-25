@@ -1,5 +1,7 @@
 # virtualenv
 env/
+env2/
+env3/
 
 *.py[cod]
 
