@@ -1,9 +1,8 @@
 What The Patch!?
 ================
 
-What The Patch!? is a Python 2 library for parsing patch files.
-It's only purpose is to read a patch file and get it into some
-usable form by other programs.
+What The Patch!? is a library for parsing patch files. It's only purpose is to
+read a patch file and get it into some usable form by other programs.
 
 Features
 ---------
@@ -63,7 +62,8 @@ Let us say we have a patch file containing some changes, aptly named
 Parsing
 -------
 
-Here is how we would use What The Patch!? in Python to get the changeset for each diff in the patch:
+Here is how we would use What The Patch!? in Python to get the changeset for
+each diff in the patch:
 
 .. code-block:: python
 
@@ -74,29 +74,30 @@ Here is how we would use What The Patch!? in Python to get the changeset for eac
     >>> for diff in whatthepatch.parse_patch(text):
     ...     print(diff)
     ...
-    diff(header=header(index_path=None,
-                    old_path='lao',
-                    old_version='2012-12-26 23:16:54.000000000 -0600',
-                    new_path='tzu',
-                    new_version='2012-12-26 23:16:50.000000000 -0600'
-                    ),
+    diff(header=header(
+                        index_path=None,
+                        old_path='lao',
+                        old_version='2012-12-26 23:16:54.000000000 -0600',
+                        new_path='tzu',
+                        new_version='2012-12-26 23:16:50.000000000 -0600'
+                        ),
         changes=[
-        (1, None,   'The Way that can be told of is not the eternal Way;'),
-        (2, None,   'The name that can be named is not the eternal name.'),
-        (3, 1,      'The Nameless is the origin of Heaven and Earth;'),
-        (4, None,   'The Named is the mother of all things.'),
-        (None, 2,   'The named is the mother of all things.'),
-        (None, 3,   ''),
-        (5, 4,       'Therefore let there always be non-being,'),
-        (6, 5,      '  so we may see their subtlety,'),
-        (7, 6,      'And let there always be being,'),
-        (9, 8,      'The two are the same,'),
-        (10, 9,     'But after they are produced,'),
-        (11, 10,    '  they have different names.'),
-        (None, 11,  'They both may be called deep and profound.'),
-        (None, 12,  'Deeper and more profound,'),
-        (None, 13,  'The door of all subtleties!')
-        ]
+            (1, None,   'The Way that can be told of is not the eternal Way;'),
+            (2, None,   'The name that can be named is not the eternal name.'),
+            (3, 1,      'The Nameless is the origin of Heaven and Earth;'),
+            (4, None,   'The Named is the mother of all things.'),
+            (None, 2,   'The named is the mother of all things.'),
+            (None, 3,   ''),
+            (5, 4,       'Therefore let there always be non-being,'),
+            (6, 5,      '  so we may see their subtlety,'),
+            (7, 6,      'And let there always be being,'),
+            (9, 8,      'The two are the same,'),
+            (10, 9,     'But after they are produced,'),
+            (11, 10,    '  they have different names.'),
+            (None, 11,  'They both may be called deep and profound.'),
+            (None, 12,  'Deeper and more profound,'),
+            (None, 13,  'The door of all subtleties!')
+            ]
         )
 
 *Edited to show structure of the results*
