@@ -1,6 +1,9 @@
 What The Patch!?
 ================
 
+.. image:: https://travis-ci.org/cscorley/whatthepatch.svg
+    :target: https://travis-ci.org/cscorley/whatthepatch
+
 What The Patch!? is a library for parsing patch files. It's only purpose is to
 read a patch file and get it into some usable form by other programs.
 
