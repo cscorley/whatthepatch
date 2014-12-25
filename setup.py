@@ -19,7 +19,11 @@ setup(
     url='https://github.com/cscorley/whatthepatch',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
-    keywords = [],
+    keywords = [
+        "patch",
+        "diff",
+        "parser",
+    ],
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
