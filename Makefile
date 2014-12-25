@@ -21,5 +21,4 @@ init3:
 	. env3/bin/activate && pip install --editable .
 
 publish:
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+	python setup.py sdist bdist_wheel upload

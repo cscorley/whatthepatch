@@ -9,9 +9,6 @@ except ImportError:
 with open('README.rst') as f:
     readme = f.read()
 
-with open('LICENSE') as f:
-    license = f.read()
-
 setup(
     name='whatthepatch',
     version='0.0.3',
@@ -20,8 +17,9 @@ setup(
     author='Christopher S. Corley',
     author_email='cscorley@crimson.ua.edu',
     url='https://github.com/cscorley/whatthepatch',
-    license=license,
+    license='MIT',
     packages=['whatthepatch'],
+    include_package_data=True,
     keywords=[
         "patch",
         "diff",
