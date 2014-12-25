@@ -110,12 +110,12 @@ def parse_scm_header(text):
             (svn_header_index, parse_svn_header),
             ]
 
-    for c in check:
-        diffs = findall_regex(lines, c[0])
+    for regex, parser in check:
+        diffs = findall_regex(lines, regex)
         if len(diffs) > 0:
             git_opt = findall_regex(lines, git_diffcmd_header)
             if len(git_opt) > 0:
-                res = c[1](lines)
+                res = parser(lines)
                 if res:
                     old_path = res.old_path
                     new_path = res.new_path
@@ -133,7 +133,7 @@ def parse_scm_header(text):
                             new_version = res.new_version
                             )
             else:
-                res = c[1](lines)
+                res = parser(lines)
 
             return res
 
@@ -155,10 +155,10 @@ def parse_diff_header(text):
             (git_header_new_line, parse_git_header),
             ]
 
-    for c in check:
-        diffs = findall_regex(lines, c[0])
+    for regex, parser in check:
+        diffs = findall_regex(lines, regex)
         if len(diffs) > 0:
-            return c[1](lines)
+            return parser(lines)
 
     return None # no header?
 
@@ -177,10 +177,10 @@ def parse_diff(text):
             (rcs_ed_hunk_start, parse_rcs_ed_diff),
             ]
 
-    for c in check:
-        diffs = findall_regex(lines, c[0])
+    for hunk, parser in check:
+        diffs = findall_regex(lines, hunk)
         if len(diffs) > 0:
-            return c[1](lines)
+            return parser(lines)
 
 def parse_git_header(text):
     try:

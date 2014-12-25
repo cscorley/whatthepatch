@@ -4,70 +4,35 @@ import whatthepatch as wtp
 
 
 import unittest
+import os
 from io import StringIO
+
+module_path = os.path.dirname(__file__)
+datapath = lambda fname: os.path.join(module_path, 'casefiles', fname)
+
 
 class PatchTestSuite(unittest.TestCase):
 
     def test_default_diff(self):
-        text = """0a1,6
-> This is an important
-> notice! It should
-> therefore be located at
-> the beginning of this
-> document!
->
-8,14c14
-< compress the size of the
-< changes.
-<
-< This paragraph contains
-< text that is outdated.
-< It will be deleted in the
-< near future.
----
-> compress anything.
-17c17
-< check this dokument. On
----
-> check this document. On
-24a25,28
->
-> This paragraph contains
-> important new additions
-> to this document.
-"""
+        with open(datapath('diff-default.diff')) as f:
+            text = f.read()
 
         expected = [
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, ''),
+            (1, None,   'The Way that can be told of is not the eternal Way;'),
+            (2, None,   'The name that can be named is not the eternal name.'),
+            (4, None,   'The Named is the mother of all things.'),
+            (None, 2,   'The named is the mother of all things.'),
+            (None, 3,   ''),
+            (None, 11,  'They both may be called deep and profound.'),
+            (None, 12,  'Deeper and more profound,'),
+            (None, 13,  'The door of all subtleties!')
+        ]
 
-                (8, None, 'compress the size of the'),
-                (9, None, 'changes.'),
-                (10, None, ''),
-                (11, None, 'This paragraph contains'),
-                (12, None, 'text that is outdated.'),
-                (13, None, 'It will be deleted in the'),
-                (14, None, 'near future.'),
-                (None, 14, 'compress anything.'),
-
-                (17, None, 'check this dokument. On'),
-                (None, 17, 'check this document. On'),
-
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.')
-                ]
-
-        results = [x for x in wtp.patch.parse_default_diff(text)]
+        results = list(wtp.patch.parse_default_diff(text))
         self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in wtp.patch.parse_patch(text)]
+        results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
     def test_svn_unified_patch(self):
@@ -158,7 +123,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
 
         self.assertEqual(results, expected)
 
@@ -250,7 +215,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
 
         self.assertEqual(results, expected)
 
@@ -343,7 +308,7 @@ class PatchTestSuite(unittest.TestCase):
                     ]
 
 
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
 
         self.assertEqual(results, expected)
 
@@ -406,7 +371,7 @@ class PatchTestSuite(unittest.TestCase):
                     )
                     ]
 
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
         self.assertEqual(results, expected)
 
 
@@ -469,7 +434,7 @@ class PatchTestSuite(unittest.TestCase):
                     text = '\n'.join(lines[22:]) + '\n'
                     )
                     ]
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
         self.assertEqual(results, expected)
 
 
@@ -540,7 +505,7 @@ class PatchTestSuite(unittest.TestCase):
                         )
                     ]
 
-        results = [x for x in wtp.parse_patch(text)]
+        results = list(wtp.parse_patch(text))
 
         self.assertEqual(results, expected)
 
@@ -647,89 +612,43 @@ diff -u -r1.6.4.1 -r1.8
 
 
     def test_unified_diff(self):
-        text = """@@ -1,3 +1,9 @@
-+This is an important
-+notice! It should
-+therefore be located at
-+the beginning of this
-+document!
-+
- This part of the
- document has stayed the
- same from version to
-@@ -5,16 +11,10 @@
- be shown if it doesn't
- change.  Otherwise, that
- would not be helping to
--compress the size of the
--changes.
--
--This paragraph contains
--text that is outdated.
--It will be deleted in the
--near future.
-+compress anything.
+        with open(datapath('diff-unified.diff')) as f:
+            text = f.read()
 
- It is important to spell
--check this dokument. On
-+check this document. On
- the other hand, a
- misspelled word isn't
- the end of the world.
-@@ -22,3 +22,7 @@
- this paragraph needs to
- be changed. Things can
- be added after it.
-+
-+This paragraph contains
-+important new additions
-+to this document.
-"""
+        # off with your head!
+        text_diff = '\n'.join(text.splitlines()[2:]) + '\n'
 
         expected = [
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, ''),
-                (1, 7, 'This part of the'),
-                (2, 8, 'document has stayed the'),
-                (3, 9, 'same from version to'),
+            (1, None,   'The Way that can be told of is not the eternal Way;'),
+            (2, None,   'The name that can be named is not the eternal name.'),
+            (3, 1,      'The Nameless is the origin of Heaven and Earth;'),
+            (4, None,   'The Named is the mother of all things.'),
+            (None, 2,   'The named is the mother of all things.'),
+            (None, 3,   ''),
+            (5, 4,       'Therefore let there always be non-being,'),
+            (6, 5,      '  so we may see their subtlety,'),
+            (7, 6,      'And let there always be being,'),
+            (9, 8,      'The two are the same,'),
+            (10, 9,     'But after they are produced,'),
+            (11, 10,    '  they have different names.'),
+            (None, 11,  'They both may be called deep and profound.'),
+            (None, 12,  'Deeper and more profound,'),
+            (None, 13,  'The door of all subtleties!')
+        ]
 
-                (5, 11, 'be shown if it doesn\'t'),
-                (6, 12, 'change.  Otherwise, that'),
-                (7, 13, 'would not be helping to'),
-                (8, None, 'compress the size of the'),
-                (9, None, 'changes.'),
-                (10, None, ''),
-                (11, None, 'This paragraph contains'),
-                (12, None, 'text that is outdated.'),
-                (13, None, 'It will be deleted in the'),
-                (14, None, 'near future.'),
-                (None, 14, 'compress anything.'),
-                (15, 15, ''),
-                (16, 16, 'It is important to spell'),
-                (17, None, 'check this dokument. On'),
-                (None, 17, 'check this document. On'),
-                (18, 18, 'the other hand, a'),
-                (19, 19, 'misspelled word isn\'t'),
-                (20, 20, 'the end of the world.'),
-
-                (22, 22, 'this paragraph needs to'),
-                (23, 23, 'be changed. Things can'),
-                (24, 24, 'be added after it.'),
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.')
-                ]
-
-        results = [x for x in wtp.patch.parse_unified_diff(text)]
+        results = list(wtp.patch.parse_unified_diff(text_diff))
         self.assertEqual(results, expected)
 
-        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in wtp.patch.parse_patch(text)]
+        expected_main = wtp.patch.diffobj(header=
+                                          wtp.patch.header(index_path=None,
+                                                           old_path='lao',
+                                                           old_version='2013-01-05 16:56:19.000000000 -0600',
+                                                           new_path='tzu',
+                                                           new_version='2013-01-05 16:56:35.000000000 -0600'
+                                                           ),
+                                          changes=expected,
+                                          text=text)
+        results_main = next(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
     def test_diff_unified_blah(self):
@@ -766,7 +685,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_diff_context_blah(self):
@@ -803,7 +722,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_diff_default_blah(self):
@@ -834,7 +753,7 @@ diff -u -r1.6.4.1 -r1.8
                 ]
 
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
 
@@ -858,219 +777,90 @@ diff -u -r1.6.4.1 -r1.8
 
 
     def test_context_diff(self):
-        text = """***************
-*** 1,3 ****
---- 1,9 ----
-+ This is an important
-+ notice! It should
-+ therefore be located at
-+ the beginning of this
-+ document!
-+
-  This part of the
-  document has stayed the
-  same from version to
-***************
-*** 5,20 ****
-  be shown if it doesn't
-  change.  Otherwise, that
-  would not be helping to
-! compress the size of the
-! changes.
-!
-! This paragraph contains
-! text that is outdated.
-! It will be deleted in the
-! near future.
+        with open(datapath('diff-context.diff')) as f:
+            text = f.read()
 
-  It is important to spell
-! check this dokument. On
-  the other hand, a
-  misspelled word isn't
-  the end of the world.
---- 11,20 ----
-  be shown if it doesn't
-  change.  Otherwise, that
-  would not be helping to
-! compress anything.
-
-  It is important to spell
-! check this document. On
-  the other hand, a
-  misspelled word isn't
-  the end of the world.
-***************
-*** 22,24 ****
---- 22,28 ----
-  this paragraph needs to
-  be changed. Things can
-  be added after it.
-+
-+ This paragraph contains
-+ important new additions
-+ to this document.
-"""
+        # off with your head!
+        text_diff = '\n'.join(text.splitlines()[2:]) + '\n'
 
         expected = [
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, ''),
-                (1, 7, 'This part of the'),
-                (2, 8, 'document has stayed the'),
-                (3, 9, 'same from version to'),
-
-                # merge the two sections of the hunk so that deletions
-                # are followed by the appropriate insertion
-                # follow up: that was a horrible idea.
-                (5, 11, 'be shown if it doesn\'t'),
-                (6, 12, 'change.  Otherwise, that'),
-                (7, 13, 'would not be helping to'),
-                (8, None, 'compress the size of the'),
-                (9, None, 'changes.'),
-                (10, None, ''),
-                (11, None, 'This paragraph contains'),
-                (12, None, 'text that is outdated.'),
-                (13, None, 'It will be deleted in the'),
-                (14, None, 'near future.'),
-                (None, 14, 'compress anything.'),
-                (15, 15, ''),
-                (16, 16, 'It is important to spell'),
-                (17, None, 'check this dokument. On'),
-                (None, 17, 'check this document. On'),
-                (18, 18, 'the other hand, a'),
-                (19, 19, 'misspelled word isn\'t'),
-                (20, 20, 'the end of the world.'),
-
-                (22, 22, 'this paragraph needs to'),
-                (23, 23, 'be changed. Things can'),
-                (24, 24, 'be added after it.'),
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.')
+                    (1, None, 'The Way that can be told of is not the eternal Way;'),
+                    (2, None, 'The name that can be named is not the eternal name.'),
+                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+                    (4, None, 'The Named is the mother of all things.'),
+                    (None, 2, 'The named is the mother of all things.'),
+                    (None, 3, ''),
+                    (5, 4, 'Therefore let there always be non-being,'),
+                    (6, 5, '  so we may see their subtlety,'),
+                    (7, 6, 'And let there always be being,'),
+                    (9, 8, 'The two are the same,'),
+                    (10, 9, 'But after they are produced,'),
+                    (11, 10, '  they have different names.'),
+                    (None, 11, 'They both may be called deep and profound.'),
+                    (None, 12, 'Deeper and more profound,'),
+                    (None, 13, 'The door of all subtleties!'),
                 ]
 
-        results = [x for x in wtp.patch.parse_context_diff(text)]
+        results = list(wtp.patch.parse_context_diff(text_diff))
         self.assertEqual(results, expected)
 
-        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in wtp.patch.parse_patch(text)]
+
+        expected_main = wtp.patch.diffobj(header=
+                                          wtp.patch.header(index_path=None,
+                                                           old_path='lao',
+                                                           old_version='2013-01-05 16:56:19.000000000 -0600',
+                                                           new_path='tzu',
+                                                           new_version='2013-01-05 16:56:35.000000000 -0600'
+                                                           ),
+                                          changes=expected,
+                                          text=text)
+        results_main = next(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
     def test_ed_diff(self):
-        text = """24a
+        with open(datapath('diff-ed.diff')) as f:
+            text = f.read()
 
-This paragraph contains
-important new additions
-to this document.
-.
-17c
-check this document. On
-.
-8,14c
-compress anything.
-.
-0a
-This is an important
-notice! It should
-therefore be located at
-the beginning of this
-document!
-
-.
-"""
         expected = [
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, ''),
+            (1, None, None),
+            (2, None, None),
+            (4, None, None),
+            (None, 2,   'The named is the mother of all things.'),
+            (None, 3,   ''),
+            (None, 11,  'They both may be called deep and profound.'),
+            (None, 12,  'Deeper and more profound,'),
+            (None, 13,  'The door of all subtleties!')
+        ]
 
-                (8, None, None),
-                (9, None, None),
-                (10, None, None),
-                (11, None, None),
-                (12, None, None),
-                (13, None, None),
-                (14, None, None),
 
-                (None, 14, 'compress anything.'),
-
-                (17, None, None),
-
-                (None, 17, 'check this document. On'),
-
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.')
-                ]
-
-        results = [x for x in wtp.patch.parse_ed_diff(text)]
+        results = list(wtp.patch.parse_ed_diff(text))
         self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in wtp.patch.parse_patch(text)]
+        results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
-    def test_rcs_ed_diff(self):
-        text="""a0 6
-This is an important
-notice! It should
-therefore be located at
-the beginning of this
-document!
-
-d8 7
-a14 1
-compress anything.
-d17 1
-a17 1
-check this document. On
-a24 4
-
-This paragraph contains
-important new additions
-to this document.
-"""
+    def test_rcs_diff(self):
+        with open(datapath('diff-rcs.diff')) as f:
+            text = f.read()
 
         expected = [
-                (None, 1, 'This is an important'),
-                (None, 2, 'notice! It should'),
-                (None, 3, 'therefore be located at'),
-                (None, 4, 'the beginning of this'),
-                (None, 5, 'document!'),
-                (None, 6, ''),
+            (1, None, None),
+            (2, None, None),
+            (4, None, None),
+            (None, 2,   'The named is the mother of all things.'),
+            (None, 3,   ''),
+            (None, 11,  'They both may be called deep and profound.'),
+            (None, 12,  'Deeper and more profound,'),
+            (None, 13,  'The door of all subtleties!')
+        ]
 
-                (8, None, None),
-                (9, None, None),
-                (10, None, None),
-                (11, None, None),
-                (12, None, None),
-                (13, None, None),
-                (14, None, None),
 
-                (None, 14, 'compress anything.'),
-
-                (17, None, None),
-
-                (None, 17, 'check this document. On'),
-
-                (None, 25, ''),
-                (None, 26, 'This paragraph contains'),
-                (None, 27, 'important new additions'),
-                (None, 28, 'to this document.')
-                ]
-
-        results = [x for x in wtp.patch.parse_rcs_ed_diff(text)]
+        results = list(wtp.patch.parse_rcs_ed_diff(text))
         self.assertEqual(results, expected)
 
         expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
-        results_main = [x for x in wtp.patch.parse_patch(text)]
+        results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
     def test_embedded_diff_in_comment(self):
@@ -1101,7 +891,7 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_mozilla_527452_5_comment(self):
@@ -1134,7 +924,7 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_dos_unified_cvs(self):
@@ -1168,7 +958,7 @@ to this document.
             )
         ]
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
 
@@ -1199,7 +989,7 @@ to this document.
         results = wtp.patch.parse_cvs_header(text)
         self.assertEqual(results, expected[0].header)
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_apache_attachment_2241(self):
@@ -1231,7 +1021,7 @@ to this document.
                    ),
                 ]
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
     def test_space_in_path_header(self):
@@ -1260,9 +1050,8 @@ to this document.
                 new_path='java/org/apache/catalina/loader/WebappClassLoader.java',
                 new_version=None)
 
-        results = [x for x in wtp.patch.parse_patch(text)]
+        results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results[0].header, expected_header)
-
 
 
 if __name__ == '__main__':

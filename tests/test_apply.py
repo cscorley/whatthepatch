@@ -26,8 +26,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-default.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
         self.assertEqual(new_text, self.tzu)
@@ -36,8 +35,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-context.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
         self.assertEqual(new_text, self.tzu)
@@ -46,8 +44,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
 
@@ -57,8 +54,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
@@ -69,8 +65,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-rcs.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
         self.assertEqual(new_text, self.tzu)
@@ -80,8 +75,7 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-ed.diff') as f:
             diff_text = f.read()
 
-        diff = [x for x in wtp.parse_patch(diff_text)]
-        diff = diff[0]
+        diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
         self.assertEqual(self.tzu,new_text)
