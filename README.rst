@@ -1,15 +1,15 @@
 What The Patch!?
 ================
 
-.. image:: https://travis-ci.org/cscorley/whatthepatch.svg
+.. image:: https://travis-ci.org/cscorley/whatthepatch.svg?style=flat
     :target: https://travis-ci.org/cscorley/whatthepatch
-.. image:: https://pypip.in/status/whatthepatch/badge.svg
+.. image:: https://pypip.in/status/whatthepatch/badge.svg?style=flat
     :target: https://pypi.python.org/pypi/whatthepatch/
-.. image:: https://pypip.in/version/whatthepatch/badge.svg?text=version
+.. image:: https://pypip.in/version/whatthepatch/badge.svg?text=version&style=flat
     :target: https://pypi.python.org/pypi/whatthepatch/
-.. image:: https://pypip.in/py_versions/whatthepatch/badge.svg
+.. image:: https://pypip.in/py_versions/whatthepatch/badge.svg?style=flat
     :target: https://pypi.python.org/pypi/whatthepatch/
-.. image:: https://pypip.in/download/whatthepatch/badge.svg
+.. image:: https://pypip.in/download/whatthepatch/badge.svg?style=flat
     :target: https://pypi.python.org/pypi/whatthepatch/
 
 What The Patch!? is a library for parsing patch files. It's only purpose is to
