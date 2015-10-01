@@ -1,0 +1,7 @@
+diff --git a/oneline.txt b/oneline.txt
+index f56f98d..169ceeb 100644
+--- a/oneline.txt
++++ b/oneline.txt
+@@ -1 +1 @@
+-Adding a one-line file.
++Changed a one-line file.

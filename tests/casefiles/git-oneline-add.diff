@@ -1,0 +1,7 @@
+diff --git a/oneline.txt b/oneline.txt
+new file mode 100644
+index 0000000..f56f98d
+--- /dev/null
++++ b/oneline.txt
+@@ -0,0 +1 @@
++Adding a one-line file.
