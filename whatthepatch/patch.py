@@ -537,10 +537,10 @@ def parse_unified_diff(text):
                 line = c.group(2)
                 c = None
 
-                if kind == '-' and r != old_len:
+                if kind == '-' and (r != old_len or r == 0):
                     changes.append((old + r, None, line))
                     r += 1
-                elif kind == '+' and i != new_len:
+                elif kind == '+' and (i != new_len or i == 0):
                     changes.append((None, new + i, line))
                     i += 1
                 elif kind == ' ' and r != old_len and i != new_len:
