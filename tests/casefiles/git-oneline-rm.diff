@@ -1,0 +1,7 @@
+diff --git a/oneline.txt b/oneline.txt
+deleted file mode 100644
+index 169ceeb..0000000
+--- a/oneline.txt
++++ /dev/null
+@@ -1 +0,0 @@
+-Changed a one-line file.

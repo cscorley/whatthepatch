@@ -509,6 +509,84 @@ class PatchTestSuite(unittest.TestCase):
 
         self.assertEqual(results, expected)
 
+    def test_git_oneline_add(self):
+        with open('tests/casefiles/git-oneline-add.diff') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
+                    index_path=None,
+                    old_path='/dev/null',
+                    old_version='0000000',
+                    new_path='oneline.txt',
+                    new_version='f56f98d'
+                ),
+                changes=[
+                    (None, 1, 'Adding a one-line file.')
+                ],
+                text='\n'.join(lines[:34]) + '\n'
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+
+        self.assertEqual(results, expected)
+
+    def test_git_oneline_change(self):
+        with open('tests/casefiles/git-oneline-change.diff') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
+                    index_path=None,
+                    old_path='oneline.txt',
+                    old_version='f56f98d',
+                    new_path='oneline.txt',
+                    new_version='169ceeb'
+                ),
+                changes=[
+                    (1, None, 'Adding a one-line file.'),
+                    (None, 1, 'Changed a one-line file.')
+                ],
+                text='\n'.join(lines[:34]) + '\n'
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+        print results
+        self.assertEqual(results, expected)
+
+    def test_git_oneline_rm(self):
+        with open('tests/casefiles/git-oneline-rm.diff') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            wtp.patch.diffobj(
+                header=wtp.patch.header(
+                    index_path=None,
+                    old_path='oneline.txt',
+                    old_version='169ceeb',
+                    new_path='/dev/null',
+                    new_version='0000000'
+                ),
+                changes=[
+                    (1, None, 'Changed a one-line file.')
+                ],
+                text='\n'.join(lines[:34]) + '\n'
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+        print results
+        self.assertEqual(results, expected)
 
     def test_git_header(self):
         text = """
