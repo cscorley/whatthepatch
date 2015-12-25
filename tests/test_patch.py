@@ -559,7 +559,6 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.parse_patch(text))
-        print results
         self.assertEqual(results, expected)
 
     def test_git_oneline_rm(self):
@@ -585,7 +584,6 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.parse_patch(text))
-        print results
         self.assertEqual(results, expected)
 
     def test_git_header(self):

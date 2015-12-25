@@ -4,6 +4,7 @@ env2/
 env3/
 
 *.py[cod]
+.ropeproject
 
 # C extensions
 *.so
