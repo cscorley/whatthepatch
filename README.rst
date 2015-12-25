@@ -91,7 +91,7 @@ each diff in the patch:
             (4, None,   'The Named is the mother of all things.'),
             (None, 2,   'The named is the mother of all things.'),
             (None, 3,   ''),
-            (5, 4,       'Therefore let there always be non-being,'),
+            (5, 4,      'Therefore let there always be non-being,'),
             (6, 5,      '  so we may see their subtlety,'),
             (7, 6,      'And let there always be being,'),
             (9, 8,      'The two are the same,'),

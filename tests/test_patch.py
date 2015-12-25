@@ -589,13 +589,9 @@ class PatchTestSuite(unittest.TestCase):
         self.assertEqual(results, expected)
 
     def test_git_header(self):
-        text = """
-diff --git a/bugtrace/patch.py b/bugtrace/patch.py
-index 8910dfd..456e34f 100644
---- a/bugtrace/patch.py
-+++ b/bugtrace/patch.py
-@@ -8,20 +8,30 @@
-"""
+        with open('tests/casefiles/git-header.diff') as f:
+            text = f.read()
+
         expected = wtp.patch.header(
                 index_path = None,
                 old_path = 'bugtrace/patch.py',
@@ -610,13 +606,9 @@ index 8910dfd..456e34f 100644
         self.assertEqual(results_main, expected)
 
     def test_svn_header(self):
-        text = """
-Index: bugtrace/trunk/src/bugtrace/csc.py
-===================================================================
---- bugtrace/trunk/src/bugtrace/csc.py	(revision 12783)
-+++ bugtrace/trunk/src/bugtrace/csc.py	(revision 12784)
-@@ -1,3 +1,6 @@
-"""
+        with open('tests/casefiles/svn-header.diff') as f:
+            text = f.read()
+
         expected = wtp.patch.header(
                 index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
                 old_path = 'bugtrace/trunk/src/bugtrace/csc.py',
@@ -630,16 +622,9 @@ Index: bugtrace/trunk/src/bugtrace/csc.py
         self.assertEqual(results_main, expected)
 
     def test_cvs_header(self):
-        text = """Index: org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java
-===================================================================
-RCS file: /cvsroot/eclipse/org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java,v
-retrieving revision 1.6.4.1
-retrieving revision 1.8
-diff -u -r1.6.4.1 -r1.8
---- org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	23 Jul 2001 17:51:45 -0000	1.6.4.1
-+++ org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java	17 May 2002 20:27:56 -0000	1.8
-@@ -1 +1 @@
-"""
+        with open('tests/casefiles/cvs-header.diff') as f:
+            text = f.read()
+
         expected = wtp.patch.header(
                 index_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
                 old_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
@@ -653,9 +638,8 @@ diff -u -r1.6.4.1 -r1.8
         self.assertEqual(results_main, expected)
 
     def test_unified_header(self):
-        text = """--- /tmp/o	2012-12-22 06:43:35.000000000 -0600
-+++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
-@@ -1,3 +1,9 @@"""
+        with open('tests/casefiles/unified-header.diff') as f:
+            text = f.read()
 
         expected = wtp.patch.header(
                 index_path = None,
@@ -671,9 +655,8 @@ diff -u -r1.6.4.1 -r1.8
         self.assertEqual(results_main, expected)
 
     def test_unified_header_notab(self):
-        text = """--- /tmp/some file    2012-12-22 06:43:35.000000000 -0600
-+++ /tmp/n	2012-12-23 20:40:50.000000000 -0600
-@@ -1,3 +1,9 @@"""
+        with open('tests/casefiles/unified-header-notab.diff') as f:
+            text = f.read()
 
         expected = wtp.patch.header(
                 index_path = None,
@@ -807,7 +790,6 @@ diff -u -r1.6.4.1 -r1.8
         with open('tests/casefiles/diff-default-blah.diff') as f:
             text = f.read()
 
-
         expected = [
             wtp.patch.diffobj(
                 header=None,
@@ -836,9 +818,9 @@ diff -u -r1.6.4.1 -r1.8
 
 
     def test_context_header(self):
-        text = """*** /tmp/o	2012-12-22 06:43:35.000000000 -0600
---- /tmp/n	2012-12-23 20:40:50.000000000 -0600
-***************"""
+        with open('tests/casefiles/context-header.diff') as f:
+            text = f.read()
+
 
         expected = wtp.patch.header(
                 index_path = None,
