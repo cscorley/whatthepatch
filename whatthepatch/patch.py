@@ -512,10 +512,10 @@ def parse_default_diff(text):
                     kind = c.group(1)
                     line = c.group(2)
 
-                    if kind == '<':# and r != old_len:
+                    if kind == '<' and (r != old_len or r == 0):
                         changes.append((old + r, None, line))
                         r += 1
-                    elif kind == '>':# and i != new_len:
+                    elif kind == '>' and (i != new_len or i == 0):
                         changes.append((None, new + i, line))
                         i += 1
 
