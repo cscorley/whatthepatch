@@ -620,11 +620,13 @@ def parse_context_diff(text):
                 del old_hunk[0]
                 if o:
                     old = int(o.group(1))
+                    old_len = int(o.group(2)) + 1 - old
                     while len(new_hunk) > 0:
                         n = context_hunk_new.match(new_hunk[0])
                         del new_hunk[0]
                         if n:
                             new = int(n.group(1))
+                            new_len = int(n.group(2)) + 1 - new
                             break
                     break
 
@@ -638,15 +640,16 @@ def parse_context_diff(text):
                         kind = c.group(1)
                         line = c.group(2)
 
-                        if kind == '-':
+                        if kind == '-' and (j != old_len or j == 0):
                             changes.append((old + j, None, line))
                             j += 1
-                        elif kind == ' ':
+                        elif kind == ' ' and ((j != old_len and k != new_len)
+                                              or (j == 0 or k == 0)):
                             changes.append((old + j, new + k, line))
                             j += 1
                             k += 1
                         elif kind == '+' or kind == '!':
-                            raise ValueError("Wat1" + kind)
+                            raise ValueError("Got unexpected change in removal hunk: " + kind)
 
             elif len(old_hunk) == 0 and len(new_hunk) > 0:
                 # only insertions left?
@@ -657,15 +660,16 @@ def parse_context_diff(text):
                         kind = c.group(1)
                         line = c.group(2)
 
-                        if kind == '+':
+                        if kind == '+' and (k != new_len or k == 0):
                             changes.append((None, new + k, line))
                             k += 1
-                        elif kind == ' ':
+                        elif kind == ' ' and ((j != old_len and k != new_len)
+                                              or (j == 0 or k == 0)):
                             changes.append((old + j, new + k, line))
                             j += 1
                             k += 1
                         elif kind == '-' or kind == '!':
-                            raise ValueError("Wat2" + kind)
+                            raise ValueError("Got unexpected change in insertion hunk: " + kind)
             else:
                 # both
                 while len(old_hunk) > 0 and len(new_hunk) > 0:
@@ -691,11 +695,11 @@ def parse_context_diff(text):
                         k += 1
                         del old_hunk[0]
                         del new_hunk[0]
-                    elif okind == '-' or okind == '!':
+                    elif okind == '-' or okind == '!' and (j != old_len or j == 0):
                         changes.append((old + j, None, oline))
                         j += 1
                         del old_hunk[0]
-                    elif nkind == '+' or nkind == '!':
+                    elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
                         changes.append((None, new + k, nline))
                         k += 1
                         del new_hunk[0]
