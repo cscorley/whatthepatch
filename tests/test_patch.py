@@ -1047,6 +1047,39 @@ class PatchTestSuite(unittest.TestCase):
         results = wtp.patch.parse_cvs_header(text)
         self.assertEqual(results, expected[0].header)
 
+        results = wtp.patch.parse_header(text)
+        self.assertEqual(results, expected[0].header)
+
+        results = list(wtp.patch.parse_patch(text))
+        self.assertEqual(results, expected)
+
+    def test_mozilla_252983_versionless(self):
+        with open('tests/casefiles/mozilla-252983-versionless.diff') as f:
+            text = f.read()
+
+        expected = [
+                wtp.patch.diffobj(
+                    header=wtp.patch.header(
+                        index_path='mozilla/js/rhino/CHANGELOG',
+                        old_path='mozilla/js/rhino/CHANGELOG',
+                        old_version=None,
+                        new_path='mozilla/js/rhino/CHANGELOG',
+                        new_version=None,
+                        ),
+                    changes=[
+                        (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 2007/01/25 15:59:02 inonit Exp $'),
+                        (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 2007/01/25 15:59:02 inonit Exp $'),
+                        (2, 2, ''),
+                        (3, 3, 'Changes since Rhino 1.6R5'),
+                        (4, 4, '========================='),
+                        ],
+                    text=text
+                   ),
+                ]
+
+        results = wtp.patch.parse_header(text)
+        self.assertEqual(results, expected[0].header)
+
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 

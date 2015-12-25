@@ -58,7 +58,7 @@ cvs_header_index = unified_header_index
 cvs_header_rcs = re.compile('^RCS file: (.+)(?:,\w{1}$|$)')
 cvs_header_timestamp = re.compile('(.+)\t([\d.]+)')
 cvs_header_timestamp_colon = re.compile(':([\d.]+)\t(.+)')
-old_cvs_diffcmd_header = re.compile('^diff.* (.+):?(.*) (.+):?(.*)$')
+old_cvs_diffcmd_header = re.compile('^diff.* (.+):(.*) (.+):(.*)$')
 
 
 def parse_patch(text):
@@ -106,6 +106,7 @@ def parse_scm_header(text):
 
     check = [
             (git_header_index, parse_git_header),
+            (old_cvs_diffcmd_header, parse_cvs_header),
             (cvs_header_rcs, parse_cvs_header),
             (svn_header_index, parse_svn_header),
             ]
@@ -298,49 +299,79 @@ def parse_cvs_header(text):
         lines = text
 
     headers = findall_regex(lines, cvs_header_rcs)
-    headers2 = findall_regex(lines, old_cvs_diffcmd_header)
-    if len(headers) == 0 and len(headers2) == 0:
-        return None
+    headers_old = findall_regex(lines, old_cvs_diffcmd_header)
 
-    while len(lines) > 0:
-        i = cvs_header_index.match(lines[0])
-        d = old_cvs_diffcmd_header.match(lines[0])
-        del lines[0]
-        if i:
-            diff_header = parse_diff_header(lines)
-            if diff_header:
-                over = diff_header.old_version
-                if over:
-                    oend = cvs_header_timestamp.match(over)
-                    oend_c = cvs_header_timestamp_colon.match(over)
-                    if oend:
-                        over = oend.group(2)
-                    elif oend_c:
-                        over = oend_c.group(1)
+    if headers:
+        # parse rcs style headers
+        while len(lines) > 0:
+            i = cvs_header_index.match(lines[0])
+            del lines[0]
+            if i:
+                diff_header = parse_diff_header(lines)
+                if diff_header:
+                    over = diff_header.old_version
+                    if over:
+                        oend = cvs_header_timestamp.match(over)
+                        oend_c = cvs_header_timestamp_colon.match(over)
+                        if oend:
+                            over = oend.group(2)
+                        elif oend_c:
+                            over = oend_c.group(1)
 
-                nver = diff_header.new_version
-                if nver:
-                    nend = cvs_header_timestamp.match(nver)
-                    nend_c = cvs_header_timestamp_colon.match(nver)
-                    if nend:
-                        nver = nend.group(2)
-                    elif nend_c:
-                        nver = nend_c.group(1)
+                    nver = diff_header.new_version
+                    if nver:
+                        nend = cvs_header_timestamp.match(nver)
+                        nend_c = cvs_header_timestamp_colon.match(nver)
+                        if nend:
+                            nver = nend.group(2)
+                        elif nend_c:
+                            nver = nend_c.group(1)
+
+                    return header(
+                            index_path = i.group(1),
+                            old_path = diff_header.old_path,
+                            old_version = over,
+                            new_path = diff_header.new_path,
+                            new_version = nver,
+                            )
+                return header(
+                        index_path = i.group(1),
+                        old_path = i.group(1),
+                        old_version = None,
+                        new_path = i.group(1),
+                        new_version = None,
+                        )
+    elif headers_old:
+        # parse old style headers
+        while len(lines) > 0:
+            i = cvs_header_index.match(lines[0])
+            del lines[0]
+            if i:
+                d = old_cvs_diffcmd_header.match(lines[0])
+                if d:
+                    _ = parse_diff_header(lines) # will get rid of the useless stuff for us
+                    over = d.group(2)
+                    if not over:
+                        over = None
+
+                    nver = d.group(4)
+                    if not nver:
+                        nver = None
+                    return header(
+                            index_path = i.group(1),
+                            old_path = d.group(1),
+                            old_version = over,
+                            new_path = d.group(3),
+                            new_version = nver,
+                            )
 
                 return header(
                         index_path = i.group(1),
-                        old_path = diff_header.old_path,
-                        old_version = over,
-                        new_path = diff_header.new_path,
-                        new_version = nver,
+                        old_path = i.group(1),
+                        old_version = None,
+                        new_path = i.group(1),
+                        new_version = None,
                         )
-            return header(
-                    index_path = i.group(1),
-                    old_path = i.group(1),
-                    old_version = None,
-                    new_path = i.group(1),
-                    new_version = None,
-                    )
 
     return None
 

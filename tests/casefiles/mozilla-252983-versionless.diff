@@ -1,0 +1,15 @@
+Index: mozilla/js/rhino/CHANGELOG
+diff -c mozilla/js/rhino/CHANGELOG mozilla/js/rhino/CHANGELOG
+*** mozilla/js/rhino/CHANGELOG	Thu Jan 25 10:59:02 2007
+--- mozilla/js/rhino/CHANGELOG	Thu Jan 25 10:59:02 2007
+***************
+*** 1,4 ****
+! This file version: $Id: CHANGELOG,v 1.1.1.1 2007/01/25 15:59:02 inonit Exp $
+  
+  Changes since Rhino 1.6R5
+  =========================
+--- 1,4 ----
+! This file version: $Id: CHANGELOG,v 1.1 2007/01/25 15:59:02 inonit Exp $
+  
+  Changes since Rhino 1.6R5
+  =========================
