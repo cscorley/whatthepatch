@@ -710,7 +710,7 @@ class PatchTestSuite(unittest.TestCase):
         results_main = next(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
-    def test_diff_unified_blah(self):
+    def test_diff_unified_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-unified-blah.diff') as f:
             text = f.read()
 
@@ -747,7 +747,7 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
-    def test_diff_context_blah(self):
+    def test_diff_context_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-context-blah.diff') as f:
             text = f.read()
 
@@ -784,7 +784,7 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
-    def test_diff_default_blah(self):
+    def test_diff_default_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-default-blah.diff') as f:
             text = f.read()
 
