@@ -603,6 +603,23 @@ class PatchTestSuite(unittest.TestCase):
         results_main = wtp.patch.parse_header(text)
         self.assertEqual(results_main, expected)
 
+    def test_git_header_long(self):
+        with open('tests/casefiles/git-header-long.diff') as f:
+            text = f.read()
+
+        expected = wtp.patch.header(
+                index_path = None,
+                old_path = 'bugtrace/patch.py',
+                old_version = '18910dfd',
+                new_path = 'bugtrace/patch.py',
+                new_version = '2456e34f')
+
+        results = wtp.patch.parse_git_header(text)
+        self.assertEqual(results, expected)
+
+        results_main = wtp.patch.parse_header(text)
+        self.assertEqual(results_main, expected)
+
     def test_svn_header(self):
         with open('tests/casefiles/svn-header.diff') as f:
             text = f.read()

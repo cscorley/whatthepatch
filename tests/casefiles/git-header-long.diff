@@ -1,0 +1,6 @@
+diff --git a/bugtrace/patch.py b/bugtrace/patch.py
+index 18910dfd..2456e34f 100644
+--- a/bugtrace/patch.py
++++ b/bugtrace/patch.py
+@@ -8,20 +8,30 @@
+
