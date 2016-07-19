@@ -45,6 +45,7 @@ git_header_index = re.compile('^index ([a-f0-9]+)..([a-f0-9]+) ?(\d*)$')
 git_header_old_line = re.compile('^--- (.+)$')
 git_header_new_line = re.compile('^\+\+\+ (.+)$')
 git_header_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
+git_header_binary_file = re.compile('^Binary files (.+) and (.+) differ')
 
 bzr_header_index = re.compile("=== (.+)")
 bzr_header_old_line = unified_header_old_line
@@ -89,7 +90,7 @@ def parse_patch(text):
         difftext = '\n'.join(diff) + '\n'
         h = parse_header(diff)
         d = parse_diff(diff)
-        if d:
+        if h or d:
             yield diffobj(header=h, changes=d, text=difftext)
 
 def parse_header(text):
@@ -189,12 +190,11 @@ def parse_git_header(text):
     except AttributeError:
         lines = text
 
-    headers = findall_regex(lines, git_header_old_line)
-    if len(headers) == 0:
-        return None
+    # headers = findall_regex(lines, git_header_old_line)
+    # if len(headers) == 0:
+    #     return None
 
-    over = None
-    nver = None
+    over = nver = old_path = new_path = None
     while len(lines) > 1:
         g = git_header_index.match(lines[0])
         # git always has it's own special headers
@@ -210,18 +210,22 @@ def parse_git_header(text):
             if n:
                 old_path = o.group(1)
                 new_path = n.group(1)
-                if old_path.startswith('a/'):
-                    old_path = old_path[2:]
+        binary = git_header_binary_file.match(lines[0])
+        if binary:
+            old_path = binary.group(1)
+            new_path = binary.group(2)
+        if old_path and new_path:
+            if old_path.startswith('a/'):
+                old_path = old_path[2:]
 
-                if new_path.startswith('b/'):
-                    new_path = new_path[2:]
-
-                return header(
-                        index_path = None,
-                        old_path = old_path,
-                        old_version = over,
-                        new_path = new_path,
-                        new_version = nver)
+            if new_path.startswith('b/'):
+                new_path = new_path[2:]
+            return header(
+                    index_path = None,
+                    old_path = old_path,
+                    old_version = over,
+                    new_path = new_path,
+                    new_version = nver)
 
     return None
 
