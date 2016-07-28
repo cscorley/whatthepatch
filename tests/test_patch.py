@@ -620,6 +620,23 @@ class PatchTestSuite(unittest.TestCase):
         results_main = wtp.patch.parse_header(text)
         self.assertEqual(results_main, expected)
 
+    def test_git_binary_files(self):
+        with open('tests/casefiles/git-binary-files.diff') as f:
+            text = f.read()
+
+        expected = wtp.patch.header(
+                index_path = None,
+                old_path = '/dev/null',
+                old_version = '0000000',
+                new_path = 'project/media/i/asc.gif',
+                new_version = '71e31ac')
+
+        results = wtp.patch.parse_git_header(text)
+        self.assertEqual(results, expected)
+
+        results_main = wtp.patch.parse_header(text)
+        self.assertEqual(results_main, expected)
+
     def test_svn_header(self):
         with open('tests/casefiles/svn-header.diff') as f:
             text = f.read()
