@@ -11,7 +11,7 @@ with open('README.rst') as f:
 
 setup(
     name='whatthepatch',
-    version='0.0.4',
+    version='0.0.5',
     description='A patch parsing library.',
     long_description=readme,
     author='Christopher S. Corley',
