@@ -2,17 +2,21 @@ class WhatThePatchException(Exception):
     pass
 
 
-class ApplyException(WhatThePatchException):
-    pass
-
-
-class ParseException(WhatThePatchException, ValueError):
-    def init(self, msg, hunk=None):
+class HunkException(WhatThePatchException):
+    def __init__(self, msg, hunk=None):
         self.hunk = hunk
         if hunk is not None:
-            super(ParseException, self).__init__('{msg}, in hunk #{n}'.format(
+            super(HunkException, self).__init__('{msg}, in hunk #{n}'.format(
                 msg=msg,
                 n=hunk,
             ))
         else:
-            super(ParseException, self).__init__(msg)
+            super(HunkException, self).__init__(msg)
+
+
+class ApplyException(HunkException):
+    pass
+
+
+class ParseException(HunkException, ValueError):
+    pass

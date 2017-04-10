@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import whatthepatch as wtp
-from whatthepatch.patch import diffobj, header as headerobj
+from whatthepatch.patch import Change, diffobj, header as headerobj
 
 
 import unittest
@@ -92,6 +92,24 @@ BUGXPLORE_CHANGES = indent(4, [
 
 class PatchTestSuite(unittest.TestCase):
 
+    def assert_diffs_equal(self, a, b):
+        def _process_change(c):
+            return (c.old, c.new, c.line)
+
+        def _process_diffobj(d):
+            return d._replace(changes=[_process_change(c) for c in d.changes])
+
+        def _process(d_or_c):
+            if isinstance(d_or_c, list):
+                return [_process(o) for o in d_or_c]
+            if isinstance(d_or_c, diffobj):
+                return _process_diffobj(d_or_c)
+            if isinstance(d_or_c, Change):
+                return _process_change(d_or_c)
+            return d_or_c
+
+        return self.assertEqual(_process(a), b)
+
     def test_default_diff(self):
         with open(datapath('diff-default.diff')) as f:
             text = f.read()
@@ -108,11 +126,11 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_default_diff(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
         expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results_main, expected_main)
+        self.assert_diffs_equal(results_main, expected_main)
 
     def test_svn_unified_patch(self):
         with open('tests/casefiles/svn-unified.patch') as f:
@@ -158,7 +176,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = list(wtp.parse_patch(text))
 
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_svn_context_patch(self):
         with open('tests/casefiles/svn-context.patch') as f:
@@ -204,10 +222,9 @@ class PatchTestSuite(unittest.TestCase):
 
         results = list(wtp.parse_patch(text))
 
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_svn_git_patch(self):
-        self.maxDiff = None
         with open('tests/casefiles/svn-git.patch') as f:
             text = f.read()
 
@@ -255,7 +272,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = list(wtp.parse_patch(text))
 
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_svn_rcs_patch(self):
         with open('tests/casefiles/svn-rcs.patch') as f:
@@ -325,7 +342,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_svn_default_patch(self):
         with open('tests/casefiles/svn-default.patch') as f:
@@ -400,7 +417,7 @@ class PatchTestSuite(unittest.TestCase):
             )
         ]
         results = list(wtp.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_git_patch(self):
         with open('tests/casefiles/git.patch') as f:
@@ -483,7 +500,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = list(wtp.parse_patch(text))
 
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_git_oneline_add(self):
         with open('tests/casefiles/git-oneline-add.diff') as f:
@@ -509,7 +526,7 @@ class PatchTestSuite(unittest.TestCase):
 
         results = list(wtp.parse_patch(text))
 
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_git_oneline_change(self):
         with open('tests/casefiles/git-oneline-change.diff') as f:
@@ -535,7 +552,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_git_oneline_rm(self):
         with open('tests/casefiles/git-oneline-rm.diff') as f:
@@ -560,7 +577,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_git_header(self):
         with open('tests/casefiles/git-header.diff') as f:
@@ -718,7 +735,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_unified_diff(text_diff))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
         expected_main = diffobj(
             header=headerobj(
@@ -732,7 +749,7 @@ class PatchTestSuite(unittest.TestCase):
             text=text,
         )
         results_main = next(wtp.patch.parse_patch(text))
-        self.assertEqual(results_main, expected_main)
+        self.assert_diffs_equal(results_main, expected_main)
 
     def test_diff_unified_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-unified-blah.diff') as f:
@@ -769,7 +786,7 @@ class PatchTestSuite(unittest.TestCase):
         )]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_diff_context_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-context-blah.diff') as f:
@@ -806,7 +823,7 @@ class PatchTestSuite(unittest.TestCase):
         )]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_diff_default_with_does_not_include_extra_lines(self):
         with open('tests/casefiles/diff-default-blah.diff') as f:
@@ -826,7 +843,7 @@ class PatchTestSuite(unittest.TestCase):
         expected = [diffobj(header=None, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_context_header(self):
         with open('tests/casefiles/context-header.diff') as f:
@@ -872,7 +889,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_context_diff(text_diff))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
         expected_main = diffobj(
             header=headerobj(
@@ -886,7 +903,7 @@ class PatchTestSuite(unittest.TestCase):
             text=text,
         )
         results_main = next(wtp.patch.parse_patch(text))
-        self.assertEqual(results_main, expected_main)
+        self.assert_diffs_equal(results_main, expected_main)
 
     def test_ed_diff(self):
         with open(datapath('diff-ed.diff')) as f:
@@ -904,11 +921,11 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_ed_diff(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
         expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results_main, expected_main)
+        self.assert_diffs_equal(results_main, expected_main)
 
     def test_rcs_diff(self):
         with open(datapath('diff-rcs.diff')) as f:
@@ -926,11 +943,11 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_rcs_ed_diff(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
         expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results_main, expected_main)
+        self.assert_diffs_equal(results_main, expected_main)
 
     def test_embedded_diff_in_comment(self):
         with open('tests/casefiles/embedded-diff.comment') as f:
@@ -962,7 +979,7 @@ class PatchTestSuite(unittest.TestCase):
         )]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_mozilla_527452_5_comment(self):
         with open('tests/casefiles/mozilla-527452-5.comment') as f:
@@ -998,7 +1015,7 @@ class PatchTestSuite(unittest.TestCase):
         expected = [diffobj(header=header, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_dos_unified_cvs(self):
         with open('tests/casefiles/mozilla-560291.diff') as f:
@@ -1034,7 +1051,7 @@ class PatchTestSuite(unittest.TestCase):
         ]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_old_style_cvs(self):
         with open('tests/casefiles/mozilla-252983.diff') as f:
@@ -1069,7 +1086,7 @@ class PatchTestSuite(unittest.TestCase):
         self.assertEqual(results, expected[0].header)
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_mozilla_252983_versionless(self):
         with open('tests/casefiles/mozilla-252983-versionless.diff') as f:
@@ -1101,7 +1118,7 @@ class PatchTestSuite(unittest.TestCase):
         self.assertEqual(results, expected[0].header)
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_apache_attachment_2241(self):
         with open('tests/casefiles/apache-attachment-2241.diff') as f:
@@ -1143,7 +1160,7 @@ class PatchTestSuite(unittest.TestCase):
         expected = [diffobj(header=header, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
-        self.assertEqual(results, expected)
+        self.assert_diffs_equal(results, expected)
 
     def test_space_in_path_header(self):
         with open('tests/casefiles/eclipse-attachment-126343.header') as f:

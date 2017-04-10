@@ -12,6 +12,7 @@ header = namedtuple(
 )
 
 diffobj = namedtuple('diff', 'header changes text')
+Change = namedtuple('Change', 'old new hunk line')
 
 file_timestamp_str = '(.+?)(?:\t|:|  +)(.*)'
 # .+? was previously [^:\t\n\r\f\v]+
@@ -507,37 +508,39 @@ def parse_default_diff(text):
     changes = list()
 
     hunks = split_by_regex(lines, default_hunk_start)
-    for hunk in hunks:
-        if len(hunk):
-            r = 0
-            i = 0
-            while len(hunk) > 0:
-                h = default_hunk_start.match(hunk[0])
-                c = default_change.match(hunk[0])
-                del hunk[0]
-                if h:
-                    old = int(h.group(1))
-                    if len(h.group(2)) > 0:
-                        old_len = int(h.group(2)) - old + 1
-                    else:
-                        old_len = 0
+    for hunk_n, hunk in enumerate(hunks):
+        if not len(hunk):
+            continue
 
-                    new = int(h.group(4))
-                    if len(h.group(5)) > 0:
-                        new_len = int(h.group(5)) - new + 1
-                    else:
-                        new_len = 0
+        r = 0
+        i = 0
+        while len(hunk) > 0:
+            h = default_hunk_start.match(hunk[0])
+            c = default_change.match(hunk[0])
+            del hunk[0]
+            if h:
+                old = int(h.group(1))
+                if len(h.group(2)) > 0:
+                    old_len = int(h.group(2)) - old + 1
+                else:
+                    old_len = 0
 
-                elif c:
-                    kind = c.group(1)
-                    line = c.group(2)
+                new = int(h.group(4))
+                if len(h.group(5)) > 0:
+                    new_len = int(h.group(5)) - new + 1
+                else:
+                    new_len = 0
 
-                    if kind == '<' and (r != old_len or r == 0):
-                        changes.append((old + r, None, line))
-                        r += 1
-                    elif kind == '>' and (i != new_len or i == 0):
-                        changes.append((None, new + i, line))
-                        i += 1
+            elif c:
+                kind = c.group(1)
+                line = c.group(2)
+
+                if kind == '<' and (r != old_len or r == 0):
+                    changes.append(Change(old + r, None, hunk_n, line))
+                    r += 1
+                elif kind == '>' and (i != new_len or i == 0):
+                    changes.append(Change(None, new + i, hunk_n, line))
+                    i += 1
 
     if len(changes) > 0:
         return changes
@@ -559,7 +562,7 @@ def parse_unified_diff(text):
     changes = list()
 
     hunks = split_by_regex(lines, unified_hunk_start)
-    for hunk in hunks:
+    for hunk_n, hunk in enumerate(hunks):
         # reset counters
         r = 0
         i = 0
@@ -590,13 +593,13 @@ def parse_unified_diff(text):
                 c = None
 
                 if kind == '-' and (r != old_len or r == 0):
-                    changes.append((old + r, None, line))
+                    changes.append(Change(old + r, None, hunk_n, line))
                     r += 1
                 elif kind == '+' and (i != new_len or i == 0):
-                    changes.append((None, new + i, line))
+                    changes.append(Change(None, new + i, hunk_n, line))
                     i += 1
                 elif kind == ' ' and r != old_len and i != new_len:
-                    changes.append((old + r, new + i, line))
+                    changes.append(Change(old + r, new + i, hunk_n, line))
                     r += 1
                     i += 1
 
@@ -671,11 +674,11 @@ def parse_context_diff(text):
                 line = c.group(2)
 
                 if kind == '-' and (j != old_len or j == 0):
-                    changes.append((old + j, None, line))
+                    changes.append(Change(old + j, None, hunk_n, line))
                     j += 1
                 elif kind == ' ' and ((j != old_len and k != new_len)
                                       or (j == 0 or k == 0)):
-                    changes.append((old + j, new + k, line))
+                    changes.append(Change(old + j, new + k, hunk_n, line))
                     j += 1
                     k += 1
                 elif kind == '+' or kind == '!':
@@ -697,11 +700,11 @@ def parse_context_diff(text):
                 line = c.group(2)
 
                 if kind == '+' and (k != new_len or k == 0):
-                    changes.append((None, new + k, line))
+                    changes.append(Change(None, new + k, hunk_n, line))
                     k += 1
                 elif kind == ' ' and ((j != old_len and k != new_len)
                                       or (j == 0 or k == 0)):
-                    changes.append((old + j, new + k, line))
+                    changes.append(Change(old + j, new + k, hunk_n, line))
                     j += 1
                     k += 1
                 elif kind == '-' or kind == '!':
@@ -727,17 +730,17 @@ def parse_context_diff(text):
                 del old_hunk[0]
                 del new_hunk[0]
             elif okind == ' ' and nkind == ' ' and oline == nline:
-                changes.append((old + j, new + k, oline))
+                changes.append(Change(old + j, new + k, hunk_n, oline))
                 j += 1
                 k += 1
                 del old_hunk[0]
                 del new_hunk[0]
             elif okind == '-' or okind == '!' and (j != old_len or j == 0):
-                changes.append((old + j, None, oline))
+                changes.append(Change(old + j, None, hunk_n, oline))
                 j += 1
                 del old_hunk[0]
             elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
-                changes.append((None, new + k, nline))
+                changes.append(Change(None, new + k, hunk_n, nline))
                 k += 1
                 del new_hunk[0]
             else:
@@ -766,7 +769,7 @@ def parse_ed_diff(text):
 
     hunks = split_by_regex(lines, ed_hunk_start)
     hunks.reverse()
-    for hunk in hunks:
+    for hunk_n, hunk in enumerate(hunks):
         if not len(hunk):
             continue
         j = 0
@@ -785,7 +788,7 @@ def parse_ed_diff(text):
             if hunk_kind == 'd':
                 k = 0
                 while old_end >= old:
-                    changes.append((old + k, None, None))
+                    changes.append(Change(old + k, None, hunk_n, None))
                     r += 1
                     k += 1
                     old_end -= 1
@@ -796,18 +799,28 @@ def parse_ed_diff(text):
                 if not e and hunk_kind == 'c':
                     k = 0
                     while old_end >= old:
-                        changes.append((old + k, None, None))
+                        changes.append(Change(old + k, None, hunk_n, None))
                         r += 1
                         k += 1
                         old_end -= 1
 
                     # I basically have no idea why this works
                     # for these tests.
-                    changes.append((None, old - r + i + k + j, hunk[0]))
+                    changes.append(Change(
+                        None,
+                        old - r + i + k + j,
+                        hunk_n,
+                        hunk[0],
+                    ))
                     i += 1
                     j += 1
                 if not e and hunk_kind == 'a':
-                    changes.append((None, old - r + i + 1, hunk[0]))
+                    changes.append(Change(
+                        None,
+                        old - r + i + 1,
+                        hunk_n,
+                        hunk[0],
+                    ))
                     i += 1
 
                 del hunk[0]
@@ -833,7 +846,7 @@ def parse_rcs_ed_diff(text):
     changes = list()
 
     hunks = split_by_regex(lines, rcs_ed_hunk_start)
-    for hunk in hunks:
+    for hunk_n, hunk in enumerate(hunks):
         if len(hunk):
             j = 0
             while len(hunk) > 0:
@@ -851,7 +864,7 @@ def parse_rcs_ed_diff(text):
                     old += total_change_size + 1
                     total_change_size += size
                     while size > 0 and len(hunk) > 0:
-                        changes.append((None, old + j, hunk[0]))
+                        changes.append(Change(None, old + j, hunk_n, hunk[0]))
                         j += 1
                         size -= 1
 
@@ -860,7 +873,7 @@ def parse_rcs_ed_diff(text):
                 elif hunk_kind == 'd':
                     total_change_size -= size
                     while size > 0:
-                        changes.append((old + j, None, None))
+                        changes.append(Change(old + j, None, hunk_n, None))
                         j += 1
                         size -= 1
 
