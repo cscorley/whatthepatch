@@ -1,14 +1,93 @@
 # -*- coding: utf-8 -*-
 
 import whatthepatch as wtp
+from whatthepatch.patch import diffobj, header as headerobj
 
 
 import unittest
 import os
-from io import StringIO
 
 module_path = os.path.dirname(__file__)
-datapath = lambda fname: os.path.join(module_path, 'casefiles', fname)
+
+
+def datapath(fname):
+    return os.path.join(module_path, 'casefiles', fname)
+
+
+def indent(amount, changes):
+    indent_str = ' ' * amount
+    return [(l, r, indent_str + t if t else t) for (l, r, t) in changes]
+
+
+CSC_CHANGES = [
+    (
+        None,
+        1,
+        '# This is a basic script I wrote to run Bugxplore over the dataset',
+    ),
+    (None, 2, ''),
+    (None, 3, ''),
+    (1, 4, 'import os'),
+    (2, 5, 'import sys'),
+    (3, 6, 'import pickle'),
+    (5, 8, 'import copy'),
+    (6, 9, ''),
+    (7, 10, 'from datetime import date'),
+    (8, None, 'from Main import main'),
+    (9, None, 'from Main import _make_dir'),
+    (None, 11, 'from Bugxplore import main'),
+    (None, 12, 'from Bugxplore import _make_dir'),
+    (10, 13, ''),
+    (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
+    (12, 15, 'argv = []'),
+]
+
+DIFFXPLORE_CHANGES = indent(4, [
+    (46, 46, ''),
+    (47, 47, '# Configure option parser'),
+    (48, 48, "optparser = OptionParser(usage='%prog [options] DIFF_FILE', "
+             "version='0.1')"),
+    (49, None, "optparser.set_defaults(output_dir='/tmp/sctdiffs',"
+               "project_name='default_project')"),
+    (None, 49, "optparser.set_defaults(output_dir='/tmp/diffs')"),
+    (50, 50, "optparser.add_option('-o', '--output-dir', dest='output_dir', "
+             "help='Output directory')"),
+    (51, 51, "optparser.add_option('-p', '--project_name', "
+             "dest='project_name', help='Project name')"),
+    (52, 52, "optparser.add_option('-d', '--delete_cvs_folder', "
+             "dest='cvs_delete', help='Deletable CVS checkout folder')"),
+    (53, None, "optparser.add_option('-a', '--append', action='store_true', "
+               "dest='app', default=False, "
+               "help='Append to existing MethTerms2 document')"),
+    (None, 53, ''),
+    (54, 54, '# Invoke option parser'),
+    (55, 55, '(options,args) = optparser.parse_args(argv)'),
+    (56, 56, ''),
+])
+
+BUGXPLORE_CHANGES = indent(4, [
+    (83, 83, ''),
+    (84, 84, '# Configure option parser'),
+    (85, 85, "optparser = OptionParser(usage='%prog [options] BUG_IDS', "
+             "version='0.1')"),
+    (86, None, "optparser.set_defaults(output_dir='/tmp/bugs',"
+               "project_name='default_project')"),
+    (None, 86, "optparser.set_defaults(output_dir='/tmp/bugs')"),
+    (87, 87, "optparser.add_option('-u', '--bugzilla-url', "
+             "dest='bugzilla_url', help='URL of Bugzilla installation root')"),
+    (88, 88, "optparser.add_option('-o', '--output-dir', dest='output_dir', "
+             "help='Output directory')"),
+    (89, 89, "optparser.add_option('-p', '--project_name', "
+             "dest='project_name', help='Project name')"),
+    (90, 90, "optparser.add_option('-d', '--delete_cvs_folder', "
+             "dest='cvs_delete', help='Deletable CVS checkout folder')"),
+    (91, None, "optparser.add_option('-a', '--append', action='store_true', "
+               "dest='app', default=False, "
+               "help='Append to existing MethTerms2 document')"),
+    (None, 91, ''),
+    (92, 92, '# Invoke option parser'),
+    (93, 93, '(options,args) = optparser.parse_args(argv)'),
+]) + [(94, 94, '    ')]
 
 
 class PatchTestSuite(unittest.TestCase):
@@ -31,7 +110,7 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_default_diff(text))
         self.assertEqual(results, expected)
 
-        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
@@ -42,86 +121,40 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
-                        (None, 2, ''),
-                        (None, 3, ''),
-                        (1, 4, 'import os'),
-                        (2, 5, 'import sys'),
-                        (3, 6, 'import pickle'),
-                        (5, 8, 'import copy'),
-                        (6, 9, ''),
-                        (7, 10, 'from datetime import date'),
-                        (8, None, 'from Main import main'),
-                        (9, None, 'from Main import _make_dir'),
-                        (None, 11, 'from Bugxplore import main'),
-                        (None, 12, 'from Bugxplore import _make_dir'),
-                        (10, 13, ''),
-                        (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
-                        (12, 15, 'argv = []'),
-                        ],
-                    text = '\n'.join(lines[:22]) + '\n'
-                   ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (46, 46, ''),
-                        (47, 47, '    # Configure option parser'),
-                        (48, 48, "    optparser = OptionParser(usage='%prog [options] DIFF_FILE', version='0.1')"),
-                        (49, None, "    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')"),
-                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
-                        (50, 50, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (51, 51, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (52, 52, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 53, ''),
-                        (54, 54, '    # Invoke option parser'),
-                        (55, 55, '    (options,args) = optparser.parse_args(argv)'),
-                        (56, 56, ''),
-                        ],
-                    text = '\n'.join(lines[22:40]) + '\n'
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    new_version=12784,
                     ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (83, 83, ''),
-                        (84, 84, '    # Configure option parser'),
-                        (85, 85, "    optparser = OptionParser(usage='%prog [options] BUG_IDS', version='0.1')"),
-                        (86, None, "    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')"),
-                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
-                        (87, 87, "    optparser.add_option('-u', '--bugzilla-url', dest='bugzilla_url', help='URL of Bugzilla installation root')"),
-                        (88, 88, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (89, 89, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (90, 90, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 91, ''),
-                        (92, 92, '    # Invoke option parser'),
-                        (93, 93, '    (options,args) = optparser.parse_args(argv)'),
-                        (94, 94, '    '),
-                        ],
-                    text = '\n'.join(lines[40:]) + '\n'
-                    )
-                    ]
+                changes=CSC_CHANGES,
+                text='\n'.join(lines[:22]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    new_version=12784,
+                ),
+                changes=DIFFXPLORE_CHANGES,
+                text='\n'.join(lines[22:40]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    new_version=12784,
+                ),
+                changes=BUGXPLORE_CHANGES,
+                text='\n'.join(lines[40:]) + '\n'
+            )
+        ]
 
         results = list(wtp.parse_patch(text))
 
@@ -134,179 +167,91 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
-                        (None, 2, ''),
-                        (None, 3, ''),
-                        (1, 4, 'import os'),
-                        (2, 5, 'import sys'),
-                        (3, 6, 'import pickle'),
-                        (5, 8, 'import copy'),
-                        (6, 9, ''),
-                        (7, 10, 'from datetime import date'),
-                        (8, None, 'from Main import main'),
-                        (9, None, 'from Main import _make_dir'),
-                        (None, 11, 'from Bugxplore import main'),
-                        (None, 12, 'from Bugxplore import _make_dir'),
-                        (10, 13, ''),
-                        (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
-                        (12, 15, 'argv = []'),
-                        ],
-                    text = '\n'.join(lines[:32]) + '\n'
-                   ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (46, 46, ''),
-                        (47, 47, '    # Configure option parser'),
-                        (48, 48, "    optparser = OptionParser(usage='%prog [options] DIFF_FILE', version='0.1')"),
-                        (49, None, "    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')"),
-                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
-                        (50, 50, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (51, 51, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (52, 52, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 53, ''),
-                        (54, 54, '    # Invoke option parser'),
-                        (55, 55, '    (options,args) = optparser.parse_args(argv)'),
-                        (56, 56, ''),
-                        ],
-                    text = '\n'.join(lines[32:61]) + '\n'
-                    ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_version=12783,
-                        new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (83, 83, ''),
-                        (84, 84, '    # Configure option parser'),
-                        (85, 85, "    optparser = OptionParser(usage='%prog [options] BUG_IDS', version='0.1')"),
-                        (86, None, "    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')"),
-                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
-                        (87, 87, "    optparser.add_option('-u', '--bugzilla-url', dest='bugzilla_url', help='URL of Bugzilla installation root')"),
-                        (88, 88, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (89, 89, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (90, 90, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 91, ''),
-                        (92, 92, '    # Invoke option parser'),
-                        (93, 93, '    (options,args) = optparser.parse_args(argv)'),
-                        (94, 94, '    '),
-                        ],
-                    text = '\n'.join(lines[61:]) + '\n'
-                    )
-                    ]
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    new_version=12784,
+                ),
+                changes=CSC_CHANGES,
+                text='\n'.join(lines[:32]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    new_version=12784,
+                ),
+                changes=DIFFXPLORE_CHANGES,
+                text='\n'.join(lines[32:61]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_version=12783,
+                    new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    new_version=12784,
+                ),
+                changes=BUGXPLORE_CHANGES,
+                text='\n'.join(lines[61:]) + '\n'
+            ),
+        ]
 
         results = list(wtp.parse_patch(text))
 
         self.assertEqual(results, expected)
 
     def test_svn_git_patch(self):
+        self.maxDiff = None
         with open('tests/casefiles/svn-git.patch') as f:
             text = f.read()
 
         lines = text.splitlines()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
-                        old_version=12783,
-                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
-                        (None, 2, ''),
-                        (None, 3, ''),
-                        (1, 4, 'import os'),
-                        (2, 5, 'import sys'),
-                        (3, 6, 'import pickle'),
-                        (5, 8, 'import copy'),
-                        (6, 9, ''),
-                        (7, 10, 'from datetime import date'),
-                        (8, None, 'from Main import main'),
-                        (9, None, 'from Main import _make_dir'),
-                        (None, 11, 'from Bugxplore import main'),
-                        (None, 12, 'from Bugxplore import _make_dir'),
-                        (10, 13, ''),
-                        (11, 14, 'storageDir = \'/tmp/csc/bugs/\''),
-                        (12, 15, 'argv = []'),
-                        ],
-                    text = '\n'.join(lines[:23]) + '\n'
-                   ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_version=12783,
-                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (46, 46, ''),
-                        (47, 47, '    # Configure option parser'),
-                        (48, 48, "    optparser = OptionParser(usage='%prog [options] DIFF_FILE', version='0.1')"),
-                        (49, None, "    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')"),
-                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
-                        (50, 50, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (51, 51, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (52, 52, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 53, ''),
-                        (54, 54, '    # Invoke option parser'),
-                        (55, 55, '    (options,args) = optparser.parse_args(argv)'),
-                        (56, 56, ''),
-                        ],
-                    text = '\n'.join(lines[23:42]) + '\n'
-                    ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_path='projects/bugs/bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_version=12783,
-                        new_path='projects/bugs/bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        new_version=12784,
-                        ),
-                    changes=[
-                        (83, 83, ''),
-                        (84, 84, '    # Configure option parser'),
-                        (85, 85, "    optparser = OptionParser(usage='%prog [options] BUG_IDS', version='0.1')"),
-                        (86, None, "    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')"),
-                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
-                        (87, 87, "    optparser.add_option('-u', '--bugzilla-url', dest='bugzilla_url', help='URL of Bugzilla installation root')"),
-                        (88, 88, "    optparser.add_option('-o', '--output-dir', dest='output_dir', help='Output directory')"),
-                        (89, 89, "    optparser.add_option('-p', '--project_name', dest='project_name', help='Project name')"),
-                        (90, 90, "    optparser.add_option('-d', '--delete_cvs_folder', dest='cvs_delete', help='Deletable CVS checkout folder')"),
-                        (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 91, ''),
-                        (92, 92, '    # Invoke option parser'),
-                        (93, 93, '    (options,args) = optparser.parse_args(argv)'),
-                        (94, 94, '    '),
-                        ],
-                    text = '\n'.join(lines[42:]) + '\n'
-                    )
-                    ]
+        csc_diff = diffobj(
+            header=headerobj(
+                index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                old_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
+                old_version=12783,
+                new_path='projects/bugs/bugtrace/trunk/src/bugtrace/csc.py',
+                new_version=12784,
+            ),
+            changes=CSC_CHANGES,
+            text='\n'.join(lines[:23]) + '\n'
+        )
 
+        diffxplore_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py'
+        diffxplore_diff = diffobj(
+            header=headerobj(
+                index_path=diffxplore_path,
+                old_path='projects/bugs/' + diffxplore_path,
+                old_version=12783,
+                new_path='projects/bugs/' + diffxplore_path,
+                new_version=12784,
+            ),
+            changes=DIFFXPLORE_CHANGES,
+            text='\n'.join(lines[23:42]) + '\n'
+        )
+
+        bugexplore_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py'
+        bugxplore_diff = diffobj(
+            header=headerobj(
+                index_path=bugexplore_path,
+                old_path='projects/bugs/' + bugexplore_path,
+                old_version=12783,
+                new_path='projects/bugs/' + bugexplore_path,
+                new_version=12784,
+            ),
+            changes=BUGXPLORE_CHANGES,
+            text='\n'.join(lines[42:]) + '\n'
+        )
+
+        expected = [csc_diff, diffxplore_diff, bugxplore_diff]
 
         results = list(wtp.parse_patch(text))
 
@@ -317,63 +262,70 @@ class PatchTestSuite(unittest.TestCase):
             text = f.read()
 
         lines = text.splitlines()
+
+        csc_changes = [
+            (None, 1, '# This is a basic script I wrote to run '
+                      'Bugxplore over the dataset'),
+            (None, 2, ''),
+            (None, 3, ''),
+            (8, None, None),
+            (9, None, None),
+            (None, 11, 'from Bugxplore import main'),
+            (None, 12, 'from Bugxplore import _make_dir'),
+        ]
+
+        diffxplore_changes = [
+            (49, None, None),
+            (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
+            (53, None, None),
+            (None, 53, ''),
+        ]
+
+        bugxplore_changes = [
+            (86, None, None),
+            (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
+            (91, None, None),
+            (None, 91, ''),
+        ]
+
         expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
-                        old_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
-                        (None, 2, ''),
-                        (None, 3, ''),
-                        (8, None, None),
-                        (9, None, None),
-                        (None, 11, 'from Bugxplore import main'),
-                        (None, 12, 'from Bugxplore import _make_dir'),
-                        ],
-                    text = '\n'.join(lines[:10]) + '\n'
-                   ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (49, None, None),
-                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
-                        (53, None, None),
-                        (None, 53, ''),
-                        ],
-                    text = '\n'.join(lines[10:18]) + '\n'
-                    ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (86, None, None),
-                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
-                        (91, None, None),
-                        (None, 91, ''),
-                        ],
-                    text = '\n'.join(lines[18:]) + '\n'
-                    )
-                    ]
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    new_version=None,
+                ),
+                changes=csc_changes,
+                text='\n'.join(lines[:10]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    new_version=None,
+                ),
+                changes=diffxplore_changes,
+                text='\n'.join(lines[10:18]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    new_version=None,
+                ),
+                changes=bugxplore_changes,
+                text='\n'.join(lines[18:]) + '\n'
+            ),
+        ]
 
         results = list(wtp.parse_patch(text))
         self.assertEqual(results, expected)
-
 
     def test_svn_default_patch(self):
         with open('tests/casefiles/svn-default.patch') as f:
@@ -381,62 +333,74 @@ class PatchTestSuite(unittest.TestCase):
 
         lines = text.splitlines()
 
+        csc_changes = [
+            (None, 1, '# This is a basic script I wrote to run '
+                      'Bugxplore over the dataset'),
+            (None, 2, ''),
+            (None, 3, ''),
+            (8, None, 'from Main import main'),
+            (9, None, 'from Main import _make_dir'),
+            (None, 11, 'from Bugxplore import main'),
+            (None, 12, 'from Bugxplore import _make_dir'),
+        ]
+
+        diffxplore_changes = indent(4, [
+            (49, None, "optparser.set_defaults(output_dir='/tmp/sctdiffs',"
+                       "project_name='default_project')"),
+            (None, 49, "optparser.set_defaults(output_dir='/tmp/diffs')"),
+            (53, None, "optparser.add_option('-a', '--append', "
+                       "action='store_true', dest='app', default=False, "
+                       "help='Append to existing MethTerms2 document')"),
+            (None, 53, ''),
+        ])
+
+        bugxplore_changes = indent(4, [
+            (86, None, "optparser.set_defaults(output_dir='/tmp/bugs',"
+                       "project_name='default_project')"),
+            (None, 86, "optparser.set_defaults(output_dir='/tmp/bugs')"),
+            (91, None, "optparser.add_option('-a', '--append', "
+                       "action='store_true', dest='app', default=False, "
+                       "help='Append to existing MethTerms2 document')"),
+            (None, 91, ''),
+        ])
+
         expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
-                        old_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/csc.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (None, 1, '# This is a basic script I wrote to run Bugxplore over the dataset'),
-                        (None, 2, ''),
-                        (None, 3, ''),
-                        (8, None, 'from Main import main'),
-                        (9, None, 'from Main import _make_dir'),
-                        (None, 11, 'from Bugxplore import main'),
-                        (None, 12, 'from Bugxplore import _make_dir'),
-                        ],
-                    text = '\n'.join(lines[:12]) + '\n'
-                   ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (49, None, "    optparser.set_defaults(output_dir='/tmp/sctdiffs',project_name='default_project')"),
-                        (None, 49, "    optparser.set_defaults(output_dir='/tmp/diffs')"),
-                        (53, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 53, ''),
-                        ],
-                    text = '\n'.join(lines[12:22]) + '\n'
-                    ),
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path = 'bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        old_version=None,
-                        new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (86, None, "    optparser.set_defaults(output_dir='/tmp/bugs',project_name='default_project')"),
-                        (None, 86, "    optparser.set_defaults(output_dir='/tmp/bugs')"),
-                        (91, None, "    optparser.add_option('-a', '--append', action='store_true', dest='app', default=False, help='Append to existing MethTerms2 document')"),
-                        (None, 91, ''),
-                        ],
-                    text = '\n'.join(lines[22:]) + '\n'
-                    )
-                    ]
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/csc.py',
+                    new_version=None,
+                ),
+                changes=csc_changes,
+                text='\n'.join(lines[:12]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/Diffxplore.py',
+                    new_version=None,
+                ),
+                changes=diffxplore_changes,
+                text='\n'.join(lines[12:22]) + '\n'
+            ),
+            diffobj(
+                header=headerobj(
+                    index_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    old_version=None,
+                    new_path='bugtrace/trunk/src/bugtrace/Bugxplore.py',
+                    new_version=None,
+                ),
+                changes=bugxplore_changes,
+                text='\n'.join(lines[22:]) + '\n'
+            )
+        ]
         results = list(wtp.parse_patch(text))
         self.assertEqual(results, expected)
-
 
     def test_git_patch(self):
         with open('tests/casefiles/git.patch') as f:
@@ -444,66 +408,78 @@ class PatchTestSuite(unittest.TestCase):
 
         lines = text.splitlines()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path=None,
-                        old_path='novel/src/java/edu/ua/eng/software/novel/NovelFrame.java',
-                        old_version='aae63fe',
-                        new_path='novel/src/java/edu/ua/eng/software/novel/NovelFrame.java',
-                        new_version='5abbc99'
-                        ),
-                    changes=[
-                        (135, 135, '    public void actionPerformed(ActionEvent e) {'),
-                        (136, 136, ''),
-                        (137, 137, '        if (e.getActionCommand().equals("OPEN")) {'),
-                        (138, None, '            prefsDialog(prefs.getImportPane());'),
-                        (None, 138, '            prefs.selectImportPane();'),
-                        (None, 139, '            prefsDialog();'),
-                        (139, 140, '        } else if (e.getActionCommand().equals("SET")) {'),
-                        (140, None, '            prefsDialog(prefs.getRepoPane());'),
-                        (None, 141, '            prefs.selectRepoPane();'),
-                        (None, 142, '            prefsDialog();'),
-                        (141, 143, '        } else if (e.getActionCommand().equals("PREFS"))'),
-                        (142, 144, '            prefsDialog();'),
-                        (143, 145, '        else if (e.getActionCommand().equals("EXIT"))'),
-                        (158, 160, '     * Create dialog to handle user preferences'),
-                        (159, 161, '     */'),
-                        (160, 162, '    public void prefsDialog() {'),
-                        (161, None, ''),
-                        (162, 163, '        prefs.setVisible(true);'),
-                        (163, 164, '    }'),
-                        (164, 165, ''),
-                        (165, None, '    public void prefsDialog(Component c) {'),
-                        (166, None, '        prefs.setSelectedComponent(c);'),
-                        (167, None, '        prefsDialog();'),
-                        (168, None, '    }'),
-                        (169, None, ''),
-                        (170, 166, '    /**'),
-                        (171, 167, '     * Open software tutorials, most likely to be hosted online'),
-                        (172, 168, '     * ')],
-                    text = '\n'.join(lines[:34]) + '\n'
-                    ),
-                    wtp.patch.diffobj(
-                        header=wtp.patch.header(
-                            index_path=None,
-                            old_path='novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java',
-                            old_version='a63b57e',
-                            new_path='novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java',
-                            new_version='919f413'
-                            ),
-                        changes=[
-                            (18, 18, ''),
-                            (19, 19, '    public abstract void apply();'),
-                            (20, 20, ''),
-                            (None, 21, '    public abstract void applyPrefs();'),
-                            (None, 22, ''),
-                            (21, 23, '    public abstract boolean isChanged();'),
-                            (22, 24, ''),
-                            (23, 25, '    protected Preferences prefs;')],
-                        text = '\n'.join(lines[34:]) + '\n'
-                        )
-                    ]
+        novel_frame_changes = indent(4, [
+            (135, 135, 'public void actionPerformed(ActionEvent e) {'),
+            (136, 136, ''),
+            (137, 137, '    if (e.getActionCommand().equals("OPEN")) {'),
+            (138, None, '        prefsDialog(prefs.getImportPane());'),
+            (None, 138, '        prefs.selectImportPane();'),
+            (None, 139, '        prefsDialog();'),
+            (139, 140, '    } else if (e.getActionCommand().equals("SET")) {'),
+            (140, None, '        prefsDialog(prefs.getRepoPane());'),
+            (None, 141, '        prefs.selectRepoPane();'),
+            (None, 142, '        prefsDialog();'),
+            (141, 143, '    } else if (e.getActionCommand().equals("PREFS"))'),
+            (142, 144, '        prefsDialog();'),
+            (143, 145, '    else if (e.getActionCommand().equals("EXIT"))'),
+            (158, 160, ' * Create dialog to handle user preferences'),
+            (159, 161, ' */'),
+            (160, 162, 'public void prefsDialog() {'),
+            (161, None, ''),
+            (162, 163, '    prefs.setVisible(true);'),
+            (163, 164, '}'),
+            (164, 165, ''),
+            (165, None, 'public void prefsDialog(Component c) {'),
+            (166, None, '    prefs.setSelectedComponent(c);'),
+            (167, None, '    prefsDialog();'),
+            (168, None, '}'),
+            (169, None, ''),
+            (170, 166, '/**'),
+            (171, 167, ' * Open software tutorials, '
+                       'most likely to be hosted online'),
+            (172, 168, ' * ')
+        ])
+
+        novel_frame_path = (
+            'novel/src/java/edu/ua/eng/software/novel/NovelFrame.java'
+        )
+        novel_frame = diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path=novel_frame_path,
+                old_version='aae63fe',
+                new_path=novel_frame_path,
+                new_version='5abbc99'
+            ),
+            changes=novel_frame_changes,
+            text='\n'.join(lines[:34]) + '\n'
+        )
+
+        novel_pref_frame_path = (
+            'novel/src/java/edu/ua/eng/software/novel/NovelPrefPane.java'
+        )
+
+        novel_pref_frame = diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path=novel_pref_frame_path,
+                old_version='a63b57e',
+                new_path=novel_pref_frame_path,
+                new_version='919f413'
+            ),
+            changes=[
+                (18, 18, ''),
+                (19, 19, '    public abstract void apply();'),
+                (20, 20, ''),
+                (None, 21, '    public abstract void applyPrefs();'),
+                (None, 22, ''),
+                (21, 23, '    public abstract boolean isChanged();'),
+                (22, 24, ''),
+                (23, 25, '    protected Preferences prefs;')],
+            text='\n'.join(lines[34:]) + '\n',
+        )
+
+        expected = [novel_frame, novel_pref_frame]
 
         results = list(wtp.parse_patch(text))
 
@@ -516,8 +492,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
+            diffobj(
+                header=headerobj(
                     index_path=None,
                     old_path='/dev/null',
                     old_version='0000000',
@@ -542,8 +518,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
+            diffobj(
+                header=headerobj(
                     index_path=None,
                     old_path='oneline.txt',
                     old_version='f56f98d',
@@ -568,8 +544,8 @@ class PatchTestSuite(unittest.TestCase):
         lines = text.splitlines()
 
         expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
+            diffobj(
+                header=headerobj(
                     index_path=None,
                     old_path='oneline.txt',
                     old_version='169ceeb',
@@ -590,12 +566,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/git-header.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = 'bugtrace/patch.py',
-                old_version = '8910dfd',
-                new_path = 'bugtrace/patch.py',
-                new_version = '456e34f')
+        expected = headerobj(
+            index_path=None,
+            old_path='bugtrace/patch.py',
+            old_version='8910dfd',
+            new_path='bugtrace/patch.py',
+            new_version='456e34f',
+        )
 
         results = wtp.patch.parse_git_header(text)
         self.assertEqual(results, expected)
@@ -607,12 +584,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/git-header-long.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = 'bugtrace/patch.py',
-                old_version = '18910dfd',
-                new_path = 'bugtrace/patch.py',
-                new_version = '2456e34f')
+        expected = headerobj(
+            index_path=None,
+            old_path='bugtrace/patch.py',
+            old_version='18910dfd',
+            new_path='bugtrace/patch.py',
+            new_version='2456e34f',
+        )
 
         results = wtp.patch.parse_git_header(text)
         self.assertEqual(results, expected)
@@ -624,12 +602,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/git-binary-files.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = '/dev/null',
-                old_version = '0000000',
-                new_path = 'project/media/i/asc.gif',
-                new_version = '71e31ac')
+        expected = headerobj(
+            index_path=None,
+            old_path='/dev/null',
+            old_version='0000000',
+            new_path='project/media/i/asc.gif',
+            new_version='71e31ac',
+        )
 
         results = wtp.patch.parse_git_header(text)
         self.assertEqual(results, expected)
@@ -641,12 +620,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-header.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = 'bugtrace/trunk/src/bugtrace/csc.py',
-                old_path = 'bugtrace/trunk/src/bugtrace/csc.py',
-                old_version = 12783,
-                new_path = 'bugtrace/trunk/src/bugtrace/csc.py',
-                new_version = 12784)
+        expected = headerobj(
+            index_path='bugtrace/trunk/src/bugtrace/csc.py',
+            old_path='bugtrace/trunk/src/bugtrace/csc.py',
+            old_version=12783,
+            new_path='bugtrace/trunk/src/bugtrace/csc.py',
+            new_version=12784,
+        )
         results = wtp.patch.parse_svn_header(text)
         self.assertEqual(results, expected)
 
@@ -657,12 +637,19 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/cvs-header.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
-                old_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
-                old_version = '1.6.4.1',
-                new_path = 'org.eclipse.core.resources/src/org/eclipse/core/internal/localstore/SafeChunkyInputStream.java',
-                new_version = '1.8')
+        path = (
+            'org.eclipse.core.resources'
+            '/src/org/eclipse/core/internal/localstore/'
+            'SafeChunkyInputStream.java'
+        )
+
+        expected = headerobj(
+            index_path=path,
+            old_path=path,
+            old_version='1.6.4.1',
+            new_path=path,
+            new_version='1.8',
+        )
         results = wtp.patch.parse_cvs_header(text)
         self.assertEqual(results, expected)
 
@@ -673,12 +660,13 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/unified-header.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = '/tmp/o',
-                old_version = '2012-12-22 06:43:35.000000000 -0600',
-                new_path = '/tmp/n',
-                new_version = '2012-12-23 20:40:50.000000000 -0600')
+        expected = headerobj(
+            index_path=None,
+            old_path='/tmp/o',
+            old_version='2012-12-22 06:43:35.000000000 -0600',
+            new_path='/tmp/n',
+            new_version='2012-12-23 20:40:50.000000000 -0600',
+        )
 
         results = wtp.patch.parse_unified_header(text)
         self.assertEqual(results, expected)
@@ -690,19 +678,19 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/unified-header-notab.diff') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = '/tmp/some file',
-                old_version = '2012-12-22 06:43:35.000000000 -0600',
-                new_path = '/tmp/n',
-                new_version = '2012-12-23 20:40:50.000000000 -0600')
+        expected = headerobj(
+            index_path=None,
+            old_path='/tmp/some file',
+            old_version='2012-12-22 06:43:35.000000000 -0600',
+            new_path='/tmp/n',
+            new_version='2012-12-23 20:40:50.000000000 -0600',
+        )
 
         results = wtp.patch.parse_unified_header(text)
         self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
         self.assertEqual(results_main, expected)
-
 
     def test_unified_diff(self):
         with open(datapath('diff-unified.diff')) as f:
@@ -732,15 +720,17 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_unified_diff(text_diff))
         self.assertEqual(results, expected)
 
-        expected_main = wtp.patch.diffobj(header=
-                                          wtp.patch.header(index_path=None,
-                                                           old_path='lao',
-                                                           old_version='2013-01-05 16:56:19.000000000 -0600',
-                                                           new_path='tzu',
-                                                           new_version='2013-01-05 16:56:35.000000000 -0600'
-                                                           ),
-                                          changes=expected,
-                                          text=text)
+        expected_main = diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path='lao',
+                old_version='2013-01-05 16:56:19.000000000 -0600',
+                new_path='tzu',
+                new_version='2013-01-05 16:56:35.000000000 -0600'
+            ),
+            changes=expected,
+            text=text,
+        )
         results_main = next(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
@@ -748,35 +738,35 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified-blah.diff') as f:
             text = f.read()
 
+        changes = [
+            (1, None, 'The Way that can be told of is not the eternal Way;'),
+            (2, None, 'The name that can be named is not the eternal name.'),
+            (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+            (4, None, 'The Named is the mother of all things.'),
+            (None, 2, 'The named is the mother of all things.'),
+            (None, 3, ''),
+            (5, 4, 'Therefore let there always be non-being,'),
+            (6, 5, '  so we may see their subtlety,'),
+            (7, 6, 'And let there always be being,'),
+            (9, 8, 'The two are the same,'),
+            (10, 9, 'But after they are produced,'),
+            (11, 10, '  they have different names.'),
+            (None, 11, 'They both may be called deep and profound.'),
+            (None, 12, 'Deeper and more profound,'),
+            (None, 13, 'The door of all subtleties!'),
+        ]
 
-        expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
-                    index_path=None,
-                    old_path='lao',
-                    old_version='2013-01-05 16:56:19.000000000 -0600',
-                    new_path='tzu',
-                    new_version='2013-01-05 16:56:35.000000000 -0600'
-                    ),
-                changes=[
-                    (1, None, 'The Way that can be told of is not the eternal Way;'),
-                    (2, None, 'The name that can be named is not the eternal name.'),
-                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
-                    (4, None, 'The Named is the mother of all things.'),
-                    (None, 2, 'The named is the mother of all things.'),
-                    (None, 3, ''),
-                    (5, 4, 'Therefore let there always be non-being,'),
-                    (6, 5, '  so we may see their subtlety,'),
-                    (7, 6, 'And let there always be being,'),
-                    (9, 8, 'The two are the same,'),
-                    (10, 9, 'But after they are produced,'),
-                    (11, 10, '  they have different names.'),
-                    (None, 11, 'They both may be called deep and profound.'),
-                    (None, 12, 'Deeper and more profound,'),
-                    (None, 13, 'The door of all subtleties!')],
-                text=text)
-                ]
-
+        expected = [diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path='lao',
+                old_version='2013-01-05 16:56:19.000000000 -0600',
+                new_path='tzu',
+                new_version='2013-01-05 16:56:35.000000000 -0600',
+            ),
+            changes=changes,
+            text=text,
+        )]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
@@ -785,35 +775,35 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-context-blah.diff') as f:
             text = f.read()
 
+        changes = [
+            (1, None, 'The Way that can be told of is not the eternal Way;'),
+            (2, None, 'The name that can be named is not the eternal name.'),
+            (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+            (4, None, 'The Named is the mother of all things.'),
+            (None, 2, 'The named is the mother of all things.'),
+            (None, 3, ''),
+            (5, 4, 'Therefore let there always be non-being,'),
+            (6, 5, '  so we may see their subtlety,'),
+            (7, 6, 'And let there always be being,'),
+            (9, 8, 'The two are the same,'),
+            (10, 9, 'But after they are produced,'),
+            (11, 10, '  they have different names.'),
+            (None, 11, 'They both may be called deep and profound.'),
+            (None, 12, 'Deeper and more profound,'),
+            (None, 13, 'The door of all subtleties!'),
+        ]
 
-        expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
-                    index_path=None,
-                    old_path='lao',
-                    old_version='2013-01-05 16:56:19.000000000 -0600',
-                    new_path='tzu',
-                    new_version='2013-01-05 16:56:35.000000000 -0600'
-                    ),
-                changes=[
-                    (1, None, 'The Way that can be told of is not the eternal Way;'),
-                    (2, None, 'The name that can be named is not the eternal name.'),
-                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
-                    (4, None, 'The Named is the mother of all things.'),
-                    (None, 2, 'The named is the mother of all things.'),
-                    (None, 3, ''),
-                    (5, 4, 'Therefore let there always be non-being,'),
-                    (6, 5, '  so we may see their subtlety,'),
-                    (7, 6, 'And let there always be being,'),
-                    (9, 8, 'The two are the same,'),
-                    (10, 9, 'But after they are produced,'),
-                    (11, 10, '  they have different names.'),
-                    (None, 11, 'They both may be called deep and profound.'),
-                    (None, 12, 'Deeper and more profound,'),
-                    (None, 13, 'The door of all subtleties!')],
-                text=text)
-                ]
-
+        expected = [diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path='lao',
+                old_version='2013-01-05 16:56:19.000000000 -0600',
+                new_path='tzu',
+                new_version='2013-01-05 16:56:35.000000000 -0600'
+            ),
+            changes=changes,
+            text=text,
+        )]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
@@ -822,44 +812,39 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-default-blah.diff') as f:
             text = f.read()
 
-        expected = [
-            wtp.patch.diffobj(
-                header=None,
-                changes=[
-                    (1, None, 'The Way that can be told of is not the eternal Way;'),
-                    (2, None, 'The name that can be named is not the eternal name.'),
-                    (4, None, 'The Named is the mother of all things.'),
-                    (None, 2, 'The named is the mother of all things.'),
-                    (None, 3, ''),
-                    (None, 11, 'They both may be called deep and profound.'),
-                    (None, 12, 'Deeper and more profound,'),
-                    (None, 13, 'The door of all subtleties!')],
-                text=text)
-                ]
+        changes = [
+            (1, None, 'The Way that can be told of is not the eternal Way;'),
+            (2, None, 'The name that can be named is not the eternal name.'),
+            (4, None, 'The Named is the mother of all things.'),
+            (None, 2, 'The named is the mother of all things.'),
+            (None, 3, ''),
+            (None, 11, 'They both may be called deep and profound.'),
+            (None, 12, 'Deeper and more profound,'),
+            (None, 13, 'The door of all subtleties!'),
+        ]
 
+        expected = [diffobj(header=None, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
-
 
     def test_context_header(self):
         with open('tests/casefiles/context-header.diff') as f:
             text = f.read()
 
-
-        expected = wtp.patch.header(
-                index_path = None,
-                old_path = '/tmp/o',
-                old_version = '2012-12-22 06:43:35.000000000 -0600',
-                new_path = '/tmp/n',
-                new_version = '2012-12-23 20:40:50.000000000 -0600')
+        expected = headerobj(
+            index_path=None,
+            old_path='/tmp/o',
+            old_version='2012-12-22 06:43:35.000000000 -0600',
+            new_path='/tmp/n',
+            new_version='2012-12-23 20:40:50.000000000 -0600',
+        )
 
         results = wtp.patch.parse_context_header(text)
         self.assertEqual(results, expected)
 
         results_main = wtp.patch.parse_header(text)
         self.assertEqual(results_main, expected)
-
 
     def test_context_diff(self):
         with open(datapath('diff-context.diff')) as f:
@@ -869,36 +854,37 @@ class PatchTestSuite(unittest.TestCase):
         text_diff = '\n'.join(text.splitlines()[2:]) + '\n'
 
         expected = [
-                    (1, None, 'The Way that can be told of is not the eternal Way;'),
-                    (2, None, 'The name that can be named is not the eternal name.'),
-                    (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
-                    (4, None, 'The Named is the mother of all things.'),
-                    (None, 2, 'The named is the mother of all things.'),
-                    (None, 3, ''),
-                    (5, 4, 'Therefore let there always be non-being,'),
-                    (6, 5, '  so we may see their subtlety,'),
-                    (7, 6, 'And let there always be being,'),
-                    (9, 8, 'The two are the same,'),
-                    (10, 9, 'But after they are produced,'),
-                    (11, 10, '  they have different names.'),
-                    (None, 11, 'They both may be called deep and profound.'),
-                    (None, 12, 'Deeper and more profound,'),
-                    (None, 13, 'The door of all subtleties!'),
-                ]
+            (1, None, 'The Way that can be told of is not the eternal Way;'),
+            (2, None, 'The name that can be named is not the eternal name.'),
+            (3, 1, 'The Nameless is the origin of Heaven and Earth;'),
+            (4, None, 'The Named is the mother of all things.'),
+            (None, 2, 'The named is the mother of all things.'),
+            (None, 3, ''),
+            (5, 4, 'Therefore let there always be non-being,'),
+            (6, 5, '  so we may see their subtlety,'),
+            (7, 6, 'And let there always be being,'),
+            (9, 8, 'The two are the same,'),
+            (10, 9, 'But after they are produced,'),
+            (11, 10, '  they have different names.'),
+            (None, 11, 'They both may be called deep and profound.'),
+            (None, 12, 'Deeper and more profound,'),
+            (None, 13, 'The door of all subtleties!'),
+        ]
 
         results = list(wtp.patch.parse_context_diff(text_diff))
         self.assertEqual(results, expected)
 
-
-        expected_main = wtp.patch.diffobj(header=
-                                          wtp.patch.header(index_path=None,
-                                                           old_path='lao',
-                                                           old_version='2013-01-05 16:56:19.000000000 -0600',
-                                                           new_path='tzu',
-                                                           new_version='2013-01-05 16:56:35.000000000 -0600'
-                                                           ),
-                                          changes=expected,
-                                          text=text)
+        expected_main = diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path='lao',
+                old_version='2013-01-05 16:56:19.000000000 -0600',
+                new_path='tzu',
+                new_version='2013-01-05 16:56:35.000000000 -0600',
+            ),
+            changes=expected,
+            text=text,
+        )
         results_main = next(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
@@ -917,11 +903,10 @@ class PatchTestSuite(unittest.TestCase):
             (None, 13,  'The door of all subtleties!')
         ]
 
-
         results = list(wtp.patch.parse_ed_diff(text))
         self.assertEqual(results, expected)
 
-        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
@@ -940,11 +925,10 @@ class PatchTestSuite(unittest.TestCase):
             (None, 13,  'The door of all subtleties!')
         ]
 
-
         results = list(wtp.patch.parse_rcs_ed_diff(text))
         self.assertEqual(results, expected)
 
-        expected_main = [wtp.patch.diffobj(header=None, changes=expected, text=text)]
+        expected_main = [diffobj(header=None, changes=expected, text=text)]
         results_main = list(wtp.patch.parse_patch(text))
         self.assertEqual(results_main, expected_main)
 
@@ -952,29 +936,30 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/embedded-diff.comment') as f:
             text = f.read()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path=None,
-                        old_path='src/org/mozilla/javascript/IRFactory.java',
-                        old_version=None,
-                        new_path='src/org/mozilla/javascript/IRFactory.java',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (2182, 2182, '          case Token.GETELEM:'),
-                        (2183, 2183, '              decompileElementGet((ElementGet) node);'),
-                        (2184, 2184, '              break;'),
-                        (None, 2185, '          case Token.THIS:'),
-                        (None, 2186, '              decompiler.addToken(node.getType());'),
-                        (None, 2187, '              break;'),
-                        (2185, 2188, '          default:'),
-                        (2186, 2189, '              Kit.codeBug("unexpected token: "'),
-                        (2187, 2190, '                          + Token.typeToName(node.getType()));'),
-                        ],
-                    text=text
-                   ),
-                ]
+        changes = indent(10, [
+            (2182, 2182, 'case Token.GETELEM:'),
+            (2183, 2183, '    decompileElementGet((ElementGet) node);'),
+            (2184, 2184, '    break;'),
+            (None, 2185, 'case Token.THIS:'),
+            (None, 2186, '    decompiler.addToken(node.getType());'),
+            (None, 2187, '    break;'),
+            (2185, 2188, 'default:'),
+            (2186, 2189, '    Kit.codeBug("unexpected token: "'),
+            (2187, 2190, '                '
+                         '+ Token.typeToName(node.getType()));'),
+        ])
+
+        expected = [diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path='src/org/mozilla/javascript/IRFactory.java',
+                old_version=None,
+                new_path='src/org/mozilla/javascript/IRFactory.java',
+                new_version=None,
+            ),
+            changes=changes,
+            text=text,
+        )]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
@@ -984,30 +969,33 @@ class PatchTestSuite(unittest.TestCase):
             text = f.read()
 
         lines = text.splitlines()
+        path = (
+            'js_instrumentation_proxy/src/org/mozilla/'
+            'javascript/ast/StringLiteral.java'
+        )
+        header = headerobj(
+            index_path=path,
+            old_path=path,
+            old_version=5547,
+            new_path=path,
+            new_version=None,
+        )
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
-                        old_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
-                        old_version=5547,
-                        new_path='js_instrumentation_proxy/src/org/mozilla/javascript/ast/StringLiteral.java',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (112, 112, '        // TODO(stevey):  make sure this unescapes everything properly'),
-                        (113, 113, '        String q = String.valueOf(getQuoteCharacter());'),
-                        (114, 114, '        String rep = "\\\\\\\\" + q;'), # escape the escape that's escaping an escape. wut
-                        (115, None, '        String s = value.replaceAll(q, rep);'),
-                        (None, 115, '        String s = value.replace("\\\\", "\\\\\\\\");'),
-                        (None, 116, '        s = s.replaceAll(q, rep);'),
-                        (116, 117, '        s = s.replaceAll("\\n", "\\\\\\\\n");'),
-                        (117, 118, '        s = s.replaceAll("\\r", "\\\\\\\\r");'),
-                        (118, 119, '        s = s.replaceAll("\\t", "\\\\\\\\t");')
-                        ],
-                    text = '\n'.join(lines[2:]) + '\n'
-                   ),
-                ]
+        changes = indent(8, [
+            (112, 112, '// TODO(stevey):  make sure this unescapes '
+                       'everything properly'),
+            (113, 113, 'String q = String.valueOf(getQuoteCharacter());'),
+            (114, 114, r'String rep = "\\\\" + q;'),
+            (115, None, 'String s = value.replaceAll(q, rep);'),
+            (None, 115, r'String s = value.replace("\\", "\\\\");'),
+            (None, 116, 's = s.replaceAll(q, rep);'),
+            (116, 117, r's = s.replaceAll("\n", "\\\\n");'),
+            (117, 118, r's = s.replaceAll("\r", "\\\\r");'),
+            (118, 119, r's = s.replaceAll("\t", "\\\\t");'),
+        ])
+        text = '\n'.join(lines[2:]) + '\n'
+
+        expected = [diffobj(header=header, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
@@ -1016,17 +1004,19 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/mozilla-560291.diff') as f:
             text = f.read()
 
+        path = 'src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java'
         lines = text.splitlines()
+        header = headerobj(
+            index_path=path,
+            old_path=path,
+            old_version='1.1',
+            new_path=path,
+            new_version='15 Sep 2011 02:26:05 -0000'
+        )
 
         expected = [
-            wtp.patch.diffobj(
-                header=wtp.patch.header(
-                    index_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                    old_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                    old_version='1.1',
-                    new_path='src/org/mozilla/javascript/ast/ArrayComprehensionLoop.java',
-                    new_version='15 Sep 2011 02:26:05 -0000'
-                ),
+            diffobj(
+                header=header,
                 changes=[
                     (79, 79, '    @Override'),
                     (80, 80, '    public String toSource(int depth) {'),
@@ -1039,37 +1029,38 @@ class PatchTestSuite(unittest.TestCase):
                     (84, 86, '                + " in "'),
                     (85, 87, '                + iteratedObject.toSource(0)')
                 ],
-                text = '\n'.join(lines[2:]) + '\n'
+                text='\n'.join(lines[2:]) + '\n'
             )
         ]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
 
-
     def test_old_style_cvs(self):
         with open('tests/casefiles/mozilla-252983.diff') as f:
             text = f.read()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='mozilla/js/rhino/CHANGELOG',
-                        old_path='mozilla/js/rhino/CHANGELOG',
-                        old_version='1.1.1.1',
-                        new_path='mozilla/js/rhino/CHANGELOG',
-                        new_version='1.1', # or 'Thu Jan 25 10:59:02 2007'
-                        ),
-                    changes=[
-                        (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 2007/01/25 15:59:02 inonit Exp $'),
-                        (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 2007/01/25 15:59:02 inonit Exp $'),
-                        (2, 2, ''),
-                        (3, 3, 'Changes since Rhino 1.6R5'),
-                        (4, 4, '========================='),
-                        ],
-                    text=text
-                   ),
-                ]
+        changes = [
+            (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 '
+                      '2007/01/25 15:59:02 inonit Exp $'),
+            (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 '
+                      '2007/01/25 15:59:02 inonit Exp $'),
+            (2, 2, ''),
+            (3, 3, 'Changes since Rhino 1.6R5'),
+            (4, 4, '========================='),
+        ]
+
+        expected = [diffobj(
+            header=headerobj(
+                index_path='mozilla/js/rhino/CHANGELOG',
+                old_path='mozilla/js/rhino/CHANGELOG',
+                old_version='1.1.1.1',
+                new_path='mozilla/js/rhino/CHANGELOG',
+                new_version='1.1',  # or 'Thu Jan 25 10:59:02 2007'
+            ),
+            changes=changes,
+            text=text,
+        )]
 
         results = wtp.patch.parse_cvs_header(text)
         self.assertEqual(results, expected[0].header)
@@ -1084,25 +1075,27 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/mozilla-252983-versionless.diff') as f:
             text = f.read()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path='mozilla/js/rhino/CHANGELOG',
-                        old_path='mozilla/js/rhino/CHANGELOG',
-                        old_version=None,
-                        new_path='mozilla/js/rhino/CHANGELOG',
-                        new_version=None,
-                        ),
-                    changes=[
-                        (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 2007/01/25 15:59:02 inonit Exp $'),
-                        (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 2007/01/25 15:59:02 inonit Exp $'),
-                        (2, 2, ''),
-                        (3, 3, 'Changes since Rhino 1.6R5'),
-                        (4, 4, '========================='),
-                        ],
-                    text=text
-                   ),
-                ]
+        changes = [
+            (1, None, 'This file version: $Id: CHANGELOG,v 1.1.1.1 '
+                      '2007/01/25 15:59:02 inonit Exp $'),
+            (None, 1, 'This file version: $Id: CHANGELOG,v 1.1 '
+                      '2007/01/25 15:59:02 inonit Exp $'),
+            (2, 2, ''),
+            (3, 3, 'Changes since Rhino 1.6R5'),
+            (4, 4, '========================='),
+        ]
+
+        expected = [diffobj(
+            header=headerobj(
+                index_path='mozilla/js/rhino/CHANGELOG',
+                old_path='mozilla/js/rhino/CHANGELOG',
+                old_version=None,
+                new_path='mozilla/js/rhino/CHANGELOG',
+                new_version=None,
+            ),
+            changes=changes,
+            text=text,
+        )]
 
         results = wtp.patch.parse_header(text)
         self.assertEqual(results, expected[0].header)
@@ -1116,28 +1109,38 @@ class PatchTestSuite(unittest.TestCase):
 
         lines = text.splitlines()
 
-        expected = [
-                wtp.patch.diffobj(
-                    header=wtp.patch.header(
-                        index_path=None,
-                        old_path='src\\main\\org\\apache\\tools\\ant\\taskdefs\\optional\\pvcs\\Pvcs.orig',
-                        old_version='Sat Jun 22 16:11:58 2002',
-                        new_path='src\\main\\org\\apache\\tools\\ant\\taskdefs\\optional\\pvcs\\Pvcs.java',
-                        new_version='Fri Jun 28 10:55:50 2002'
-                        ),
-                    changes=[
-                        (91, 91, ' *'),
-                        (92, 92, ' * @author <a href="mailto:tchristensen@nordija.com">Thomas Christensen</a>'),
-                        (93, 93, ' * @author <a href="mailto:donj@apogeenet.com">Don Jeffery</a>'),
-                        (94, None, ' * @author <a href="snewton@standard.com">Steven E. Newton</a>'),
-                        (None, 94, ' * @author <a href="mailto:snewton@standard.com">Steven E. Newton</a>'),
-                        (95, 95, ' */'),
-                        (96, 96, 'public class Pvcs extends org.apache.tools.ant.Task {'),
-                        (97, 97, '    private String pvcsbin;')
-                        ],
-                    text= '\n'.join(lines) + '\n'
-                   ),
-                ]
+        header = headerobj(
+            index_path=None,
+            old_path=(
+                r'src\main\org\apache\tools\ant'
+                r'\taskdefs\optional\pvcs\Pvcs.orig'
+            ),
+            old_version='Sat Jun 22 16:11:58 2002',
+            new_path=(
+                r'src\main\org\apache\tools\ant'
+                r'\taskdefs\optional\pvcs\Pvcs.java'
+            ),
+            new_version='Fri Jun 28 10:55:50 2002'
+        )
+
+        changes = [
+            (91, 91, ' *'),
+            (92, 92, ' * @author <a href="mailto:tchristensen@nordija.com">'
+                     'Thomas Christensen</a>'),
+            (93, 93, ' * @author <a href="mailto:donj@apogeenet.com">'
+                     'Don Jeffery</a>'),
+            (94, None, ' * @author <a href="snewton@standard.com">'
+                       'Steven E. Newton</a>'),
+            (None, 94, ' * @author <a href="mailto:snewton@standard.com">'
+                       'Steven E. Newton</a>'),
+            (95, 95, ' */'),
+            (96, 96, 'public class Pvcs extends org.apache.tools.ant.Task {'),
+            (97, 97, '    private String pvcsbin;')
+        ]
+
+        text = '\n'.join(lines) + '\n'
+
+        expected = [diffobj(header=header, changes=changes, text=text)]
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results, expected)
@@ -1146,13 +1149,19 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/eclipse-attachment-126343.header') as f:
             text = f.read()
 
-        expected = wtp.patch.header(
-                index_path = 'test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java',
-                old_path = '/dev/null',
-                old_version = '1 Jan 1970 00:00:00 -0000',
-                new_path = 'test plugin/org/eclipse/jdt/debug/testplugin/ResumeBreakpointListener.java',
-                new_version = '1 Jan 1970 00:00:00 -0000'
-                )
+        expected = headerobj(
+            index_path=(
+                'test plugin/org/eclipse/jdt/debug/testplugin/'
+                'ResumeBreakpointListener.java'
+            ),
+            old_path='/dev/null',
+            old_version='1 Jan 1970 00:00:00 -0000',
+            new_path=(
+                'test plugin/org/eclipse/jdt/debug/testplugin/'
+                'ResumeBreakpointListener.java'
+            ),
+            new_version='1 Jan 1970 00:00:00 -0000'
+        )
 
         results = wtp.patch.parse_header(text)
         self.assertEqual(results, expected)
@@ -1161,12 +1170,15 @@ class PatchTestSuite(unittest.TestCase):
         with open('tests/casefiles/svn-mixed_line_ends.patch') as f:
             text = f.read()
 
-        expected_header = wtp.patch.header(
-                index_path='java/org/apache/catalina/loader/WebappClassLoader.java',
-                old_path='java/org/apache/catalina/loader/WebappClassLoader.java',
-                old_version=1346371,
-                new_path='java/org/apache/catalina/loader/WebappClassLoader.java',
-                new_version=None)
+        expected_header = headerobj(
+            index_path=(
+                'java/org/apache/catalina/loader/WebappClassLoader.java'
+            ),
+            old_path='java/org/apache/catalina/loader/WebappClassLoader.java',
+            old_version=1346371,
+            new_path='java/org/apache/catalina/loader/WebappClassLoader.java',
+            new_version=None,
+        )
 
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results[0].header, expected_header)
