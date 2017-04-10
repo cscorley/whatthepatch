@@ -4,7 +4,7 @@ import whatthepatch as wtp
 
 
 import unittest
-from io import StringIO
+
 
 class ApplyTestSuite(unittest.TestCase):
     """Basic test cases."""
@@ -59,7 +59,13 @@ class ApplyTestSuite(unittest.TestCase):
         new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
 
-        self.assertRaises(AssertionError, wtp.apply.apply_diff, diff, [''] + self.lao, use_patch=True)
+        self.assertRaises(
+            AssertionError,
+            wtp.apply.apply_diff,
+            diff,
+            [''] + self.lao,
+            use_patch=True,
+        )
 
     def test_diff_rcs(self):
         with open('tests/casefiles/diff-rcs.diff') as f:
@@ -78,10 +84,11 @@ class ApplyTestSuite(unittest.TestCase):
         diff = next(wtp.parse_patch(diff_text))
 
         new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEqual(self.tzu,new_text)
+        self.assertEqual(self.tzu, new_text)
 
         new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
+
 
 if __name__ == '__main__':
     unittest.main()
