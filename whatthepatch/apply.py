@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import re
 import subprocess
 
 from . import patch
 from .snippets import which, remove
+
 
 def apply_patch(diffs):
     """ Not ready for use yet """
@@ -24,6 +24,7 @@ def apply_patch(diffs):
         with open(diff.header.new_path, 'w') as f:
             f.write(new_text)
 
+
 def apply_diff(diff, text, use_patch=False):
     try:
         lines = text.splitlines()
@@ -33,7 +34,7 @@ def apply_diff(diff, text, use_patch=False):
     if use_patch:
         # call out to patch program
         patchexec = which('patch')
-        assert patchexec # patch program does not exist
+        assert patchexec  # patch program does not exist
 
         filepath = '/tmp/wtp-' + str(hash(diff.header))
         oldfilepath = filepath + '.old'
@@ -55,7 +56,6 @@ def apply_diff(diff, text, use_patch=False):
                 ]
         ret = subprocess.call(args)
 
-
         with open(newfilepath) as f:
             lines = f.read().splitlines()
 
@@ -71,7 +71,7 @@ def apply_diff(diff, text, use_patch=False):
         remove(patchfilepath)
 
         # do this last to ensure files get cleaned up
-        assert ret == 0 # patch return code is success
+        assert ret == 0  # patch return code is success
 
         return lines, rejlines
 
@@ -95,13 +95,10 @@ def apply_diff(diff, text, use_patch=False):
             i += 1
         elif old is not None and new is not None:
             # are we crazy?
-            #assert new == old - r + i
+            # assert new == old - r + i
 
             # Sometimes, people remove hunks from patches, making these
             # numbers completely unreliable. Because they're jerks.
             pass
 
     return lines
-
-
-
