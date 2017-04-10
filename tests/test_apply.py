@@ -125,13 +125,8 @@ class ApplyTestSuite(unittest.TestCase):
         new_text = _apply(self.lao, diff_text, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
 
-        def _do_apply():
-            return _apply([''] + self.lao, diff_text, use_patch=True)
-
-        self.assertRaises(
-            exceptions.ApplyException,
-            _do_apply,
-        )
+        with assert_raises(exceptions.ApplyException):
+            _apply([''] + self.lao, diff_text, use_patch=True)
 
     def test_diff_rcs(self):
         with open('tests/casefiles/diff-rcs.diff') as f:
