@@ -5,8 +5,10 @@ from collections import namedtuple
 
 from .snippets import split_by_regex, findall_regex
 
-header = namedtuple('header',
-        'index_path old_path old_version new_path new_version')
+header = namedtuple(
+    'header',
+    'index_path old_path old_version new_path new_version',
+)
 
 diffobj = namedtuple('diff', 'header changes text')
 
@@ -71,17 +73,17 @@ def parse_patch(text):
         lines = text
 
     # maybe use this to nuke all of those line endings?
-    #lines = [x.splitlines()[0] for x in lines]
+    # lines = [x.splitlines()[0] for x in lines]
     lines = [x if len(x) == 0 else x.splitlines()[0] for x in lines]
 
     check = [
-            unified_header_index,
-            diffcmd_header,
-            cvs_header_rcs,
-            git_header_index,
-            context_header_old_line,
-            unified_header_old_line,
-            ]
+        unified_header_index,
+        diffcmd_header,
+        cvs_header_rcs,
+        git_header_index,
+        context_header_old_line,
+        unified_header_old_line,
+    ]
 
     for c in check:
         diffs = split_by_regex(lines, c)
@@ -95,11 +97,13 @@ def parse_patch(text):
         if h or d:
             yield diffobj(header=h, changes=d, text=difftext)
 
+
 def parse_header(text):
     h = parse_scm_header(text)
     if h is None:
         h = parse_diff_header(text)
     return h
+
 
 def parse_scm_header(text):
     try:
@@ -130,18 +134,19 @@ def parse_scm_header(text):
                         new_path = new_path[2:]
 
                     return header(
-                            index_path=res.index_path,
-                            old_path = old_path,
-                            old_version = res.old_version,
-                            new_path = new_path,
-                            new_version = res.new_version
-                            )
+                        index_path=res.index_path,
+                        old_path=old_path,
+                        old_version=res.old_version,
+                        new_path=new_path,
+                        new_version=res.new_version
+                    )
             else:
                 res = parser(lines)
 
             return res
 
     return None
+
 
 def parse_diff_header(text):
     try:
@@ -150,21 +155,21 @@ def parse_diff_header(text):
         lines = text
 
     check = [
-            (unified_header_new_line, parse_unified_header),
-            (context_header_old_line, parse_context_header),
-            (diffcmd_header, parse_diffcmd_header),
-            # TODO:
-            # git_header can handle version-less unified headers, but
-            # will trim a/ and b/ in the paths if they exist...
-            (git_header_new_line, parse_git_header),
-            ]
+        (unified_header_new_line, parse_unified_header),
+        (context_header_old_line, parse_context_header),
+        (diffcmd_header, parse_diffcmd_header),
+        # TODO:
+        # git_header can handle version-less unified headers, but
+        # will trim a/ and b/ in the paths if they exist...
+        (git_header_new_line, parse_git_header),
+    ]
 
     for regex, parser in check:
         diffs = findall_regex(lines, regex)
         if len(diffs) > 0:
             return parser(lines)
 
-    return None # no header?
+    return None  # no header?
 
 
 def parse_diff(text):
@@ -174,17 +179,18 @@ def parse_diff(text):
         lines = text
 
     check = [
-            (unified_hunk_start, parse_unified_diff),
-            (context_hunk_start, parse_context_diff),
-            (default_hunk_start, parse_default_diff),
-            (ed_hunk_start, parse_ed_diff),
-            (rcs_ed_hunk_start, parse_rcs_ed_diff),
-            ]
+        (unified_hunk_start, parse_unified_diff),
+        (context_hunk_start, parse_context_diff),
+        (default_hunk_start, parse_default_diff),
+        (ed_hunk_start, parse_ed_diff),
+        (rcs_ed_hunk_start, parse_rcs_ed_diff),
+    ]
 
     for hunk, parser in check:
         diffs = findall_regex(lines, hunk)
         if len(diffs) > 0:
             return parser(lines)
+
 
 def parse_git_header(text):
     try:
@@ -223,13 +229,15 @@ def parse_git_header(text):
             if new_path.startswith('b/'):
                 new_path = new_path[2:]
             return header(
-                    index_path = None,
-                    old_path = old_path,
-                    old_version = over,
-                    new_path = new_path,
-                    new_version = nver)
+                index_path=None,
+                old_path=old_path,
+                old_version=over,
+                new_path=new_path,
+                new_version=nver
+            )
 
     return None
+
 
 def parse_svn_header(text):
     try:
@@ -250,11 +258,11 @@ def parse_svn_header(text):
         diff_header = parse_diff_header(lines)
         if not diff_header:
             return header(
-                index_path = i.group(1),
-                old_path = i.group(1),
-                old_version = None,
-                new_path = i.group(1),
-                new_version = None,
+                index_path=i.group(1),
+                old_path=i.group(1),
+                old_version=None,
+                new_path=i.group(1),
+                new_version=None,
             )
 
         opath = diff_header.old_path
@@ -292,15 +300,15 @@ def parse_svn_header(text):
             nver = None
 
         return header(
-            index_path = i.group(1),
-            old_path = opath,
-            old_version = over,
-            new_path = npath,
-            new_version = nver,
+            index_path=i.group(1),
+            old_path=opath,
+            old_version=over,
+            new_path=npath,
+            new_version=nver,
         )
 
-
     return None
+
 
 def parse_cvs_header(text):
     try:
@@ -340,18 +348,18 @@ def parse_cvs_header(text):
                         nver = nend_c.group(1)
 
                 return header(
-                    index_path = i.group(1),
-                    old_path = diff_header.old_path,
-                    old_version = over,
-                    new_path = diff_header.new_path,
-                    new_version = nver,
+                    index_path=i.group(1),
+                    old_path=diff_header.old_path,
+                    old_version=over,
+                    new_path=diff_header.new_path,
+                    new_version=nver,
                 )
             return header(
-                index_path = i.group(1),
-                old_path = i.group(1),
-                old_version = None,
-                new_path = i.group(1),
-                new_version = None,
+                index_path=i.group(1),
+                old_path=i.group(1),
+                old_version=None,
+                new_path=i.group(1),
+                new_version=None,
             )
     elif headers_old:
         # parse old style headers
@@ -364,26 +372,27 @@ def parse_cvs_header(text):
             d = old_cvs_diffcmd_header.match(lines[0])
             if not d:
                 return header(
-                        index_path = i.group(1),
-                        old_path = i.group(1),
-                        old_version = None,
-                        new_path = i.group(1),
-                        new_version = None,
+                    index_path=i.group(1),
+                    old_path=i.group(1),
+                    old_version=None,
+                    new_path=i.group(1),
+                    new_version=None,
                 )
 
             # will get rid of the useless stuff for us
-            _ = parse_diff_header(lines)
+            parse_diff_header(lines)
             over = d.group(2) if d.group(2) else None
             nver = d.group(4) if d.group(4) else None
             return header(
-                index_path = i.group(1),
-                old_path = d.group(1),
-                old_version = over,
-                new_path = d.group(3),
-                new_version = nver,
+                index_path=i.group(1),
+                old_path=d.group(1),
+                old_version=over,
+                new_path=d.group(3),
+                new_version=nver,
             )
 
     return None
+
 
 def parse_diffcmd_header(text):
     try:
@@ -400,14 +409,14 @@ def parse_diffcmd_header(text):
         del lines[0]
         if d:
             return header(
-                    index_path = None,
-                    old_path = d.group(1),
-                    old_version = None,
-                    new_path = d.group(2),
-                    new_version = None,
-                    )
-
+                index_path=None,
+                old_path=d.group(1),
+                old_version=None,
+                new_path=d.group(2),
+                new_version=None,
+            )
     return None
+
 
 def parse_unified_header(text):
     try:
