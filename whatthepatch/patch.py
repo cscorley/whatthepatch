@@ -4,6 +4,7 @@ import re
 from collections import namedtuple
 
 from .snippets import split_by_regex, findall_regex
+from . import exceptions
 
 header = namedtuple(
     'header',
@@ -621,7 +622,7 @@ def parse_context_diff(text):
     changes = list()
 
     hunks = split_by_regex(lines, context_hunk_start)
-    for hunk in hunks:
+    for hunk_n, hunk in enumerate(hunks):
         if not len(hunk):
             continue
 
@@ -629,7 +630,7 @@ def parse_context_diff(text):
         k = 0
         parts = split_by_regex(hunk, context_hunk_new)
         if len(parts) != 2:
-            raise ValueError("Context diff invalid")
+            raise exceptions.ParseException("Context diff invalid", hunk_n)
 
         old_hunk = parts[0]
         new_hunk = parts[1]
@@ -678,7 +679,7 @@ def parse_context_diff(text):
                     j += 1
                     k += 1
                 elif kind == '+' or kind == '!':
-                    raise ValueError(msg + kind)
+                    raise exceptions.ParseException(msg + kind, hunk_n)
 
             continue
 
@@ -704,7 +705,7 @@ def parse_context_diff(text):
                     j += 1
                     k += 1
                 elif kind == '-' or kind == '!':
-                    raise ValueError(msg + kind)
+                    raise exceptions.ParseException(msg + kind, hunk_n)
             continue
 
         # both

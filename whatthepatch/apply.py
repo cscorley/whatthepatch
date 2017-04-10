@@ -2,7 +2,7 @@
 
 import subprocess
 
-from . import patch
+from . import patch, exceptions
 from .snippets import which, remove
 
 
@@ -25,6 +25,53 @@ def apply_patch(diffs):
             f.write(new_text)
 
 
+def _apply_diff_with_subprocess(diff, lines):
+    # call out to patch program
+    patchexec = which('patch')
+    if not patchexec:
+        raise exceptions.ApplyException('patch program does not exist')
+
+    filepath = '/tmp/wtp-' + str(hash(diff.header))
+    oldfilepath = filepath + '.old'
+    newfilepath = filepath + '.new'
+    rejfilepath = filepath + '.rej'
+    patchfilepath = filepath + '.patch'
+    with open(oldfilepath, 'w') as f:
+        f.write('\n'.join(lines) + '\n')
+
+    with open(patchfilepath, 'w') as f:
+        f.write(diff.text)
+
+    args = [patchexec,
+            '--quiet',
+            '-o', newfilepath,
+            '-i', patchfilepath,
+            '-r', rejfilepath,
+            oldfilepath
+            ]
+    ret = subprocess.call(args)
+
+    with open(newfilepath) as f:
+        lines = f.read().splitlines()
+
+    try:
+        with open(rejfilepath) as f:
+            rejlines = f.read().splitlines()
+    except IOError:
+        rejlines = None
+
+    remove(oldfilepath)
+    remove(newfilepath)
+    remove(rejfilepath)
+    remove(patchfilepath)
+
+    # do this last to ensure files get cleaned up
+    if ret != 0:
+        raise exceptions.ApplyException('patch program failed')
+
+    return lines, rejlines
+
+
 def apply_diff(diff, text, use_patch=False):
     try:
         lines = text.splitlines()
@@ -32,55 +79,28 @@ def apply_diff(diff, text, use_patch=False):
         lines = list(text)
 
     if use_patch:
-        # call out to patch program
-        patchexec = which('patch')
-        assert patchexec  # patch program does not exist
+        return _apply_diff_with_subprocess(diff, lines)
 
-        filepath = '/tmp/wtp-' + str(hash(diff.header))
-        oldfilepath = filepath + '.old'
-        newfilepath = filepath + '.new'
-        rejfilepath = filepath + '.rej'
-        patchfilepath = filepath + '.patch'
-        with open(oldfilepath, 'w') as f:
-            f.write('\n'.join(lines) + '\n')
-
-        with open(patchfilepath, 'w') as f:
-            f.write(diff.text)
-
-        args = [patchexec,
-                '--quiet',
-                '-o', newfilepath,
-                '-i', patchfilepath,
-                '-r', rejfilepath,
-                oldfilepath
-                ]
-        ret = subprocess.call(args)
-
-        with open(newfilepath) as f:
-            lines = f.read().splitlines()
-
-        try:
-            with open(rejfilepath) as f:
-                rejlines = f.read().splitlines()
-        except IOError:
-            rejlines = None
-
-        remove(oldfilepath)
-        remove(newfilepath)
-        remove(rejfilepath)
-        remove(patchfilepath)
-
-        # do this last to ensure files get cleaned up
-        assert ret == 0  # patch return code is success
-
-        return lines, rejlines
-
+    n_lines = len(lines)
     # check that the source text matches the context of the diff
     for old, new, line in diff.changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
-            assert len(lines) >= old
-            assert lines[old-1] == line
+            if old > n_lines:
+                raise exceptions.ApplyException(
+                    'context line {n}, "{l}" does not exist in source'.format(
+                        n=old,
+                        l=line,
+                    )
+                )
+            if lines[old-1] != line:
+                raise exceptions.ApplyException(
+                    'context line {n}, "{l}" does not match "{sl}"'.format(
+                        n=old,
+                        l=line,
+                        sl=lines[old-1]
+                    )
+                )
 
     # for calculating the old line
     r = 0
