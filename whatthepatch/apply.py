@@ -83,7 +83,7 @@ def apply_diff(diff, text, use_patch=False):
 
     n_lines = len(lines)
     # check that the source text matches the context of the diff
-    for old, new, line in diff.changes:
+    for old, new, hunk, line in diff.changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
             if old > n_lines:
@@ -91,7 +91,8 @@ def apply_diff(diff, text, use_patch=False):
                     'context line {n}, "{l}" does not exist in source'.format(
                         n=old,
                         l=line,
-                    )
+                    ),
+                    hunk=hunk,
                 )
             if lines[old-1] != line:
                 raise exceptions.ApplyException(
@@ -99,14 +100,15 @@ def apply_diff(diff, text, use_patch=False):
                         n=old,
                         l=line,
                         sl=lines[old-1]
-                    )
+                    ),
+                    hunk=hunk,
                 )
 
     # for calculating the old line
     r = 0
     i = 0
 
-    for old, new, line in diff.changes:
+    for old, new, hunk, line in diff.changes:
         if old is not None and new is None:
             del lines[old-1-r+i]
             r += 1
