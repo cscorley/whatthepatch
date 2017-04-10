@@ -29,7 +29,7 @@ def _apply_diff_with_subprocess(diff, lines):
     # call out to patch program
     patchexec = which('patch')
     if not patchexec:
-        raise exceptions.ApplyException('patch program does not exist')
+        raise exceptions.SubprocessException('patch program does not exist')
 
     filepath = '/tmp/wtp-' + str(hash(diff.header))
     oldfilepath = filepath + '.old'
@@ -67,7 +67,7 @@ def _apply_diff_with_subprocess(diff, lines):
 
     # do this last to ensure files get cleaned up
     if ret != 0:
-        raise exceptions.ApplyException('patch program failed')
+        raise exceptions.SubprocessException('patch program failed', code=ret)
 
     return lines, rejlines
 
@@ -87,7 +87,7 @@ def apply_diff(diff, text, use_patch=False):
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
             if old > n_lines:
-                raise exceptions.ApplyException(
+                raise exceptions.HunkApplyException(
                     'context line {n}, "{l}" does not exist in source'.format(
                         n=old,
                         l=line,
@@ -95,7 +95,7 @@ def apply_diff(diff, text, use_patch=False):
                     hunk=hunk,
                 )
             if lines[old-1] != line:
-                raise exceptions.ApplyException(
+                raise exceptions.HunkApplyException(
                     'context line {n}, "{l}" does not match "{sl}"'.format(
                         n=old,
                         l=line,

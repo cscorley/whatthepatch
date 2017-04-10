@@ -14,7 +14,17 @@ class HunkException(WhatThePatchException):
             super(HunkException, self).__init__(msg)
 
 
-class ApplyException(HunkException):
+class ApplyException(WhatThePatchException):
+    pass
+
+
+class SubprocessException(ApplyException):
+    def __init__(self, msg, code):
+        super(SubprocessException, self).__init__(msg)
+        self.code = code
+
+
+class HunkApplyException(HunkException, ApplyException, ValueError):
     pass
 
 
