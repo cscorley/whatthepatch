@@ -52,7 +52,9 @@ bzr_header_old_line = unified_header_old_line
 bzr_header_new_line = unified_header_new_line
 
 svn_header_index = unified_header_index
-svn_header_timestamp_version = re.compile('\((?:working copy|revision (\d+))\)')
+svn_header_timestamp_version = re.compile(
+    '\((?:working copy|revision (\d+))\)'
+)
 svn_header_timestamp = re.compile('.*(\(.*\))$')
 
 cvs_header_index = unified_header_index
@@ -242,57 +244,61 @@ def parse_svn_header(text):
     while len(lines) > 0:
         i = svn_header_index.match(lines[0])
         del lines[0]
-        if i:
-            diff_header = parse_diff_header(lines)
-            if diff_header:
-                opath = diff_header.old_path
-                over = diff_header.old_version
-                if over:
-                    oend = svn_header_timestamp_version.match(over)
-                    if oend and oend.group(1):
-                        over = int(oend.group(1))
-                elif opath:
-                    ts = svn_header_timestamp.match(opath)
-                    if ts:
-                        opath = opath[:-len(ts.group(1))]
-                        oend = svn_header_timestamp_version.match(ts.group(1))
-                        if oend and oend.group(1):
-                            over = int(oend.group(1))
+        if not i:
+            continue
 
-                npath = diff_header.new_path
-                nver = diff_header.new_version
-                if nver:
-                    nend = svn_header_timestamp_version.match(diff_header.new_version)
-                    if nend and nend.group(1):
-                        nver = int(nend.group(1))
-                elif npath:
-                    ts = svn_header_timestamp.match(npath)
-                    if ts:
-                        npath = npath[:-len(ts.group(1))]
-                        nend = svn_header_timestamp_version.match(ts.group(1))
-                        if nend and nend.group(1):
-                            nver = int(nend.group(1))
-
-                if type(over) != int:
-                    over = None
-
-                if type(nver) != int:
-                    nver = None
-
-                return header(
-                        index_path = i.group(1),
-                        old_path = opath,
-                        old_version = over,
-                        new_path = npath,
-                        new_version = nver,
-                        )
+        diff_header = parse_diff_header(lines)
+        if not diff_header:
             return header(
-                    index_path = i.group(1),
-                    old_path = i.group(1),
-                    old_version = None,
-                    new_path = i.group(1),
-                    new_version = None,
-                    )
+                index_path = i.group(1),
+                old_path = i.group(1),
+                old_version = None,
+                new_path = i.group(1),
+                new_version = None,
+            )
+
+        opath = diff_header.old_path
+        over = diff_header.old_version
+        if over:
+            oend = svn_header_timestamp_version.match(over)
+            if oend and oend.group(1):
+                over = int(oend.group(1))
+        elif opath:
+            ts = svn_header_timestamp.match(opath)
+            if ts:
+                opath = opath[:-len(ts.group(1))]
+                oend = svn_header_timestamp_version.match(ts.group(1))
+                if oend and oend.group(1):
+                    over = int(oend.group(1))
+
+        npath = diff_header.new_path
+        nver = diff_header.new_version
+        if nver:
+            nend = svn_header_timestamp_version.match(diff_header.new_version)
+            if nend and nend.group(1):
+                nver = int(nend.group(1))
+        elif npath:
+            ts = svn_header_timestamp.match(npath)
+            if ts:
+                npath = npath[:-len(ts.group(1))]
+                nend = svn_header_timestamp_version.match(ts.group(1))
+                if nend and nend.group(1):
+                    nver = int(nend.group(1))
+
+        if type(over) != int:
+            over = None
+
+        if type(nver) != int:
+            nver = None
+
+        return header(
+            index_path = i.group(1),
+            old_path = opath,
+            old_version = over,
+            new_path = npath,
+            new_version = nver,
+        )
+
 
     return None
 
@@ -310,72 +316,72 @@ def parse_cvs_header(text):
         while len(lines) > 0:
             i = cvs_header_index.match(lines[0])
             del lines[0]
-            if i:
-                diff_header = parse_diff_header(lines)
-                if diff_header:
-                    over = diff_header.old_version
-                    if over:
-                        oend = cvs_header_timestamp.match(over)
-                        oend_c = cvs_header_timestamp_colon.match(over)
-                        if oend:
-                            over = oend.group(2)
-                        elif oend_c:
-                            over = oend_c.group(1)
+            if not i:
+                continue
 
-                    nver = diff_header.new_version
-                    if nver:
-                        nend = cvs_header_timestamp.match(nver)
-                        nend_c = cvs_header_timestamp_colon.match(nver)
-                        if nend:
-                            nver = nend.group(2)
-                        elif nend_c:
-                            nver = nend_c.group(1)
+            diff_header = parse_diff_header(lines)
+            if diff_header:
+                over = diff_header.old_version
+                if over:
+                    oend = cvs_header_timestamp.match(over)
+                    oend_c = cvs_header_timestamp_colon.match(over)
+                    if oend:
+                        over = oend.group(2)
+                    elif oend_c:
+                        over = oend_c.group(1)
 
-                    return header(
-                            index_path = i.group(1),
-                            old_path = diff_header.old_path,
-                            old_version = over,
-                            new_path = diff_header.new_path,
-                            new_version = nver,
-                            )
+                nver = diff_header.new_version
+                if nver:
+                    nend = cvs_header_timestamp.match(nver)
+                    nend_c = cvs_header_timestamp_colon.match(nver)
+                    if nend:
+                        nver = nend.group(2)
+                    elif nend_c:
+                        nver = nend_c.group(1)
+
                 return header(
-                        index_path = i.group(1),
-                        old_path = i.group(1),
-                        old_version = None,
-                        new_path = i.group(1),
-                        new_version = None,
-                        )
+                    index_path = i.group(1),
+                    old_path = diff_header.old_path,
+                    old_version = over,
+                    new_path = diff_header.new_path,
+                    new_version = nver,
+                )
+            return header(
+                index_path = i.group(1),
+                old_path = i.group(1),
+                old_version = None,
+                new_path = i.group(1),
+                new_version = None,
+            )
     elif headers_old:
         # parse old style headers
         while len(lines) > 0:
             i = cvs_header_index.match(lines[0])
             del lines[0]
-            if i:
-                d = old_cvs_diffcmd_header.match(lines[0])
-                if d:
-                    _ = parse_diff_header(lines) # will get rid of the useless stuff for us
-                    over = d.group(2)
-                    if not over:
-                        over = None
+            if not i:
+                continue
 
-                    nver = d.group(4)
-                    if not nver:
-                        nver = None
-                    return header(
-                            index_path = i.group(1),
-                            old_path = d.group(1),
-                            old_version = over,
-                            new_path = d.group(3),
-                            new_version = nver,
-                            )
-
+            d = old_cvs_diffcmd_header.match(lines[0])
+            if not d:
                 return header(
                         index_path = i.group(1),
                         old_path = i.group(1),
                         old_version = None,
                         new_path = i.group(1),
                         new_version = None,
-                        )
+                )
+
+            # will get rid of the useless stuff for us
+            _ = parse_diff_header(lines)
+            over = d.group(2) if d.group(2) else None
+            nver = d.group(4) if d.group(4) else None
+            return header(
+                index_path = i.group(1),
+                old_path = d.group(1),
+                old_version = over,
+                new_path = d.group(3),
+                new_version = nver,
+            )
 
     return None
 
@@ -426,17 +432,18 @@ def parse_unified_header(text):
 
                 nver = n.group(2)
                 if len(nver) == 0:
-                    never = None
+                    nver = None
 
                 return header(
-                        index_path = None,
-                        old_path = o.group(1),
-                        old_version = over,
-                        new_path = n.group(1),
-                        new_version = nver,
-                        )
+                    index_path=None,
+                    old_path=o.group(1),
+                    old_version=over,
+                    new_path=n.group(1),
+                    new_version=nver,
+                )
 
     return None
+
 
 def parse_context_header(text):
     try:
@@ -461,15 +468,15 @@ def parse_context_header(text):
 
                 nver = n.group(2)
                 if len(nver) == 0:
-                    never = None
+                    nver = None
 
                 return header(
-                        index_path = None,
-                        old_path = o.group(1),
-                        old_version = over,
-                        new_path = n.group(1),
-                        new_version = nver,
-                        )
+                    index_path=None,
+                    old_path=o.group(1),
+                    old_version=over,
+                    new_path=n.group(1),
+                    new_version=nver,
+                )
 
     return None
 
@@ -511,7 +518,6 @@ def parse_default_diff(text):
                     else:
                         new_len = 0
 
-                    hunk_kind = h.group(3)
                 elif c:
                     kind = c.group(1)
                     line = c.group(2)
@@ -527,6 +533,7 @@ def parse_default_diff(text):
         return changes
 
     return None
+
 
 def parse_unified_diff(text):
     try:
@@ -591,7 +598,6 @@ def parse_unified_diff(text):
     return None
 
 
-
 def parse_context_diff(text):
     try:
         lines = text.splitlines()
@@ -604,111 +610,128 @@ def parse_context_diff(text):
     k = 0
 
     changes = list()
-    old_lines = list()
-    new_lines = list()
 
     hunks = split_by_regex(lines, context_hunk_start)
     for hunk in hunks:
-        if len(hunk):
-            j = 0
-            k = 0
-            parts = split_by_regex(hunk, context_hunk_new)
-            if len(parts) != 2:
-                raise ValueError("Context diff invalid")
+        if not len(hunk):
+            continue
 
-            old_hunk = parts[0]
-            new_hunk = parts[1]
+        j = 0
+        k = 0
+        parts = split_by_regex(hunk, context_hunk_new)
+        if len(parts) != 2:
+            raise ValueError("Context diff invalid")
 
+        old_hunk = parts[0]
+        new_hunk = parts[1]
+
+        while len(old_hunk) > 0:
+            o = context_hunk_old.match(old_hunk[0])
+            del old_hunk[0]
+
+            if not o:
+                continue
+
+            old = int(o.group(1))
+            old_len = int(o.group(2)) + 1 - old
+            while len(new_hunk) > 0:
+                n = context_hunk_new.match(new_hunk[0])
+                del new_hunk[0]
+
+                if not n:
+                    continue
+
+                new = int(n.group(1))
+                new_len = int(n.group(2)) + 1 - new
+                break
+            break
+
+        # now have old and new set, can start processing?
+        if len(old_hunk) > 0 and len(new_hunk) == 0:
+            msg = "Got unexpected change in removal hunk: "
+            # only removes left?
             while len(old_hunk) > 0:
-                o = context_hunk_old.match(old_hunk[0])
+                c = context_change.match(old_hunk[0])
                 del old_hunk[0]
-                if o:
-                    old = int(o.group(1))
-                    old_len = int(o.group(2)) + 1 - old
-                    while len(new_hunk) > 0:
-                        n = context_hunk_new.match(new_hunk[0])
-                        del new_hunk[0]
-                        if n:
-                            new = int(n.group(1))
-                            new_len = int(n.group(2)) + 1 - new
-                            break
-                    break
 
-            # now have old and new set, can start processing?
-            if len(old_hunk) > 0 and len(new_hunk) == 0:
-                # only removes left?
-                while len(old_hunk) > 0:
-                    c = context_change.match(old_hunk[0])
-                    del old_hunk[0]
-                    if c:
-                        kind = c.group(1)
-                        line = c.group(2)
+                if not c:
+                    continue
 
-                        if kind == '-' and (j != old_len or j == 0):
-                            changes.append((old + j, None, line))
-                            j += 1
-                        elif kind == ' ' and ((j != old_len and k != new_len)
-                                              or (j == 0 or k == 0)):
-                            changes.append((old + j, new + k, line))
-                            j += 1
-                            k += 1
-                        elif kind == '+' or kind == '!':
-                            raise ValueError("Got unexpected change in removal hunk: " + kind)
+                kind = c.group(1)
+                line = c.group(2)
 
-            elif len(old_hunk) == 0 and len(new_hunk) > 0:
-                # only insertions left?
-                while len(new_hunk) > 0:
-                    c = context_change.match(new_hunk[0])
-                    del new_hunk[0]
-                    if c:
-                        kind = c.group(1)
-                        line = c.group(2)
+                if kind == '-' and (j != old_len or j == 0):
+                    changes.append((old + j, None, line))
+                    j += 1
+                elif kind == ' ' and ((j != old_len and k != new_len)
+                                      or (j == 0 or k == 0)):
+                    changes.append((old + j, new + k, line))
+                    j += 1
+                    k += 1
+                elif kind == '+' or kind == '!':
+                    raise ValueError(msg + kind)
 
-                        if kind == '+' and (k != new_len or k == 0):
-                            changes.append((None, new + k, line))
-                            k += 1
-                        elif kind == ' ' and ((j != old_len and k != new_len)
-                                              or (j == 0 or k == 0)):
-                            changes.append((old + j, new + k, line))
-                            j += 1
-                            k += 1
-                        elif kind == '-' or kind == '!':
-                            raise ValueError("Got unexpected change in insertion hunk: " + kind)
+            continue
+
+        if len(old_hunk) == 0 and len(new_hunk) > 0:
+            msg = "Got unexpected change in removal hunk: "
+            # only insertions left?
+            while len(new_hunk) > 0:
+                c = context_change.match(new_hunk[0])
+                del new_hunk[0]
+
+                if not c:
+                    continue
+
+                kind = c.group(1)
+                line = c.group(2)
+
+                if kind == '+' and (k != new_len or k == 0):
+                    changes.append((None, new + k, line))
+                    k += 1
+                elif kind == ' ' and ((j != old_len and k != new_len)
+                                      or (j == 0 or k == 0)):
+                    changes.append((old + j, new + k, line))
+                    j += 1
+                    k += 1
+                elif kind == '-' or kind == '!':
+                    raise ValueError(msg + kind)
+            continue
+
+        # both
+        while len(old_hunk) > 0 and len(new_hunk) > 0:
+            oc = context_change.match(old_hunk[0])
+            nc = context_change.match(new_hunk[0])
+            okind = None
+            nkind = None
+
+            if oc:
+                okind = oc.group(1)
+                oline = oc.group(2)
+
+            if nc:
+                nkind = nc.group(1)
+                nline = nc.group(2)
+
+            if not (oc or nc):
+                del old_hunk[0]
+                del new_hunk[0]
+            elif okind == ' ' and nkind == ' ' and oline == nline:
+                changes.append((old + j, new + k, oline))
+                j += 1
+                k += 1
+                del old_hunk[0]
+                del new_hunk[0]
+            elif okind == '-' or okind == '!' and (j != old_len or j == 0):
+                changes.append((old + j, None, oline))
+                j += 1
+                del old_hunk[0]
+            elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
+                changes.append((None, new + k, nline))
+                k += 1
+                del new_hunk[0]
             else:
-                # both
-                while len(old_hunk) > 0 and len(new_hunk) > 0:
-                    oc = context_change.match(old_hunk[0])
-                    nc = context_change.match(new_hunk[0])
-                    okind = None
-                    nkind = None
-
-                    if oc:
-                        okind = oc.group(1)
-                        oline = oc.group(2)
-
-                    if nc:
-                        nkind = nc.group(1)
-                        nline = nc.group(2)
-
-                    if not (oc or nc):
-                        del old_hunk[0]
-                        del new_hunk[0]
-                    elif okind == ' ' and nkind == ' ' and oline == nline:
-                        changes.append((old + j, new + k, oline))
-                        j += 1
-                        k += 1
-                        del old_hunk[0]
-                        del new_hunk[0]
-                    elif okind == '-' or okind == '!' and (j != old_len or j == 0):
-                        changes.append((old + j, None, oline))
-                        j += 1
-                        del old_hunk[0]
-                    elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
-                        changes.append((None, new + k, nline))
-                        k += 1
-                        del new_hunk[0]
-                    else:
-                        return None
+                return None
 
     if len(changes) > 0:
         return changes
@@ -723,7 +746,6 @@ def parse_ed_diff(text):
         lines = text
 
     old = 0
-    new = 0
     j = 0
     k = 0
 
@@ -735,57 +757,56 @@ def parse_ed_diff(text):
     hunks = split_by_regex(lines, ed_hunk_start)
     hunks.reverse()
     for hunk in hunks:
-        if len(hunk):
-            j = 0
-            k = 0
+        if not len(hunk):
+            continue
+        j = 0
+        k = 0
+        while len(hunk) > 0:
+            o = ed_hunk_start.match(hunk[0])
+            del hunk[0]
+
+            if not o:
+                continue
+
+            old = int(o.group(1))
+            old_end = int(o.group(2)) if len(o.group(2)) else old
+
+            hunk_kind = o.group(3)
+            if hunk_kind == 'd':
+                k = 0
+                while old_end >= old:
+                    changes.append((old + k, None, None))
+                    r += 1
+                    k += 1
+                    old_end -= 1
+                continue
+
             while len(hunk) > 0:
-                o = ed_hunk_start.match(hunk[0])
+                e = ed_hunk_end.match(hunk[0])
+                if not e and hunk_kind == 'c':
+                    k = 0
+                    while old_end >= old:
+                        changes.append((old + k, None, None))
+                        r += 1
+                        k += 1
+                        old_end -= 1
+
+                    # I basically have no idea why this works
+                    # for these tests.
+                    changes.append((None, old - r + i + k + j, hunk[0]))
+                    i += 1
+                    j += 1
+                if not e and hunk_kind == 'a':
+                    changes.append((None, old - r + i + 1, hunk[0]))
+                    i += 1
+
                 del hunk[0]
-                if o:
-                    old = int(o.group(1))
-                    if len(o.group(2)):
-                        old_end = int(o.group(2))
-                    else:
-                        old_end = old
-
-                    hunk_kind = o.group(3)
-                    if hunk_kind == 'd':
-                        k = 0
-                        while old_end >= old:
-                            changes.append((old + k, None, None))
-                            r += 1
-                            k += 1
-                            old_end -= 1
-                    else:
-                        while len(hunk) > 0:
-                            e = ed_hunk_end.match(hunk[0])
-                            if e:
-                                pass
-                            elif hunk_kind == 'c':
-                                k = 0
-                                while old_end >= old:
-                                    changes.append((old + k, None, None))
-                                    r += 1
-                                    k += 1
-                                    old_end -= 1
-
-                                # I basically have no idea why this works
-                                # for these tests.
-                                changes.append((None, old - r + i + k + j, hunk[0]))
-                                i += 1
-                                j += 1
-                            elif hunk_kind == 'a':
-                                changes.append((None, old - r + i + 1, hunk[0]))
-                                i += 1
-
-                            del hunk[0]
-
-
 
     if len(changes) > 0:
         return changes
 
     return None
+
 
 def parse_rcs_ed_diff(text):
     # much like forward ed, but no 'c' type
@@ -795,13 +816,11 @@ def parse_rcs_ed_diff(text):
         lines = text
 
     old = 0
-    new = 0
     j = 0
     size = 0
     total_change_size = 0
 
     changes = list()
-
 
     hunks = split_by_regex(lines, rcs_ed_hunk_start)
     for hunk in hunks:
@@ -810,28 +829,30 @@ def parse_rcs_ed_diff(text):
             while len(hunk) > 0:
                 o = rcs_ed_hunk_start.match(hunk[0])
                 del hunk[0]
-                if o:
-                    hunk_kind = o.group(1)
-                    old = int(o.group(2))
-                    size = int(o.group(3))
 
+                if not o:
+                    continue
 
-                    if hunk_kind == 'a':
-                        old += total_change_size + 1
-                        total_change_size += size
-                        while size > 0 and len(hunk) > 0:
-                            changes.append((None, old + j, hunk[0]))
-                            j += 1
-                            size -= 1
+                hunk_kind = o.group(1)
+                old = int(o.group(2))
+                size = int(o.group(3))
 
-                            del hunk[0]
+                if hunk_kind == 'a':
+                    old += total_change_size + 1
+                    total_change_size += size
+                    while size > 0 and len(hunk) > 0:
+                        changes.append((None, old + j, hunk[0]))
+                        j += 1
+                        size -= 1
 
-                    elif hunk_kind == 'd':
-                        total_change_size -= size
-                        while size > 0:
-                            changes.append((old + j, None, None))
-                            j += 1
-                            size -= 1
+                        del hunk[0]
+
+                elif hunk_kind == 'd':
+                    total_change_size -= size
+                    while size > 0:
+                        changes.append((old + j, None, None))
+                        j += 1
+                        size -= 1
 
     if len(changes) > 0:
         return changes
