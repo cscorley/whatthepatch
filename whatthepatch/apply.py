@@ -25,7 +25,7 @@ def apply_patch(diffs):
             f.write(new_text)
 
 
-def _apply_diff_with_subprocess(diff, lines):
+def _apply_diff_with_subprocess(diff, lines, reverse=False):
     # call out to patch program
     patchexec = which('patch')
     if not patchexec:
@@ -43,6 +43,7 @@ def _apply_diff_with_subprocess(diff, lines):
         f.write(diff.text)
 
     args = [patchexec,
+            '--reverse' if reverse else '--forward',
             '--quiet',
             '-o', newfilepath,
             '-i', patchfilepath,
@@ -72,18 +73,30 @@ def _apply_diff_with_subprocess(diff, lines):
     return lines, rejlines
 
 
-def apply_diff(diff, text, use_patch=False):
+def _reverse(changes):
+    def _reverse_change(c):
+        return c._replace(
+            old=c.new,
+            new=c.old,
+        )
+
+    return [_reverse_change(c) for c in changes]
+
+
+def apply_diff(diff, text, reverse=False, use_patch=False):
     try:
         lines = text.splitlines()
     except AttributeError:
         lines = list(text)
 
     if use_patch:
-        return _apply_diff_with_subprocess(diff, lines)
+        return _apply_diff_with_subprocess(diff, lines, reverse)
 
     n_lines = len(lines)
+
+    changes = _reverse(diff.changes) if reverse else diff.changes
     # check that the source text matches the context of the diff
-    for old, new, hunk, line in diff.changes:
+    for old, new, hunk, line in changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
             if old > n_lines:
@@ -108,7 +121,7 @@ def apply_diff(diff, text, use_patch=False):
     r = 0
     i = 0
 
-    for old, new, hunk, line in diff.changes:
+    for old, new, hunk, line in changes:
         if old is not None and new is None:
             del lines[old-1-r+i]
             r += 1

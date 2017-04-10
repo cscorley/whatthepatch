@@ -7,6 +7,15 @@ from nose.tools import assert_raises
 import unittest
 
 
+def _apply(src, diff_text, reverse=False, use_patch=False):
+    diff = next(wtp.parse_patch(diff_text))
+    return wtp.apply.apply_diff(diff, src, reverse, use_patch)
+
+
+def _apply_r(src, diff_text, reverse=True, use_patch=False):
+    return _apply(src, diff_text, reverse, use_patch)
+
+
 class ApplyTestSuite(unittest.TestCase):
     """Basic test cases."""
 
@@ -27,38 +36,29 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-default.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
-        new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEqual(new_text, self.tzu)
+        self.assertEqual(_apply(self.lao, diff_text), self.tzu)
+        self.assertEqual(_apply_r(self.tzu, diff_text), self.lao)
 
     def test_diff_context(self):
         with open('tests/casefiles/diff-context.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
-        new_text = wtp.apply.apply_diff(diff, self.lao)
-        self.assertEqual(new_text, self.tzu)
+        self.assertEqual(_apply(self.lao, diff_text), self.tzu)
+        self.assertEqual(_apply_r(self.tzu, diff_text), self.lao)
 
     def test_diff_unified(self):
         with open('tests/casefiles/diff-unified.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
-        new_text = wtp.apply.apply_diff(diff, self.lao)
-
-        self.assertEqual(new_text, self.tzu)
+        self.assertEqual(_apply(self.lao, diff_text), self.tzu)
+        self.assertEqual(_apply_r(self.tzu, diff_text), self.lao)
 
     def test_diff_unified_bad(self):
         with open('tests/casefiles/diff-unified-bad.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
         with assert_raises(exceptions.ApplyException) as ec:
-            wtp.apply.apply_diff(diff, self.lao)
+            _apply(self.lao, diff_text)
 
         e = ec.exception
         e_str = str(e)
@@ -71,10 +71,8 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified-bad2.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
         with assert_raises(exceptions.ApplyException) as ec:
-            wtp.apply.apply_diff(diff, self.lao)
+            _apply(self.lao, diff_text)
 
         e = ec.exception
         e_str = str(e)
@@ -87,10 +85,8 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified-bad2.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
         with assert_raises(exceptions.ApplyException) as ec:
-            wtp.apply.apply_diff(diff, self.tzu)
+            _apply(self.tzu, diff_text)
 
         e = ec.exception
         e_str = str(e)
@@ -103,10 +99,8 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified-bad2.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
         with assert_raises(exceptions.ApplyException) as ec:
-            wtp.apply.apply_diff(diff, '')
+            _apply('', diff_text)
 
         e = ec.exception
         e_str = str(e)
@@ -119,39 +113,42 @@ class ApplyTestSuite(unittest.TestCase):
         with open('tests/casefiles/diff-unified.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
+        self.assertEqual(
+            _apply(self.lao, diff_text, use_patch=True),
+            (self.tzu, None),
+        )
+        self.assertEqual(
+            _apply_r(self.tzu, diff_text, use_patch=True),
+            (self.lao, None),
+        )
 
-        new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
+        new_text = _apply(self.lao, diff_text, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
+
+        def _do_apply():
+            return _apply([''] + self.lao, diff_text, use_patch=True)
 
         self.assertRaises(
             exceptions.ApplyException,
-            wtp.apply.apply_diff,
-            diff,
-            [''] + self.lao,
-            use_patch=True,
+            _do_apply,
         )
 
     def test_diff_rcs(self):
         with open('tests/casefiles/diff-rcs.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
+        new_text = _apply(self.lao, diff_text)
 
-        new_text = wtp.apply.apply_diff(diff, self.lao)
         self.assertEqual(new_text, self.tzu)
 
     def test_diff_ed(self):
-        self.maxDiff = None
         with open('tests/casefiles/diff-ed.diff') as f:
             diff_text = f.read()
 
-        diff = next(wtp.parse_patch(diff_text))
-
-        new_text = wtp.apply.apply_diff(diff, self.lao)
+        new_text = _apply(self.lao, diff_text)
         self.assertEqual(self.tzu, new_text)
 
-        new_text = wtp.apply.apply_diff(diff, self.lao, use_patch=True)
+        new_text = _apply(self.lao, diff_text, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
 
 
