@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import whatthepatch as wtp
+from whatthepatch import exceptions
 
 
 import unittest
@@ -60,7 +61,7 @@ class ApplyTestSuite(unittest.TestCase):
         self.assertEqual(new_text, (self.tzu, None))
 
         self.assertRaises(
-            AssertionError,
+            exceptions.ApplyException,
             wtp.apply.apply_diff,
             diff,
             [''] + self.lao,
