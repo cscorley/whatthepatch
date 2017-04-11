@@ -94,7 +94,8 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
 
     n_lines = len(lines)
 
-    changes = _reverse(diff.changes) if reverse else diff.changes
+    changes = diff.changes or []
+    changes = _reverse(changes) if reverse else changes
     # check that the source text matches the context of the diff
     for old, new, hunk, line in changes:
         # might have to check for line is None here for ed scripts
