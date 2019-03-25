@@ -27,6 +27,7 @@ def make_dir(dir):
         else:
             raise e
 
+
 def remove(path):
     if os.path.exists(path):
         if os.path.isdir(path):
@@ -34,12 +35,14 @@ def remove(path):
         else:
             os.remove(path)
 
+
 # file line length
 def file_len(fname):
     with open(fname) as f:
         for i, l in enumerate(f):
             pass
     return i + 1
+
 
 # find all indices of a list of strings that match a regex
 def findall_regex(l, r):
@@ -51,6 +54,7 @@ def findall_regex(l, r):
             k = None
 
     return found
+
 
 def split_by_regex(l, r):
     splits = list()
@@ -67,6 +71,7 @@ def split_by_regex(l, r):
     splits.append(l[k:])
 
     return splits
+
 
 # http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 def which(program):

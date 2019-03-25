@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import re
 import subprocess
 
-from . import patch
+from . import patch, exceptions
 from .snippets import which, remove
+
 
 def apply_patch(diffs):
     """ Not ready for use yet """
@@ -24,69 +24,104 @@ def apply_patch(diffs):
         with open(diff.header.new_path, 'w') as f:
             f.write(new_text)
 
-def apply_diff(diff, text, use_patch=False):
+
+def _apply_diff_with_subprocess(diff, lines, reverse=False):
+    # call out to patch program
+    patchexec = which('patch')
+    if not patchexec:
+        raise exceptions.SubprocessException('patch program does not exist')
+
+    filepath = '/tmp/wtp-' + str(hash(diff.header))
+    oldfilepath = filepath + '.old'
+    newfilepath = filepath + '.new'
+    rejfilepath = filepath + '.rej'
+    patchfilepath = filepath + '.patch'
+    with open(oldfilepath, 'w') as f:
+        f.write('\n'.join(lines) + '\n')
+
+    with open(patchfilepath, 'w') as f:
+        f.write(diff.text)
+
+    args = [patchexec,
+            '--reverse' if reverse else '--forward',
+            '--quiet',
+            '-o', newfilepath,
+            '-i', patchfilepath,
+            '-r', rejfilepath,
+            oldfilepath
+            ]
+    ret = subprocess.call(args)
+
+    with open(newfilepath) as f:
+        lines = f.read().splitlines()
+
+    try:
+        with open(rejfilepath) as f:
+            rejlines = f.read().splitlines()
+    except IOError:
+        rejlines = None
+
+    remove(oldfilepath)
+    remove(newfilepath)
+    remove(rejfilepath)
+    remove(patchfilepath)
+
+    # do this last to ensure files get cleaned up
+    if ret != 0:
+        raise exceptions.SubprocessException('patch program failed', code=ret)
+
+    return lines, rejlines
+
+
+def _reverse(changes):
+    def _reverse_change(c):
+        return c._replace(
+            old=c.new,
+            new=c.old,
+        )
+
+    return [_reverse_change(c) for c in changes]
+
+
+def apply_diff(diff, text, reverse=False, use_patch=False):
     try:
         lines = text.splitlines()
     except AttributeError:
         lines = list(text)
 
     if use_patch:
-        # call out to patch program
-        patchexec = which('patch')
-        assert patchexec # patch program does not exist
+        return _apply_diff_with_subprocess(diff, lines, reverse)
 
-        filepath = '/tmp/wtp-' + str(hash(diff.header))
-        oldfilepath = filepath + '.old'
-        newfilepath = filepath + '.new'
-        rejfilepath = filepath + '.rej'
-        patchfilepath = filepath + '.patch'
-        with open(oldfilepath, 'w') as f:
-            f.write('\n'.join(lines) + '\n')
+    n_lines = len(lines)
 
-        with open(patchfilepath, 'w') as f:
-            f.write(diff.text)
-
-        args = [patchexec,
-                '--quiet',
-                '-o', newfilepath,
-                '-i', patchfilepath,
-                '-r', rejfilepath,
-                oldfilepath
-                ]
-        ret = subprocess.call(args)
-
-
-        with open(newfilepath) as f:
-            lines = f.read().splitlines()
-
-        try:
-            with open(rejfilepath) as f:
-                rejlines = f.read().splitlines()
-        except IOError:
-            rejlines = None
-
-        remove(oldfilepath)
-        remove(newfilepath)
-        remove(rejfilepath)
-        remove(patchfilepath)
-
-        # do this last to ensure files get cleaned up
-        assert ret == 0 # patch return code is success
-
-        return lines, rejlines
-
+    changes = _reverse(diff.changes) if reverse else diff.changes
     # check that the source text matches the context of the diff
-    for old, new, line in diff.changes:
+    for old, new, hunk, line in changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
-            assert len(lines) >= old
-            assert lines[old-1] == line
+            if old > n_lines:
+                raise exceptions.HunkApplyException(
+                    'context line {n}, "{l}" does not exist in source'.format(
+                        n=old,
+                        l=line,
+                    ),
+                    hunk=hunk,
+                )
+            if lines[old-1] != line:
+                raise exceptions.HunkApplyException(
+                    'context line {n}, "{l}" does not match "{sl}"'.format(
+                        n=old,
+                        l=line,
+                        sl=lines[old-1]
+                    ),
+                    hunk=hunk,
+                )
 
     # for calculating the old line
     r = 0
     i = 0
 
-    for old, new, line in diff.changes:
+    for old, new, hunk, line in changes:
         if old is not None and new is None:
             del lines[old-1-r+i]
             r += 1
@@ -95,13 +130,10 @@ def apply_diff(diff, text, use_patch=False):
             i += 1
         elif old is not None and new is not None:
             # are we crazy?
-            #assert new == old - r + i
+            # assert new == old - r + i
 
             # Sometimes, people remove hunks from patches, making these
             # numbers completely unreliable. Because they're jerks.
             pass
 
     return lines
-
-
-
