@@ -101,17 +101,15 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
         if old is not None and line is not None:
             if old > n_lines:
                 raise exceptions.HunkApplyException(
-                    'context line {n}, "{l}" does not exist in source'.format(
-                        n=old,
-                        l=line,
-                    ),
+                    'context line {n}, "{line}" does not exist in source'
+                    .format(n=old, line=line),
                     hunk=hunk,
                 )
             if lines[old-1] != line:
                 raise exceptions.HunkApplyException(
-                    'context line {n}, "{l}" does not match "{sl}"'.format(
+                    'context line {n}, "{line}" does not match "{sl}"'.format(
                         n=old,
-                        l=line,
+                        line=line,
                         sl=lines[old-1]
                     ),
                     hunk=hunk,
