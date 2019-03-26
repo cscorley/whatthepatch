@@ -200,7 +200,12 @@ def parse_git_header(text):
     except AttributeError:
         lines = text
 
-    old_version = new_version = old_path = new_path = cmd_old_path = cmd_new_path = None
+    old_version = None
+    new_version = None
+    old_path = None
+    new_path = None
+    cmd_old_path = None
+    cmd_new_path = None
     for line in lines:
         hm = git_diffcmd_header.match(line)
         if hm:
@@ -242,7 +247,8 @@ def parse_git_header(text):
                 new_version=new_version
             )
 
-    # if we go through all of the text without finding our normal info, use the cmd if available
+    # if we go through all of the text without finding our normal info,
+    # use the cmd if available
     if cmd_old_path and cmd_new_path and old_version and new_version:
         print("returning from dumb path")
         if cmd_old_path.startswith('a/'):
@@ -253,7 +259,8 @@ def parse_git_header(text):
 
         return header(
             index_path=None,
-            # wow, I kind of hate this: assume /dev/null if the versions are zeroed out
+            # wow, I kind of hate this:
+            # assume /dev/null if the versions are zeroed out
             old_path='/dev/null' if old_version == '0000000' else cmd_old_path,
             old_version=old_version,
             new_path='/dev/null' if new_version == '0000000' else cmd_new_path,
