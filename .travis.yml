@@ -1,29 +1,27 @@
 sudo: false
 language: python
-python: "3.5"
 matrix:
   include:
     - python: 3.4
       env: TOX_ENV=py34
-  include:
+
     - python: 3.5
       env: TOX_ENV=py35
-  include:
+
     - python: 3.6
       env: TOX_ENV=py36
-  include:
+
     - python: 3.7
       env: TOX_ENV=py37
-  include:
     - python: 3.7
       env: TOX_ENV=lint
-  include:
+
     - python: 2.7
       env: TOX_ENV=py27
 addons:
-    apt:
-        packages:
-            - ed
+  apt:
+    packages:
+      - ed
 install: pip install tox
 script: tox -e $TOX_ENV
 cache: pip
