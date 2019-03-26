@@ -87,7 +87,8 @@ each diff in the patch:
                   Change(old=3, new=1, hunk=1, line='The Nameless is the origin of Heaven and Earth;'),
                   Change(old=4, new=None, hunk=1, line='The Named is the mother of all things.'),
                   Change(old=None, new=2, hunk=1, line='The named is the mother of all things.'),
-                  Change(old=None, new=3, hunk=1, line=''), Change(old=5, new=4, hunk=1, line='Therefore let there always be non-being,'),
+                  Change(old=None, new=3, hunk=1, line=''),
+                  Change(old=5, new=4, hunk=1, line='Therefore let there always be non-being,'),
                   Change(old=6, new=5, hunk=1, line='  so we may see their subtlety,'),
                   Change(old=7, new=6, hunk=1, line='And let there always be being,'),
                   Change(old=9, new=8, hunk=2, line='The two are the same,'),
@@ -106,7 +107,7 @@ What these numbers indicate are as follows:
 #. ``( old=None, new=2, ... )`` indicates line 2 of the file tzu was **inserted**.
 #. ``( old=5, new=4, ... )`` indicates that line 5 of lao and line 4 of tzu are **equal**.
 
-Please note that not all patch formats provide the actual lines modified, so some 
+Please note that not all patch formats provide the actual lines modified, so some
 results will have the text portion of the tuple set to ``None``.
 
 Applying
