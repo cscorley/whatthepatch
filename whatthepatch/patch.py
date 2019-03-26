@@ -20,24 +20,24 @@ file_timestamp_str = '(.+?)(?:\t|:|  +)(.*)'
 # general diff regex
 diffcmd_header = re.compile('^diff.* (.+) (.+)$')
 unified_header_index = re.compile('^Index: (.+)$')
-unified_header_old_line = re.compile('^--- ' + file_timestamp_str + '$')
-unified_header_new_line = re.compile('^\+\+\+ ' + file_timestamp_str + '$')
-unified_hunk_start = re.compile('^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)$')
+unified_header_old_line = re.compile(r'^--- ' + file_timestamp_str + '$')
+unified_header_new_line = re.compile(r'^\+\+\+ ' + file_timestamp_str + '$')
+unified_hunk_start = re.compile(r'^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)$')
 unified_change = re.compile('^([-+ ])(.*)$')
 
-context_header_old_line = re.compile('^\*\*\* ' + file_timestamp_str + '$')
+context_header_old_line = re.compile(r'^\*\*\* ' + file_timestamp_str + '$')
 context_header_new_line = re.compile('^--- ' + file_timestamp_str + '$')
-context_hunk_start = re.compile('^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
-context_hunk_old = re.compile('^\*\*\* (\d+),?(\d*) \*\*\*\*$')
-context_hunk_new = re.compile('^--- (\d+),?(\d*) ----$')
+context_hunk_start = re.compile(r'^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
+context_hunk_old = re.compile(r'^\*\*\* (\d+),?(\d*) \*\*\*\*$')
+context_hunk_new = re.compile(r'^--- (\d+),?(\d*) ----$')
 context_change = re.compile('^([-+ !]) (.*)$')
 
-ed_hunk_start = re.compile('^(\d+),?(\d*)([acd])$')
+ed_hunk_start = re.compile(r'^(\d+),?(\d*)([acd])$')
 ed_hunk_end = re.compile('^.$')
 # much like forward ed, but no 'c' type
-rcs_ed_hunk_start = re.compile('^([ad])(\d+) ?(\d*)$')
+rcs_ed_hunk_start = re.compile(r'^([ad])(\d+) ?(\d*)$')
 
-default_hunk_start = re.compile('^(\d+),?(\d*)([acd])(\d+),?(\d*)$')
+default_hunk_start = re.compile(r'^(\d+),?(\d*)([acd])(\d+),?(\d*)$')
 default_hunk_mid = re.compile('^---$')
 default_change = re.compile('^([><]) (.*)$')
 
@@ -45,10 +45,10 @@ default_change = re.compile('^([><]) (.*)$')
 
 # git has a special index header and no end part
 git_diffcmd_header = re.compile('^diff --git a/(.+) b/(.+)$')
-git_header_index = re.compile('^index ([a-f0-9]+)..([a-f0-9]+) ?(\d*)$')
+git_header_index = re.compile(r'^index ([a-f0-9]+)..([a-f0-9]+) ?(\d*)$')
 git_header_old_line = re.compile('^--- (.+)$')
-git_header_new_line = re.compile('^\+\+\+ (.+)$')
-git_header_file_mode = re.compile('^(new|deleted) file mode \d{6}$')
+git_header_new_line = re.compile(r'^\+\+\+ (.+)$')
+git_header_file_mode = re.compile(r'^(new|deleted) file mode \d{6}$')
 git_header_binary_file = re.compile('^Binary files (.+) and (.+) differ')
 
 bzr_header_index = re.compile("=== (.+)")
@@ -57,14 +57,14 @@ bzr_header_new_line = unified_header_new_line
 
 svn_header_index = unified_header_index
 svn_header_timestamp_version = re.compile(
-    '\((?:working copy|revision (\d+))\)'
+    r'\((?:working copy|revision (\d+))\)'
 )
-svn_header_timestamp = re.compile('.*(\(.*\))$')
+svn_header_timestamp = re.compile(r'.*(\(.*\))$')
 
 cvs_header_index = unified_header_index
-cvs_header_rcs = re.compile('^RCS file: (.+)(?:,\w{1}$|$)')
-cvs_header_timestamp = re.compile('(.+)\t([\d.]+)')
-cvs_header_timestamp_colon = re.compile(':([\d.]+)\t(.+)')
+cvs_header_rcs = re.compile(r'^RCS file: (.+)(?:,\w{1}$|$)')
+cvs_header_timestamp = re.compile(r'(.+)\t([\d.]+)')
+cvs_header_timestamp_colon = re.compile(r':([\d.]+)\t(.+)')
 old_cvs_diffcmd_header = re.compile('^diff.* (.+):(.*) (.+):(.*)$')
 
 
