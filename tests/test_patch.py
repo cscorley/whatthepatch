@@ -97,10 +97,8 @@ class PatchTestSuite(unittest.TestCase):
             return (c.old, c.new, c.line)
 
         def _process_diffobj(d):
-            if d.changes:
-                return d._replace(changes=[_process_change(c) for c in d.changes])
-            else:
-                return d._replace(changes=[])
+            changes = d.changes or []
+            return d._replace(changes=[_process_change(c) for c in changes])
 
         def _process(d_or_c):
             if isinstance(d_or_c, list):
