@@ -3,6 +3,8 @@ env/
 env2/
 env3/
 
+.vscode/
+
 *.py[cod]
 .ropeproject
 

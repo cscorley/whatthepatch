@@ -97,7 +97,8 @@ class PatchTestSuite(unittest.TestCase):
             return (c.old, c.new, c.line)
 
         def _process_diffobj(d):
-            return d._replace(changes=[_process_change(c) for c in d.changes])
+            changes = d.changes or []
+            return d._replace(changes=[_process_change(c) for c in changes])
 
         def _process(d_or_c):
             if isinstance(d_or_c, list):
@@ -572,6 +573,29 @@ class PatchTestSuite(unittest.TestCase):
                 changes=[
                     (1, None, 'Changed a one-line file.')
                 ],
+                text='\n'.join(lines[:34]) + '\n'
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+        self.assert_diffs_equal(results, expected)
+
+    def test_git_new_empty_file(self):
+        with open('tests/casefiles/git-new-empty-file.diff') as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            diffobj(
+                header=headerobj(
+                    index_path=None,
+                    old_path='/dev/null',
+                    old_version='0000000',
+                    new_path='somefile.txt',
+                    new_version='e69de29',
+                ),
+                changes=[],
                 text='\n'.join(lines[:34]) + '\n'
             )
         ]
