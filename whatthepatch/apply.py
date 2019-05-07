@@ -96,7 +96,7 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
 
     changes = _reverse(diff.changes) if reverse else diff.changes
     # check that the source text matches the context of the diff
-    for old, new, hunk, line in changes:
+    for old, new, line, hunk in changes:
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
             if old > n_lines:
@@ -119,7 +119,7 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
     r = 0
     i = 0
 
-    for old, new, hunk, line in changes:
+    for old, new, line, hunk in changes:
         if old is not None and new is None:
             del lines[old-1-r+i]
             r += 1
@@ -127,9 +127,6 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
             lines.insert(new-1, line)
             i += 1
         elif old is not None and new is not None:
-            # are we crazy?
-            # assert new == old - r + i
-
             # Sometimes, people remove hunks from patches, making these
             # numbers completely unreliable. Because they're jerks.
             pass

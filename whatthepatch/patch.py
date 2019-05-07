@@ -12,7 +12,7 @@ header = namedtuple(
 )
 
 diffobj = namedtuple('diff', 'header changes text')
-Change = namedtuple('Change', 'old new hunk line')
+Change = namedtuple('Change', 'old new line hunk')
 
 file_timestamp_str = '(.+?)(?:\t|:|  +)(.*)'
 # .+? was previously [^:\t\n\r\f\v]+
@@ -200,30 +200,39 @@ def parse_git_header(text):
     except AttributeError:
         lines = text
 
-    # headers = findall_regex(lines, git_header_old_line)
-    # if len(headers) == 0:
-    #     return None
+    old_version = None
+    new_version = None
+    old_path = None
+    new_path = None
+    cmd_old_path = None
+    cmd_new_path = None
+    for line in lines:
+        hm = git_diffcmd_header.match(line)
+        if hm:
+            cmd_old_path = hm.group(1)
+            cmd_new_path = hm.group(2)
+            continue
 
-    over = nver = old_path = new_path = None
-    while len(lines) > 1:
-        g = git_header_index.match(lines[0])
-        # git always has it's own special headers
-        o = git_header_old_line.match(lines[0])
-        del lines[0]
+        g = git_header_index.match(line)
         if g:
-            over = g.group(1)
-            nver = g.group(2)
-            g = None
+            old_version = g.group(1)
+            new_version = g.group(2)
+            continue
+
+        # git always has it's own special headers
+        o = git_header_old_line.match(line)
         if o:
-            n = git_header_new_line.match(lines[0])
-            del lines[0]
-            if n:
-                old_path = o.group(1)
-                new_path = n.group(1)
-        binary = git_header_binary_file.match(lines[0])
+            old_path = o.group(1)
+
+        n = git_header_new_line.match(line)
+        if n:
+            new_path = n.group(1)
+
+        binary = git_header_binary_file.match(line)
         if binary:
             old_path = binary.group(1)
             new_path = binary.group(2)
+
         if old_path and new_path:
             if old_path.startswith('a/'):
                 old_path = old_path[2:]
@@ -233,10 +242,30 @@ def parse_git_header(text):
             return header(
                 index_path=None,
                 old_path=old_path,
-                old_version=over,
+                old_version=old_version,
                 new_path=new_path,
-                new_version=nver
+                new_version=new_version
             )
+
+    # if we go through all of the text without finding our normal info,
+    # use the cmd if available
+    if cmd_old_path and cmd_new_path and old_version and new_version:
+        print("returning from dumb path")
+        if cmd_old_path.startswith('a/'):
+            cmd_old_path = cmd_old_path[2:]
+
+        if cmd_new_path.startswith('b/'):
+            cmd_new_path = cmd_new_path[2:]
+
+        return header(
+            index_path=None,
+            # wow, I kind of hate this:
+            # assume /dev/null if the versions are zeroed out
+            old_path='/dev/null' if old_version == '0000000' else cmd_old_path,
+            old_version=old_version,
+            new_path='/dev/null' if new_version == '0000000' else cmd_new_path,
+            new_version=new_version
+        )
 
     return None
 
@@ -536,10 +565,10 @@ def parse_default_diff(text):
                 line = c.group(2)
 
                 if kind == '<' and (r != old_len or r == 0):
-                    changes.append(Change(old + r, None, hunk_n, line))
+                    changes.append(Change(old + r, None, line, hunk_n))
                     r += 1
                 elif kind == '>' and (i != new_len or i == 0):
-                    changes.append(Change(None, new + i, hunk_n, line))
+                    changes.append(Change(None, new + i, line, hunk_n))
                     i += 1
 
     if len(changes) > 0:
@@ -593,13 +622,13 @@ def parse_unified_diff(text):
                 c = None
 
                 if kind == '-' and (r != old_len or r == 0):
-                    changes.append(Change(old + r, None, hunk_n, line))
+                    changes.append(Change(old + r, None, line, hunk_n))
                     r += 1
                 elif kind == '+' and (i != new_len or i == 0):
-                    changes.append(Change(None, new + i, hunk_n, line))
+                    changes.append(Change(None, new + i, line, hunk_n))
                     i += 1
                 elif kind == ' ' and r != old_len and i != new_len:
-                    changes.append(Change(old + r, new + i, hunk_n, line))
+                    changes.append(Change(old + r, new + i, line, hunk_n))
                     r += 1
                     i += 1
 
@@ -674,11 +703,11 @@ def parse_context_diff(text):
                 line = c.group(2)
 
                 if kind == '-' and (j != old_len or j == 0):
-                    changes.append(Change(old + j, None, hunk_n, line))
+                    changes.append(Change(old + j, None, line, hunk_n))
                     j += 1
                 elif kind == ' ' and ((j != old_len and k != new_len)
                                       or (j == 0 or k == 0)):
-                    changes.append(Change(old + j, new + k, hunk_n, line))
+                    changes.append(Change(old + j, new + k, line, hunk_n))
                     j += 1
                     k += 1
                 elif kind == '+' or kind == '!':
@@ -700,11 +729,11 @@ def parse_context_diff(text):
                 line = c.group(2)
 
                 if kind == '+' and (k != new_len or k == 0):
-                    changes.append(Change(None, new + k, hunk_n, line))
+                    changes.append(Change(None, new + k, line, hunk_n))
                     k += 1
                 elif kind == ' ' and ((j != old_len and k != new_len)
                                       or (j == 0 or k == 0)):
-                    changes.append(Change(old + j, new + k, hunk_n, line))
+                    changes.append(Change(old + j, new + k, line, hunk_n))
                     j += 1
                     k += 1
                 elif kind == '-' or kind == '!':
@@ -730,17 +759,17 @@ def parse_context_diff(text):
                 del old_hunk[0]
                 del new_hunk[0]
             elif okind == ' ' and nkind == ' ' and oline == nline:
-                changes.append(Change(old + j, new + k, hunk_n, oline))
+                changes.append(Change(old + j, new + k, oline, hunk_n))
                 j += 1
                 k += 1
                 del old_hunk[0]
                 del new_hunk[0]
             elif okind == '-' or okind == '!' and (j != old_len or j == 0):
-                changes.append(Change(old + j, None, hunk_n, oline))
+                changes.append(Change(old + j, None, oline, hunk_n))
                 j += 1
                 del old_hunk[0]
             elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
-                changes.append(Change(None, new + k, hunk_n, nline))
+                changes.append(Change(None, new + k, nline, hunk_n))
                 k += 1
                 del new_hunk[0]
             else:
@@ -788,7 +817,7 @@ def parse_ed_diff(text):
             if hunk_kind == 'd':
                 k = 0
                 while old_end >= old:
-                    changes.append(Change(old + k, None, hunk_n, None))
+                    changes.append(Change(old + k, None, None, hunk_n))
                     r += 1
                     k += 1
                     old_end -= 1
@@ -799,7 +828,7 @@ def parse_ed_diff(text):
                 if not e and hunk_kind == 'c':
                     k = 0
                     while old_end >= old:
-                        changes.append(Change(old + k, None, hunk_n, None))
+                        changes.append(Change(old + k, None, None, hunk_n))
                         r += 1
                         k += 1
                         old_end -= 1
@@ -809,8 +838,8 @@ def parse_ed_diff(text):
                     changes.append(Change(
                         None,
                         old - r + i + k + j,
-                        hunk_n,
                         hunk[0],
+                        hunk_n,
                     ))
                     i += 1
                     j += 1
@@ -818,8 +847,8 @@ def parse_ed_diff(text):
                     changes.append(Change(
                         None,
                         old - r + i + 1,
-                        hunk_n,
                         hunk[0],
+                        hunk_n,
                     ))
                     i += 1
 
@@ -864,7 +893,7 @@ def parse_rcs_ed_diff(text):
                     old += total_change_size + 1
                     total_change_size += size
                     while size > 0 and len(hunk) > 0:
-                        changes.append(Change(None, old + j, hunk_n, hunk[0]))
+                        changes.append(Change(None, old + j, hunk[0], hunk_n))
                         j += 1
                         size -= 1
 
@@ -873,7 +902,7 @@ def parse_rcs_ed_diff(text):
                 elif hunk_kind == 'd':
                     total_change_size -= size
                     while size > 0:
-                        changes.append(Change(old + j, None, hunk_n, None))
+                        changes.append(Change(old + j, None, None, hunk_n))
                         j += 1
                         size -= 1
 
