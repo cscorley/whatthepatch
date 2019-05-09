@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import whatthepatch as wtp
-from whatthepatch import exceptions
-
-from nose.tools import assert_raises
 import unittest
+import difflib
+
+from hypothesis import given, assume
+from hypothesis import strategies as st
+from nose.tools import assert_raises
+
+from whatthepatch import exceptions
+import whatthepatch as wtp
 
 
 def _apply(src, diff_text, reverse=False, use_patch=False):
-    diff = next(wtp.parse_patch(diff_text))
-    return wtp.apply.apply_diff(diff, src, reverse, use_patch)
+    diff = list(wtp.parse_patch(diff_text))
+    assert len(diff) == 1
+    return wtp.apply.apply_diff(diff[0], src, reverse, use_patch)
 
 
 def _apply_r(src, diff_text, reverse=True, use_patch=False):
@@ -145,6 +150,31 @@ class ApplyTestSuite(unittest.TestCase):
 
         new_text = _apply(self.lao, diff_text, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
+
+    @given(
+        st.text(), st.text(), st.text(), st.text(), st.datetimes(),
+        st.datetimes(), st.integers(),
+    )
+    def test_apply_reverse(self, a, b, fromfile, tofile, fromdate, todate, n):
+        diff = list(difflib.unified_diff(
+            a.split('\n'),
+            b.split('\n'),
+            fromfile=fromfile,
+            tofile=tofile,
+            fromfiledate=fromdate.isoformat(),
+            tofiledate=todate.isoformat(),
+            n=n,
+            lineterm='',
+        ))
+        assume(diff)
+        a_str = a
+        b_str = b
+
+        self.assertEqual(_apply(a_str.split('\n'), diff[:]), b_str.split('\n'))
+        self.assertEqual(
+            _apply_r(b_str.split('\n'), diff[:]),
+            a_str.split('\n'),
+        )
 
 
 if __name__ == '__main__':
