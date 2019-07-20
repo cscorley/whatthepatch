@@ -2,7 +2,8 @@
 
 import subprocess
 
-from . import patch, exceptions
+from . import patch
+from .exceptions import SubprocessException, HunkApplyException
 from .snippets import which, remove
 
 
@@ -14,42 +15,46 @@ def apply_patch(diffs):
         diffs = [diffs]
 
     for diff in diffs:
-        if diff.header.old_path == '/dev/null':
+        if diff.header.old_path == "/dev/null":
             text = []
         else:
             with open(diff.header.old_path) as f:
                 text = f.read()
 
         new_text = apply_diff(diff, text)
-        with open(diff.header.new_path, 'w') as f:
+        with open(diff.header.new_path, "w") as f:
             f.write(new_text)
 
 
 def _apply_diff_with_subprocess(diff, lines, reverse=False):
     # call out to patch program
-    patchexec = which('patch')
+    patchexec = which("patch")
     if not patchexec:
-        raise exceptions.SubprocessException('patch program does not exist')
+        raise SubprocessException("cannot find patch program", code=-1)
 
-    filepath = '/tmp/wtp-' + str(hash(diff.header))
-    oldfilepath = filepath + '.old'
-    newfilepath = filepath + '.new'
-    rejfilepath = filepath + '.rej'
-    patchfilepath = filepath + '.patch'
-    with open(oldfilepath, 'w') as f:
-        f.write('\n'.join(lines) + '\n')
+    filepath = "/tmp/wtp-" + str(hash(diff.header))
+    oldfilepath = filepath + ".old"
+    newfilepath = filepath + ".new"
+    rejfilepath = filepath + ".rej"
+    patchfilepath = filepath + ".patch"
+    with open(oldfilepath, "w") as f:
+        f.write("\n".join(lines) + "\n")
 
-    with open(patchfilepath, 'w') as f:
+    with open(patchfilepath, "w") as f:
         f.write(diff.text)
 
-    args = [patchexec,
-            '--reverse' if reverse else '--forward',
-            '--quiet',
-            '-o', newfilepath,
-            '-i', patchfilepath,
-            '-r', rejfilepath,
-            oldfilepath
-            ]
+    args = [
+        patchexec,
+        "--reverse" if reverse else "--forward",
+        "--quiet",
+        "-o",
+        newfilepath,
+        "-i",
+        patchfilepath,
+        "-r",
+        rejfilepath,
+        oldfilepath,
+    ]
     ret = subprocess.call(args)
 
     with open(newfilepath) as f:
@@ -68,17 +73,14 @@ def _apply_diff_with_subprocess(diff, lines, reverse=False):
 
     # do this last to ensure files get cleaned up
     if ret != 0:
-        raise exceptions.SubprocessException('patch program failed', code=ret)
+        raise SubprocessException("patch program failed", code=ret)
 
     return lines, rejlines
 
 
 def _reverse(changes):
     def _reverse_change(c):
-        return c._replace(
-            old=c.new,
-            new=c.old,
-        )
+        return c._replace(old=c.new, new=c.old)
 
     return [_reverse_change(c) for c in changes]
 
@@ -100,17 +102,16 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
         # might have to check for line is None here for ed scripts
         if old is not None and line is not None:
             if old > n_lines:
-                raise exceptions.HunkApplyException(
-                    'context line {n}, "{line}" does not exist in source'
-                    .format(n=old, line=line),
+                raise HunkApplyException(
+                    'context line {n}, "{line}" does not exist in source'.format(
+                        n=old, line=line
+                    ),
                     hunk=hunk,
                 )
-            if lines[old-1] != line:
-                raise exceptions.HunkApplyException(
+            if lines[old - 1] != line:
+                raise HunkApplyException(
                     'context line {n}, "{line}" does not match "{sl}"'.format(
-                        n=old,
-                        line=line,
-                        sl=lines[old-1]
+                        n=old, line=line, sl=lines[old - 1]
                     ),
                     hunk=hunk,
                 )
@@ -121,10 +122,10 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
 
     for old, new, line, hunk in changes:
         if old is not None and new is None:
-            del lines[old-1-r+i]
+            del lines[old - 1 - r + i]
             r += 1
         elif old is None and new is not None:
-            lines.insert(new-1, line)
+            lines.insert(new - 1, line)
             i += 1
         elif old is not None and new is not None:
             # Sometimes, people remove hunks from patches, making these
