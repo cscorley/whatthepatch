@@ -1,12 +1,28 @@
 What The Patch!?
 ================
 
-.. image:: https://github.com/cscorley/whatthepatch/workflows/Build/badge.svg
-
 What The Patch!? is a library for both parsing and applying patch files.
 
+Status
+------
+
+.. image:: https://github.com/cscorley/whatthepatch/workflows/Build/badge.svg
+
+This has been released as 1.0, but has never had much active development. The
+functions are stable and have been reliable for several years, even if they
+are not ideally implemented. Pull requests will always be considered, merged,
+and released; however, issues may not ever be fixed by the maintainer.
+
+Contribute
+^^^^^^^^^^
+
+#. Fork this repository
+#. Create a new branch to work on
+#. Commit your tests and/or changes
+#. Push and create a pull request here!
+
 Features
----------
+--------
 
 - Parsing of almost all ``diff`` formats (except forwarded ed):
 
@@ -25,7 +41,8 @@ Features
 Installation
 ------------
 
-To install What The Patch!?, simply:
+This library is available on `PyPI <https://pypi.org/project/whatthepatch/>`_
+and can be installed via pip:
 
 .. code-block:: bash
 
@@ -141,15 +158,8 @@ To apply a diff to some lines of text, first read the patch and parse it.
      'Deeper and more profound,',
      'The door of all subtleties!']
 
-If apply does not satisfy your needs and you are on a system that has `patch`
-in `PATH`, you can also call `apply_diff(diff, lao, use_patch=True)`. The
-default is False, and patch is not necessary to apply diffs to text.
-
-Contribute
-==========
-
-#. Fork this repository
-#. Create a new branch to work on
-#. Commit your tests and/or changes
-#. Push and create a pull request here!
+If apply does not satisfy your needs and you are on a system that has
+``patch`` in ``PATH``, you can also call ``apply_diff(diff, lao,
+use_patch=True)``. The default is false, and patch is not necessary to apply
+diffs to text.
 
