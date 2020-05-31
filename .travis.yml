@@ -17,14 +17,12 @@ matrix:
     - python: 3.8
       env: TOX_ENV=lint
 
-    - python: 3.8
+    - language: shell
       os: windows
-      language: shell
       before_install:
         - choco install python --version 3.8.0
-        - choco install patch
         - python -m pip install --upgrade pip
-      env: TOX_ENV=py38 PATH=/c/Python38:/c/Python38/Scripts:/c/ProgramData/chocolatey/lib/patch/tools:$PATH
+      env: TOX_ENV=py38 PATH=/c/Python38:/c/Python38/Scripts:$PATH
 addons:
   apt:
     packages:
