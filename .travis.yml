@@ -14,7 +14,10 @@ matrix:
 
     - python: 3.7
       env: TOX_ENV=py37
-    - python: 3.7
+
+    - python: 3.8
+      env: TOX_ENV=py38
+    - python: 3.8
       env: TOX_ENV=lint
 
     - python: 2.7
