@@ -2,7 +2,7 @@
 
 import subprocess
 import tempfile
-from pathlib import Path
+import os.path
 
 from . import patch
 from .exceptions import SubprocessException, HunkApplyException
@@ -34,13 +34,13 @@ def _apply_diff_with_subprocess(diff, lines, reverse=False):
     if not patchexec:
         raise SubprocessException("cannot find patch program", code=-1)
 
-    tempdir = Path(tempfile.gettempdir())
+    tempdir = tempfile.gettempdir()
 
-    filepath = tempdir.joinpath("wtp-" + str(hash(diff.header)))
-    oldfilepath = filepath.with_suffix(".old")
-    newfilepath = filepath.with_suffix(".new")
-    rejfilepath = filepath.with_suffix(".rej")
-    patchfilepath = filepath.with_suffix(".patch")
+    filepath = os.path.join(tempdir, "wtp-" + str(hash(diff.header)))
+    oldfilepath = filepath + ".old"
+    newfilepath = filepath + ".new"
+    rejfilepath = filepath + ".rej"
+    patchfilepath = filepath + ".patch"
     with open(oldfilepath, "w") as f:
         f.write("\n".join(lines) + "\n")
 
