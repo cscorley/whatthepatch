@@ -2,7 +2,7 @@
 
 - Issue #26 fix where hardcoded "/tmp" reference was being used
 - Support up to Python 3.8
-- Drop support for Python 2
+- Drop support for Python 2, 3.4
 
 # 0.0.6
 
