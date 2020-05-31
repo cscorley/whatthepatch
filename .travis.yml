@@ -16,6 +16,13 @@ matrix:
       env: TOX_ENV=py38
     - python: 3.8
       env: TOX_ENV=lint
+
+    - language: shell
+      os: windows
+      before_install:
+        - choco install python --version 3.8.0
+        - python -m pip install --upgrade pip
+      env: TOX_ENV=py38 PATH=/c/Python38:/c/Python38/Scripts:$PATH
 addons:
   apt:
     packages:
