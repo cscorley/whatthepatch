@@ -2,9 +2,11 @@
 
 import whatthepatch as wtp
 from whatthepatch import exceptions
+from whatthepatch.snippets import which
 
 from nose.tools import assert_raises
 import unittest
+from unittest.case import SkipTest
 
 
 def _apply(src, diff_text, reverse=False, use_patch=False):
@@ -113,6 +115,9 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/diff-unified.diff") as f:
             diff_text = f.read()
 
+        if not which("patch"):
+            raise SkipTest()
+
         self.assertEqual(_apply(self.lao, diff_text, use_patch=True), (self.tzu, None))
         self.assertEqual(
             _apply_r(self.tzu, diff_text, use_patch=True), (self.lao, None)
@@ -138,9 +143,6 @@ class ApplyTestSuite(unittest.TestCase):
 
         new_text = _apply(self.lao, diff_text)
         self.assertEqual(self.tzu, new_text)
-
-        new_text = _apply(self.lao, diff_text, use_patch=True)
-        self.assertEqual(new_text, (self.tzu, None))
 
 
 if __name__ == "__main__":
