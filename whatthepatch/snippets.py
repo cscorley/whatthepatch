@@ -4,30 +4,6 @@ import os
 from shutil import rmtree
 
 
-# order preserving uniq for lists
-def uniq(L):
-    seen = {}
-    result = []
-    for item in L:
-        if item in seen:
-            continue
-        seen[item] = 1
-        result.append(item)
-    return result
-
-
-# exception handling mkdir -p
-def make_dir(dir):
-    try:
-        os.makedirs(dir)
-    except os.error as e:
-        if 17 == e.errno:
-            # the directory already exists
-            pass
-        else:
-            raise e
-
-
 def remove(path):
     if os.path.exists(path):
         if os.path.isdir(path):
@@ -36,19 +12,11 @@ def remove(path):
             os.remove(path)
 
 
-# file line length
-def file_len(fname):
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1
-
-
 # find all indices of a list of strings that match a regex
-def findall_regex(l, r):
+def findall_regex(items, regex):
     found = list()
-    for i in range(0, len(l)):
-        k = r.match(l[i])
+    for i in range(0, len(items)):
+        k = regex.match(items[i])
         if k:
             found.append(i)
             k = None
@@ -56,19 +24,19 @@ def findall_regex(l, r):
     return found
 
 
-def split_by_regex(l, r):
+def split_by_regex(items, regex):
     splits = list()
-    indices = findall_regex(l, r)
+    indices = findall_regex(items, regex)
     k = None
     for i in indices:
         if k is None:
-            splits.append(l[0:i])
+            splits.append(items[0:i])
             k = i
         else:
-            splits.append(l[k:i])
+            splits.append(items[k:i])
             k = i
 
-    splits.append(l[k:])
+    splits.append(items[k:])
 
     return splits
 
