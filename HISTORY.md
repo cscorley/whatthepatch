@@ -4,6 +4,12 @@
 - Support up to Python 3.8
 - Drop support for Python 2, 3.4
 
+Dev-only:
+
+- Setup Github Actions for package publishing
+- Setup Github Actions for build and testing
+  - Move off Travis and Tox in favor of Github Actions
+
 # 0.0.6
 
 - PR #13 Support for reverse patching (Thanks, @graingert)
