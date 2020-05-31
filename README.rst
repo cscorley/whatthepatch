@@ -1,8 +1,7 @@
 What The Patch!?
 ================
 
-.. image:: https://travis-ci.org/cscorley/whatthepatch.svg?style=flat
-    :target: https://travis-ci.org/cscorley/whatthepatch
+.. image:: https://github.com/cscorley/whatthepatch/workflows/Build/badge.svg
 
 What The Patch!? is a library for both parsing and applying patch files.
 
