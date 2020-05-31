@@ -142,6 +142,9 @@ To apply a diff to some lines of text, first read the patch and parse it.
      'Deeper and more profound,',
      'The door of all subtleties!']
 
+If apply does not satisfy your needs and you are on a system that has `patch`
+in `PATH`, you can also call `apply_diff(diff, lao, use_patch=True)`. The
+default is False, and patch is not necessary to apply diffs to text.
 
 Contribute
 ==========
