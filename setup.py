@@ -11,12 +11,11 @@ with open("README.rst") as f:
 
 setup(
     name="whatthepatch",
-    version="0.0.6",
+    version="1.0.0",
     author="Christopher S. Corley",
-    author_email="cscorley@crimson.ua.edu",
+    author_email="cscorley@gmail.com",
     description="A patch parsing and application library.",
     long_description=readme,
-    long_description_content_type="text/markdown",
     url="https://github.com/cscorley/whatthepatch",
     license="MIT",
     packages=["whatthepatch"],
@@ -25,7 +24,7 @@ setup(
     classifiers=[
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Topic :: Software Development",

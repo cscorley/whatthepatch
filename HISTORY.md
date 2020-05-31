@@ -1,11 +1,16 @@
 # next
 
+- Your PR goes here :)
+
+# 1.0.0
+
 - Issue #26 fix where hardcoded "/tmp" reference was being used
 - Support up to Python 3.8
 - Drop support for Python 2, 3.4
 
 Dev-only:
 
+- Bump Code of Conduct to 2.0
 - Setup Github Actions for package publishing
 - Setup Github Actions for build and testing
   - Move off Travis and Tox in favor of Github Actions
