@@ -1,4 +1,7 @@
-# 0.0.7
+# next
+
+- Issue #26 fix where hardcoded "/tmp" reference was being used
+- Support up to Python 3.8
 
 # 0.0.6
 
