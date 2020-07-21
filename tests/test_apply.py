@@ -4,7 +4,7 @@ import whatthepatch as wtp
 from whatthepatch import exceptions
 from whatthepatch.snippets import which
 
-from nose.tools import assert_raises
+import pytest
 import unittest
 from unittest.case import SkipTest
 
@@ -26,7 +26,7 @@ class ApplyTestSuite(unittest.TestCase):
             self.lao = f.read().splitlines()
 
         with open("tests/casefiles/tzu") as f:
-            self.tzu = f.read().splitlines()
+           self.tzu = f.read().splitlines()
 
     def test_truth(self):
         self.assertEqual(type(self.lao), list)
@@ -59,10 +59,10 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/diff-unified-bad.diff") as f:
             diff_text = f.read()
 
-        with assert_raises(exceptions.ApplyException) as ec:
+        with pytest.raises(exceptions.ApplyException) as ec:
             _apply(self.lao, diff_text)
 
-        e = ec.exception
+        e = ec.value
         e_str = str(e)
         assert "line 4" in e_str
         assert "The Named is the mother of all tings." in e_str
@@ -73,10 +73,10 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/diff-unified-bad2.diff") as f:
             diff_text = f.read()
 
-        with assert_raises(exceptions.ApplyException) as ec:
+        with pytest.raises(exceptions.ApplyException) as ec:
             _apply(self.lao, diff_text)
 
-        e = ec.exception
+        e = ec.value
         e_str = str(e)
         assert "line 9" in e_str
         assert "The two are te same," in e_str
@@ -87,10 +87,10 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/diff-unified-bad2.diff") as f:
             diff_text = f.read()
 
-        with assert_raises(exceptions.ApplyException) as ec:
+        with pytest.raises(exceptions.ApplyException) as ec:
             _apply(self.tzu, diff_text)
 
-        e = ec.exception
+        e = ec.value
         e_str = str(e)
         assert "line 1" in e_str
         assert "The Way that can be told of is not the eternal Way;" in e_str
@@ -101,10 +101,10 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/diff-unified-bad2.diff") as f:
             diff_text = f.read()
 
-        with assert_raises(exceptions.ApplyException) as ec:
+        with pytest.raises(exceptions.ApplyException) as ec:
             _apply("", diff_text)
 
-        e = ec.exception
+        e = ec.value
         e_str = str(e)
         assert "line 1" in e_str
         assert "The Way that can be told of is not the eternal Way;" in e_str
@@ -126,7 +126,7 @@ class ApplyTestSuite(unittest.TestCase):
         new_text = _apply(self.lao, diff_text, use_patch=True)
         self.assertEqual(new_text, (self.tzu, None))
 
-        with assert_raises(exceptions.ApplyException):
+        with pytest.raises(exceptions.ApplyException):
             _apply([""] + self.lao, diff_text, use_patch=True)
 
     def test_diff_rcs(self):
