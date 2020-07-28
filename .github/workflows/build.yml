@@ -43,4 +43,4 @@ jobs:
 
       - name: Test
         run: |
-          PYTHONPATH=. py.test --doctest-modules --doctest-glob='*.rst'
+          pytest --doctest-modules --doctest-glob='*.rst'
