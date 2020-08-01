@@ -1,6 +1,6 @@
 # next
 
-- Your PR goes here :)
+- PR #37 Replace nose with pytest (Thanks, @MeggyCal)
 
 # 1.0.0
 
