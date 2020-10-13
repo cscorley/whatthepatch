@@ -768,7 +768,7 @@ def parse_context_diff(text):
                 changes.append(Change(old + j, None, oline, hunk_n))
                 j += 1
                 del old_hunk[0]
-            elif nkind == '+' or nkind == '!' and (k != old_len or k == 0):
+            elif nkind == '+' or nkind == '!' and (k != new_len or k == 0):
                 changes.append(Change(None, new + k, nline, hunk_n))
                 k += 1
                 del new_hunk[0]
