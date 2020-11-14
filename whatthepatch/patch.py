@@ -6,66 +6,61 @@ from collections import namedtuple
 from .snippets import split_by_regex, findall_regex
 from . import exceptions
 
-header = namedtuple(
-    'header',
-    'index_path old_path old_version new_path new_version',
-)
+header = namedtuple("header", "index_path old_path old_version new_path new_version",)
 
-diffobj = namedtuple('diff', 'header changes text')
-Change = namedtuple('Change', 'old new line hunk')
+diffobj = namedtuple("diff", "header changes text")
+Change = namedtuple("Change", "old new line hunk")
 
-file_timestamp_str = '(.+?)(?:\t|:|  +)(.*)'
+file_timestamp_str = "(.+?)(?:\t|:|  +)(.*)"
 # .+? was previously [^:\t\n\r\f\v]+
 
 # general diff regex
-diffcmd_header = re.compile('^diff.* (.+) (.+)$')
-unified_header_index = re.compile('^Index: (.+)$')
-unified_header_old_line = re.compile(r'^--- ' + file_timestamp_str + '$')
-unified_header_new_line = re.compile(r'^\+\+\+ ' + file_timestamp_str + '$')
-unified_hunk_start = re.compile(r'^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)$')
-unified_change = re.compile('^([-+ ])(.*)$')
+diffcmd_header = re.compile("^diff.* (.+) (.+)$")
+unified_header_index = re.compile("^Index: (.+)$")
+unified_header_old_line = re.compile(r"^--- " + file_timestamp_str + "$")
+unified_header_new_line = re.compile(r"^\+\+\+ " + file_timestamp_str + "$")
+unified_hunk_start = re.compile(r"^@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@(.*)$")
+unified_change = re.compile("^([-+ ])(.*)$")
 
-context_header_old_line = re.compile(r'^\*\*\* ' + file_timestamp_str + '$')
-context_header_new_line = re.compile('^--- ' + file_timestamp_str + '$')
-context_hunk_start = re.compile(r'^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$')
-context_hunk_old = re.compile(r'^\*\*\* (\d+),?(\d*) \*\*\*\*$')
-context_hunk_new = re.compile(r'^--- (\d+),?(\d*) ----$')
-context_change = re.compile('^([-+ !]) (.*)$')
+context_header_old_line = re.compile(r"^\*\*\* " + file_timestamp_str + "$")
+context_header_new_line = re.compile("^--- " + file_timestamp_str + "$")
+context_hunk_start = re.compile(r"^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*$")
+context_hunk_old = re.compile(r"^\*\*\* (\d+),?(\d*) \*\*\*\*$")
+context_hunk_new = re.compile(r"^--- (\d+),?(\d*) ----$")
+context_change = re.compile("^([-+ !]) (.*)$")
 
-ed_hunk_start = re.compile(r'^(\d+),?(\d*)([acd])$')
-ed_hunk_end = re.compile('^.$')
+ed_hunk_start = re.compile(r"^(\d+),?(\d*)([acd])$")
+ed_hunk_end = re.compile("^.$")
 # much like forward ed, but no 'c' type
-rcs_ed_hunk_start = re.compile(r'^([ad])(\d+) ?(\d*)$')
+rcs_ed_hunk_start = re.compile(r"^([ad])(\d+) ?(\d*)$")
 
-default_hunk_start = re.compile(r'^(\d+),?(\d*)([acd])(\d+),?(\d*)$')
-default_hunk_mid = re.compile('^---$')
-default_change = re.compile('^([><]) (.*)$')
+default_hunk_start = re.compile(r"^(\d+),?(\d*)([acd])(\d+),?(\d*)$")
+default_hunk_mid = re.compile("^---$")
+default_change = re.compile("^([><]) (.*)$")
 
 # Headers
 
 # git has a special index header and no end part
-git_diffcmd_header = re.compile('^diff --git a/(.+) b/(.+)$')
-git_header_index = re.compile(r'^index ([a-f0-9]+)..([a-f0-9]+) ?(\d*)$')
-git_header_old_line = re.compile('^--- (.+)$')
-git_header_new_line = re.compile(r'^\+\+\+ (.+)$')
-git_header_file_mode = re.compile(r'^(new|deleted) file mode \d{6}$')
-git_header_binary_file = re.compile('^Binary files (.+) and (.+) differ')
+git_diffcmd_header = re.compile("^diff --git a/(.+) b/(.+)$")
+git_header_index = re.compile(r"^index ([a-f0-9]+)..([a-f0-9]+) ?(\d*)$")
+git_header_old_line = re.compile("^--- (.+)$")
+git_header_new_line = re.compile(r"^\+\+\+ (.+)$")
+git_header_file_mode = re.compile(r"^(new|deleted) file mode \d{6}$")
+git_header_binary_file = re.compile("^Binary files (.+) and (.+) differ")
 
 bzr_header_index = re.compile("=== (.+)")
 bzr_header_old_line = unified_header_old_line
 bzr_header_new_line = unified_header_new_line
 
 svn_header_index = unified_header_index
-svn_header_timestamp_version = re.compile(
-    r'\((?:working copy|revision (\d+))\)'
-)
-svn_header_timestamp = re.compile(r'.*(\(.*\))$')
+svn_header_timestamp_version = re.compile(r"\((?:working copy|revision (\d+))\)")
+svn_header_timestamp = re.compile(r".*(\(.*\))$")
 
 cvs_header_index = unified_header_index
-cvs_header_rcs = re.compile(r'^RCS file: (.+)(?:,\w{1}$|$)')
-cvs_header_timestamp = re.compile(r'(.+)\t([\d.]+)')
-cvs_header_timestamp_colon = re.compile(r':([\d.]+)\t(.+)')
-old_cvs_diffcmd_header = re.compile('^diff.* (.+):(.*) (.+):(.*)$')
+cvs_header_rcs = re.compile(r"^RCS file: (.+)(?:,\w{1}$|$)")
+cvs_header_timestamp = re.compile(r"(.+)\t([\d.]+)")
+cvs_header_timestamp_colon = re.compile(r":([\d.]+)\t(.+)")
+old_cvs_diffcmd_header = re.compile("^diff.* (.+):(.*) (.+):(.*)$")
 
 
 def parse_patch(text):
@@ -93,7 +88,7 @@ def parse_patch(text):
             break
 
     for diff in diffs:
-        difftext = '\n'.join(diff) + '\n'
+        difftext = "\n".join(diff) + "\n"
         h = parse_header(diff)
         d = parse_diff(diff)
         if h or d:
@@ -114,11 +109,11 @@ def parse_scm_header(text):
         lines = text
 
     check = [
-            (git_header_index, parse_git_header),
-            (old_cvs_diffcmd_header, parse_cvs_header),
-            (cvs_header_rcs, parse_cvs_header),
-            (svn_header_index, parse_svn_header),
-            ]
+        (git_header_index, parse_git_header),
+        (old_cvs_diffcmd_header, parse_cvs_header),
+        (cvs_header_rcs, parse_cvs_header),
+        (svn_header_index, parse_svn_header),
+    ]
 
     for regex, parser in check:
         diffs = findall_regex(lines, regex)
@@ -129,10 +124,10 @@ def parse_scm_header(text):
                 if res:
                     old_path = res.old_path
                     new_path = res.new_path
-                    if old_path.startswith('a/'):
+                    if old_path.startswith("a/"):
                         old_path = old_path[2:]
 
-                    if new_path.startswith('b/'):
+                    if new_path.startswith("b/"):
                         new_path = new_path[2:]
 
                     return header(
@@ -140,7 +135,7 @@ def parse_scm_header(text):
                         old_path=old_path,
                         old_version=res.old_version,
                         new_path=new_path,
-                        new_version=res.new_version
+                        new_version=res.new_version,
                     )
             else:
                 res = parser(lines)
@@ -234,37 +229,37 @@ def parse_git_header(text):
             new_path = binary.group(2)
 
         if old_path and new_path:
-            if old_path.startswith('a/'):
+            if old_path.startswith("a/"):
                 old_path = old_path[2:]
 
-            if new_path.startswith('b/'):
+            if new_path.startswith("b/"):
                 new_path = new_path[2:]
             return header(
                 index_path=None,
                 old_path=old_path,
                 old_version=old_version,
                 new_path=new_path,
-                new_version=new_version
+                new_version=new_version,
             )
 
     # if we go through all of the text without finding our normal info,
     # use the cmd if available
     if cmd_old_path and cmd_new_path and old_version and new_version:
         print("returning from dumb path")
-        if cmd_old_path.startswith('a/'):
+        if cmd_old_path.startswith("a/"):
             cmd_old_path = cmd_old_path[2:]
 
-        if cmd_new_path.startswith('b/'):
+        if cmd_new_path.startswith("b/"):
             cmd_new_path = cmd_new_path[2:]
 
         return header(
             index_path=None,
             # wow, I kind of hate this:
             # assume /dev/null if the versions are zeroed out
-            old_path='/dev/null' if old_version == '0000000' else cmd_old_path,
+            old_path="/dev/null" if old_version == "0000000" else cmd_old_path,
             old_version=old_version,
-            new_path='/dev/null' if new_version == '0000000' else cmd_new_path,
-            new_version=new_version
+            new_path="/dev/null" if new_version == "0000000" else cmd_new_path,
+            new_version=new_version,
         )
 
     return None
@@ -305,7 +300,7 @@ def parse_svn_header(text):
         elif opath:
             ts = svn_header_timestamp.match(opath)
             if ts:
-                opath = opath[:-len(ts.group(1))]
+                opath = opath[: -len(ts.group(1))]
                 oend = svn_header_timestamp_version.match(ts.group(1))
                 if oend and oend.group(1):
                     over = int(oend.group(1))
@@ -319,7 +314,7 @@ def parse_svn_header(text):
         elif npath:
             ts = svn_header_timestamp.match(npath)
             if ts:
-                npath = npath[:-len(ts.group(1))]
+                npath = npath[: -len(ts.group(1))]
                 nend = svn_header_timestamp_version.match(ts.group(1))
                 if nend and nend.group(1):
                     nver = int(nend.group(1))
@@ -564,10 +559,10 @@ def parse_default_diff(text):
                 kind = c.group(1)
                 line = c.group(2)
 
-                if kind == '<' and (r != old_len or r == 0):
+                if kind == "<" and (r != old_len or r == 0):
                     changes.append(Change(old + r, None, line, hunk_n))
                     r += 1
-                elif kind == '>' and (i != new_len or i == 0):
+                elif kind == ">" and (i != new_len or i == 0):
                     changes.append(Change(None, new + i, line, hunk_n))
                     i += 1
 
@@ -621,13 +616,13 @@ def parse_unified_diff(text):
                 line = c.group(2)
                 c = None
 
-                if kind == '-' and (r != old_len or r == 0):
+                if kind == "-" and (r != old_len or r == 0):
                     changes.append(Change(old + r, None, line, hunk_n))
                     r += 1
-                elif kind == '+' and (i != new_len or i == 0):
+                elif kind == "+" and (i != new_len or i == 0):
                     changes.append(Change(None, new + i, line, hunk_n))
                     i += 1
-                elif kind == ' ' and r != old_len and i != new_len:
+                elif kind == " " and r != old_len and i != new_len:
                     changes.append(Change(old + r, new + i, line, hunk_n))
                     r += 1
                     i += 1
@@ -702,15 +697,16 @@ def parse_context_diff(text):
                 kind = c.group(1)
                 line = c.group(2)
 
-                if kind == '-' and (j != old_len or j == 0):
+                if kind == "-" and (j != old_len or j == 0):
                     changes.append(Change(old + j, None, line, hunk_n))
                     j += 1
-                elif kind == ' ' and ((j != old_len and k != new_len)
-                                      or (j == 0 or k == 0)):
+                elif kind == " " and (
+                    (j != old_len and k != new_len) or (j == 0 or k == 0)
+                ):
                     changes.append(Change(old + j, new + k, line, hunk_n))
                     j += 1
                     k += 1
-                elif kind == '+' or kind == '!':
+                elif kind == "+" or kind == "!":
                     raise exceptions.ParseException(msg + kind, hunk_n)
 
             continue
@@ -728,15 +724,16 @@ def parse_context_diff(text):
                 kind = c.group(1)
                 line = c.group(2)
 
-                if kind == '+' and (k != new_len or k == 0):
+                if kind == "+" and (k != new_len or k == 0):
                     changes.append(Change(None, new + k, line, hunk_n))
                     k += 1
-                elif kind == ' ' and ((j != old_len and k != new_len)
-                                      or (j == 0 or k == 0)):
+                elif kind == " " and (
+                    (j != old_len and k != new_len) or (j == 0 or k == 0)
+                ):
                     changes.append(Change(old + j, new + k, line, hunk_n))
                     j += 1
                     k += 1
-                elif kind == '-' or kind == '!':
+                elif kind == "-" or kind == "!":
                     raise exceptions.ParseException(msg + kind, hunk_n)
             continue
 
@@ -758,17 +755,17 @@ def parse_context_diff(text):
             if not (oc or nc):
                 del old_hunk[0]
                 del new_hunk[0]
-            elif okind == ' ' and nkind == ' ' and oline == nline:
+            elif okind == " " and nkind == " " and oline == nline:
                 changes.append(Change(old + j, new + k, oline, hunk_n))
                 j += 1
                 k += 1
                 del old_hunk[0]
                 del new_hunk[0]
-            elif okind == '-' or okind == '!' and (j != old_len or j == 0):
+            elif okind == "-" or okind == "!" and (j != old_len or j == 0):
                 changes.append(Change(old + j, None, oline, hunk_n))
                 j += 1
                 del old_hunk[0]
-            elif nkind == '+' or nkind == '!' and (k != new_len or k == 0):
+            elif nkind == "+" or nkind == "!" and (k != new_len or k == 0):
                 changes.append(Change(None, new + k, nline, hunk_n))
                 k += 1
                 del new_hunk[0]
@@ -814,7 +811,7 @@ def parse_ed_diff(text):
             old_end = int(o.group(2)) if len(o.group(2)) else old
 
             hunk_kind = o.group(3)
-            if hunk_kind == 'd':
+            if hunk_kind == "d":
                 k = 0
                 while old_end >= old:
                     changes.append(Change(old + k, None, None, hunk_n))
@@ -825,7 +822,7 @@ def parse_ed_diff(text):
 
             while len(hunk) > 0:
                 e = ed_hunk_end.match(hunk[0])
-                if not e and hunk_kind == 'c':
+                if not e and hunk_kind == "c":
                     k = 0
                     while old_end >= old:
                         changes.append(Change(old + k, None, None, hunk_n))
@@ -835,21 +832,11 @@ def parse_ed_diff(text):
 
                     # I basically have no idea why this works
                     # for these tests.
-                    changes.append(Change(
-                        None,
-                        old - r + i + k + j,
-                        hunk[0],
-                        hunk_n,
-                    ))
+                    changes.append(Change(None, old - r + i + k + j, hunk[0], hunk_n,))
                     i += 1
                     j += 1
-                if not e and hunk_kind == 'a':
-                    changes.append(Change(
-                        None,
-                        old - r + i + 1,
-                        hunk[0],
-                        hunk_n,
-                    ))
+                if not e and hunk_kind == "a":
+                    changes.append(Change(None, old - r + i + 1, hunk[0], hunk_n,))
                     i += 1
 
                 del hunk[0]
@@ -889,7 +876,7 @@ def parse_rcs_ed_diff(text):
                 old = int(o.group(2))
                 size = int(o.group(3))
 
-                if hunk_kind == 'a':
+                if hunk_kind == "a":
                     old += total_change_size + 1
                     total_change_size += size
                     while size > 0 and len(hunk) > 0:
@@ -899,7 +886,7 @@ def parse_rcs_ed_diff(text):
 
                         del hunk[0]
 
-                elif hunk_kind == 'd':
+                elif hunk_kind == "d":
                     total_change_size -= size
                     while size > 0:
                         changes.append(Change(old + j, None, None, hunk_n))

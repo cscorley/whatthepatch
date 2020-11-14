@@ -26,7 +26,7 @@ class ApplyTestSuite(unittest.TestCase):
             self.lao = f.read().splitlines()
 
         with open("tests/casefiles/tzu") as f:
-           self.tzu = f.read().splitlines()
+            self.tzu = f.read().splitlines()
 
     def test_truth(self):
         self.assertEqual(type(self.lao), list)
