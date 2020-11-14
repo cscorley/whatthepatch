@@ -1,0 +1,20 @@
+*** ../bash-4.2-patched/lib/glob/gmisc.c	2011-02-05 16:11:17.000000000 -0500
+--- lib/glob/gmisc.c	2011-02-18 23:53:42.000000000 -0500
+***************
+*** 295,300 ****
+  		{
+  		  pat++;
+  		  if (*pat == ']')	/* right bracket can appear as equivalence class */
+! 		    pat++;
+  		  in_equiv = 1;
+  		}
+--- 331,340 ----
+  		{
+  		  pat++;
++ 		  bracklen++;
+  		  if (*pat == ']')	/* right bracket can appear as equivalence class */
+! 		    {
+! 		      pat++;
+! 		      bracklen++;
+! 		    }
+  		  in_equiv = 1;
