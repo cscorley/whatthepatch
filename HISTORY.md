@@ -1,5 +1,9 @@
 # next
 
+Nothing yet :)
+
+# 1.0.1
+
 - PR #37 Replace nose with pytest (Thanks, @MeggyCal)
 - PR #39 Fix bug where context diffs would not parse (Thanks, @FallenSky2077)
 
