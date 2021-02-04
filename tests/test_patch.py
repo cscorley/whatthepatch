@@ -857,6 +857,34 @@ class PatchTestSuite(unittest.TestCase):
         results_main = next(wtp.patch.parse_patch(text))
         self.assert_diffs_equal(results_main, expected_main)
 
+    def test_unified2_diff(self):
+        with open(datapath("diff-unified2.diff")) as f:
+            text = f.read()
+
+        # off with your head!
+        text_diff = "\n".join(text.splitlines()[2:]) + "\n"
+
+        expected = [
+            (None, 2, "The named is the mother of all things."),
+        ]
+
+        results = list(wtp.patch.parse_unified_diff(text_diff))
+        self.assert_diffs_equal(results, expected)
+
+        expected_main = diffobj(
+            header=headerobj(
+                index_path=None,
+                old_path="abc",
+                old_version="2013-01-05 16:56:19.000000000 -0600",
+                new_path="efg",
+                new_version="2013-01-05 16:56:35.000000000 -0600",
+            ),
+            changes=expected,
+            text=text,
+        )
+        results_main = next(wtp.patch.parse_patch(text))
+        self.assert_diffs_equal(results_main, expected_main)
+
     def test_diff_unified_with_does_not_include_extra_lines(self):
         with open("tests/casefiles/diff-unified-blah.diff") as f:
             text = f.read()
