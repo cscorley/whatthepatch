@@ -28,6 +28,12 @@ class ApplyTestSuite(unittest.TestCase):
         with open("tests/casefiles/tzu") as f:
             self.tzu = f.read().splitlines()
 
+        with open("tests/casefiles/abc") as f:
+            self.abc = f.read().splitlines()
+
+        with open("tests/casefiles/efg") as f:
+            self.efg = f.read().splitlines()
+
     def test_truth(self):
         self.assertEqual(type(self.lao), list)
         self.assertEqual(type(self.tzu), list)
@@ -54,6 +60,13 @@ class ApplyTestSuite(unittest.TestCase):
 
         self.assertEqual(_apply(self.lao, diff_text), self.tzu)
         self.assertEqual(_apply_r(self.tzu, diff_text), self.lao)
+
+    def test_diff_unified2(self):
+        with open("tests/casefiles/diff-unified2.diff") as f:
+            diff_text = f.read()
+
+        self.assertEqual(_apply(self.abc, diff_text), self.efg)
+        self.assertEqual(_apply_r(self.efg, diff_text), self.abc)
 
     def test_diff_unified_bad(self):
         with open("tests/casefiles/diff-unified-bad.diff") as f:
@@ -128,6 +141,22 @@ class ApplyTestSuite(unittest.TestCase):
 
         with pytest.raises(exceptions.ApplyException):
             _apply([""] + self.lao, diff_text, use_patch=True)
+
+    def test_diff_unified2_patchutil(self):
+        with open("tests/casefiles/diff-unified2.diff") as f:
+            diff_text = f.read()
+
+        if not which("patch"):
+            raise SkipTest()
+
+        self.assertEqual(_apply(self.abc, diff_text, use_patch=True),
+                         (self.efg, None))
+        self.assertEqual(_apply(self.abc, diff_text, use_patch=True),
+                         (_apply(self.abc, diff_text), None))
+        self.assertEqual(_apply_r(self.efg, diff_text, use_patch=True),
+                         (self.abc, None))
+        self.assertEqual(_apply_r(self.efg, diff_text, use_patch=True),
+                         (_apply_r(self.efg, diff_text), None))
 
     def test_diff_rcs(self):
         with open("tests/casefiles/diff-rcs.diff") as f:
