@@ -622,8 +622,9 @@ def parse_unified_diff(text):
                 elif kind == "+" and (i != new_len or i == 0):
                     changes.append(Change(None, new + i, line, hunk_n))
                     i += 1
-                elif kind == " " and r != old_len and i != new_len:
-                    changes.append(Change(old + r, new + i, line, hunk_n))
+                elif kind == " ":
+                    if r != old_len and i != new_len:
+                        changes.append(Change(old + r, new + i, line, hunk_n))
                     r += 1
                     i += 1
 
