@@ -2,6 +2,11 @@
 
 Nothing yet :)
 
+# 1.0.2
+
+- Support up to 3.9
+- PR #42 Fix unified diff parse error (Thanks, @kkpattern)
+
 # 1.0.1
 
 - PR #37 Replace nose with pytest (Thanks, @MeggyCal)
