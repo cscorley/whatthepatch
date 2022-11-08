@@ -1443,5 +1443,6 @@ index 0000000..1111111 100644
         self.assertEqual(1000007, len(result[0].changes))
         self.assertGreater(10, time.time() - start_time)
 
+
 if __name__ == "__main__":
     unittest.main()
