@@ -582,6 +582,8 @@ def parse_unified_diff(text):
     new = 0
     r = 0
     i = 0
+    old_len = 0
+    new_len = 0
 
     changes = list()
 
@@ -609,12 +611,11 @@ def parse_unified_diff(text):
                 h = None
                 break
 
-        while len(hunk) > 0:
-            c = unified_change.match(hunk[0])
+        for n in hunk:
+            c = unified_change.match(n)
             if c:
                 kind = c.group(1)
                 line = c.group(2)
-                c = None
 
                 if kind == "-" and (r != old_len or r == 0):
                     changes.append(Change(old + r, None, line, hunk_n))
@@ -627,8 +628,6 @@ def parse_unified_diff(text):
                         changes.append(Change(old + r, new + i, line, hunk_n))
                     r += 1
                     i += 1
-
-            del hunk[0]
 
     if len(changes) > 0:
         return changes
