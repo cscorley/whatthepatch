@@ -3,8 +3,8 @@
 import re
 from collections import namedtuple
 
-from .snippets import split_by_regex, findall_regex
 from . import exceptions
+from .snippets import findall_regex, split_by_regex
 
 header = namedtuple(
     "header",

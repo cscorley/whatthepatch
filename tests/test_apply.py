@@ -5,8 +5,7 @@ from unittest.case import SkipTest
 
 import pytest
 
-from src.whatthepatch import parse_patch, apply_diff
-from src.whatthepatch import exceptions
+from src.whatthepatch import apply_diff, exceptions, parse_patch
 from src.whatthepatch.snippets import which
 
 
