@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import os.path
 import subprocess
 import tempfile
-import os.path
 
 from . import patch
-from .exceptions import SubprocessException, HunkApplyException
-from .snippets import which, remove
+from .exceptions import HunkApplyException, SubprocessException
+from .snippets import remove, which
 
 
 def apply_patch(diffs):

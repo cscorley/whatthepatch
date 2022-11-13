@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import whatthepatch as wtp
-from whatthepatch.patch import Change, diffobj, header as headerobj
-
-
+import os
 import time
 import unittest
-import os
+
+from src import whatthepatch as wtp
+from src.whatthepatch.patch import Change, diffobj
+from src.whatthepatch.patch import header as headerobj
 
 module_path = os.path.dirname(__file__)
 

@@ -1,0 +1,35 @@
+[project]
+name = "whatthepatch"
+version = "1.0.3"
+maintainers = [{ name = "Christopher S. Corley", email = "cscorley@gmail.com" }]
+requires-python = ">=3.7"
+readme = "README.rst"
+description = "A patch parsing and application library."
+keywords = ["patch", "diff", "parser"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control",
+    "Topic :: Software Development",
+    "Topic :: Text Processing",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/cscorley/whatthepatch"
+"Bug Tracker" = "https://github.com/cscorley/whatthepatch/issues"
+
+[build-system]
+requires = ["setuptools>=65.0.0", "wheel"]
+build-backend = "setuptools.build_meta"

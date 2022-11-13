@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import whatthepatch as wtp
-from whatthepatch import exceptions
-from whatthepatch.snippets import which
-
-import pytest
 import unittest
 from unittest.case import SkipTest
 
+import pytest
+
+from src.whatthepatch import apply_diff, exceptions, parse_patch
+from src.whatthepatch.snippets import which
+
 
 def _apply(src, diff_text, reverse=False, use_patch=False):
-    diff = next(wtp.parse_patch(diff_text))
-    return wtp.apply.apply_diff(diff, src, reverse, use_patch)
+    diff = next(parse_patch(diff_text))
+    return apply_diff(diff, src, reverse, use_patch)
 
 
 def _apply_r(src, diff_text, reverse=True, use_patch=False):
