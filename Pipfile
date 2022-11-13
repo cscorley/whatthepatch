@@ -6,16 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 flake8 = "*"
-twine = "*"
 black = "*"
-urllib3 = ">=1.24.2"
-setuptools = "*"
-wheel = "*"
-
-[packages]
-
-[requires]
-python_version = "3.9"
+build = "*"
 
 [pipenv]
 allow_prereleases = true

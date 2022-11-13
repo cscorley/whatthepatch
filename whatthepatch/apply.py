@@ -10,7 +10,7 @@ from .snippets import which, remove
 
 
 def apply_patch(diffs):
-    """ Not ready for use yet """
+    """Not ready for use yet"""
     pass
 
     if isinstance(diffs, patch.diff):
