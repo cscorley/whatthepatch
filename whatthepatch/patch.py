@@ -6,7 +6,10 @@ from collections import namedtuple
 from .snippets import split_by_regex, findall_regex
 from . import exceptions
 
-header = namedtuple("header", "index_path old_path old_version new_path new_version",)
+header = namedtuple(
+    "header",
+    "index_path old_path old_version new_path new_version",
+)
 
 diffobj = namedtuple("diff", "header changes text")
 Change = namedtuple("Change", "old new line hunk")
@@ -832,11 +835,25 @@ def parse_ed_diff(text):
 
                     # I basically have no idea why this works
                     # for these tests.
-                    changes.append(Change(None, old - r + i + k + j, hunk[0], hunk_n,))
+                    changes.append(
+                        Change(
+                            None,
+                            old - r + i + k + j,
+                            hunk[0],
+                            hunk_n,
+                        )
+                    )
                     i += 1
                     j += 1
                 if not e and hunk_kind == "a":
-                    changes.append(Change(None, old - r + i + 1, hunk[0], hunk_n,))
+                    changes.append(
+                        Change(
+                            None,
+                            old - r + i + 1,
+                            hunk[0],
+                            hunk_n,
+                        )
+                    )
                     i += 1
 
                 del hunk[0]

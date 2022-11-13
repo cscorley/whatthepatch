@@ -21,7 +21,11 @@ def indent(amount, changes):
 
 
 CSC_CHANGES = [
-    (None, 1, "# This is a basic script I wrote to run Bugxplore over the dataset",),
+    (
+        None,
+        1,
+        "# This is a basic script I wrote to run Bugxplore over the dataset",
+    ),
     (None, 2, ""),
     (None, 3, ""),
     (1, 4, "import os"),
@@ -1442,6 +1446,7 @@ index 0000000..1111111 100644
         self.assertEqual(1, len(result))
         self.assertEqual(1000007, len(result[0].changes))
         self.assertGreater(10, time.time() - start_time)
+
 
 if __name__ == "__main__":
     unittest.main()

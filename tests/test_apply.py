@@ -149,14 +149,18 @@ class ApplyTestSuite(unittest.TestCase):
         if not which("patch"):
             raise SkipTest()
 
-        self.assertEqual(_apply(self.abc, diff_text, use_patch=True),
-                         (self.efg, None))
-        self.assertEqual(_apply(self.abc, diff_text, use_patch=True),
-                         (_apply(self.abc, diff_text), None))
-        self.assertEqual(_apply_r(self.efg, diff_text, use_patch=True),
-                         (self.abc, None))
-        self.assertEqual(_apply_r(self.efg, diff_text, use_patch=True),
-                         (_apply_r(self.efg, diff_text), None))
+        self.assertEqual(_apply(self.abc, diff_text, use_patch=True), (self.efg, None))
+        self.assertEqual(
+            _apply(self.abc, diff_text, use_patch=True),
+            (_apply(self.abc, diff_text), None),
+        )
+        self.assertEqual(
+            _apply_r(self.efg, diff_text, use_patch=True), (self.abc, None)
+        )
+        self.assertEqual(
+            _apply_r(self.efg, diff_text, use_patch=True),
+            (_apply_r(self.efg, diff_text), None),
+        )
 
     def test_diff_rcs(self):
         with open("tests/casefiles/diff-rcs.diff") as f:
