@@ -1425,7 +1425,7 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results[0].header, expected_header)
 
-    def test_huge_path(self):
+    def test_huge_patch(self):
         start_time = time.time()
         text = """diff --git a/huge.file b/huge.file
 index 0000000..1111111 100644
@@ -1445,7 +1445,9 @@ index 0000000..1111111 100644
         result = list(wtp.patch.parse_patch(text))
         self.assertEqual(1, len(result))
         self.assertEqual(1000007, len(result[0].changes))
-        self.assertGreater(10, time.time() - start_time)
+        # This is 2x the usual time for CI to allow for some slow tests
+        # Really all we care about is that this parses faster than it used to (200s+)
+        self.assertGreater(20, time.time() - start_time)
 
 
 if __name__ == "__main__":
