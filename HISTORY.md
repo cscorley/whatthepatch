@@ -2,6 +2,13 @@
 
 Nothing yet :)
 
+# 1.0.3
+
+- PR #46 Code optimization for unified diff parsing (Thanks, @babenek)
+- Package using build module and pyproject.toml
+- Support up to 3.11
+- Drop support up to 3.6
+
 # 1.0.2
 
 - Support up to 3.9
