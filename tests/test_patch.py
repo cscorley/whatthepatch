@@ -4,6 +4,7 @@ import whatthepatch as wtp
 from whatthepatch.patch import Change, diffobj, header as headerobj
 
 
+import time
 import unittest
 import os
 
@@ -1420,6 +1421,27 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.patch.parse_patch(text))
         self.assertEqual(results[0].header, expected_header)
 
+    def test_huge_path(self):
+        start_time = time.time()
+        text = """diff --git a/huge.file b/huge.file
+index 0000000..1111111 100644
+--- a/huge.file
++++ a/huge.file
+@@ -3,13 +3,1000007 @@
+ 00000000
+ 11111111
+ 22222222
+-33333333
+-44444444
++55555555
++66666666
+"""
+        for n in range(0, 1000000):
+            text += "+" + hex(n) + "\n"
+        result = list(wtp.patch.parse_patch(text))
+        self.assertEqual(1, len(result))
+        self.assertEqual(1000007, len(result[0].changes))
+        self.assertGreater(10, time.time() - start_time)
 
 if __name__ == "__main__":
     unittest.main()
