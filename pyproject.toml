@@ -6,7 +6,6 @@ requires-python = ">=3.7"
 readme = "README.rst"
 description = "A patch parsing and application library."
 keywords = ["patch", "diff", "parser"]
-license = "MIT"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
