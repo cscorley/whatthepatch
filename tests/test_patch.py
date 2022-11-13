@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import whatthepatch as wtp
-from whatthepatch.patch import Change, diffobj, header as headerobj
-
+from src import whatthepatch as wtp
+from src.whatthepatch.patch import Change, diffobj, header as headerobj
 
 import time
 import unittest
