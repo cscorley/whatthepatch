@@ -13,18 +13,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.x"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel twine
-      - name: Build and publish
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: |
-          python setup.py sdist bdist_wheel
-          twine upload dist/*
+          pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@37f50c210e3d2f9450da2cd423303d6a14a6e29f # release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
