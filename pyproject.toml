@@ -31,5 +31,5 @@ classifiers = [
 "Bug Tracker" = "https://github.com/cscorley/whatthepatch/issues"
 
 [build-system]
-requires = ["setuptools>=65.0.0", "wheel"]
+requires = ["setuptools>=65.0.0"]
 build-backend = "setuptools.build_meta"
