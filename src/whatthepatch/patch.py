@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-
+import base64
 import re
+import zlib
 from collections import namedtuple
 
 from . import exceptions
@@ -50,6 +51,10 @@ git_header_old_line = re.compile("^--- (.+)$")
 git_header_new_line = re.compile(r"^\+\+\+ (.+)$")
 git_header_file_mode = re.compile(r"^(new|deleted) file mode \d{6}$")
 git_header_binary_file = re.compile("^Binary files (.+) and (.+) differ")
+git_binary_patch_start = re.compile(r"^GIT binary patch$")
+git_binary_literal_start = re.compile(r"^literal (\d+)$")
+git_binary_delta_start = re.compile(r"^delta (\d+)$")
+base85string = re.compile(r"^[0-9A-Za-z!#$%&()*+;<=>?@^_`{|}~-]+$")
 
 bzr_header_index = re.compile("=== (.+)")
 bzr_header_old_line = unified_header_old_line
@@ -85,6 +90,7 @@ def parse_patch(text):
         unified_header_old_line,
     ]
 
+    diffs = []
     for c in check:
         diffs = split_by_regex(lines, c)
         if len(diffs) > 1:
@@ -184,12 +190,14 @@ def parse_diff(text):
         (default_hunk_start, parse_default_diff),
         (ed_hunk_start, parse_ed_diff),
         (rcs_ed_hunk_start, parse_rcs_ed_diff),
+        (git_binary_patch_start, parse_binary_diff),
     ]
 
     for hunk, parser in check:
         diffs = findall_regex(lines, hunk)
         if len(diffs) > 0:
             return parser(lines)
+    return None
 
 
 def parse_git_header(text):
@@ -248,7 +256,6 @@ def parse_git_header(text):
     # if we go through all of the text without finding our normal info,
     # use the cmd if available
     if cmd_old_path and cmd_new_path and old_version and new_version:
-        print("returning from dumb path")
         if cmd_old_path.startswith("a/"):
             cmd_old_path = cmd_old_path[2:]
 
@@ -914,3 +921,87 @@ def parse_rcs_ed_diff(text):
         return changes
 
     return None
+
+
+def parse_binary_diff(text):
+    try:
+        lines = text.splitlines()
+    except AttributeError:
+        lines = text
+
+    changes = list()
+
+    old_version = None
+    new_version = None
+    cmd_old_path = None
+    cmd_new_path = None
+    # the sizes are used as latch-up
+    old_size = None
+    new_size = None
+    old_encoded = ""
+    new_encoded = ""
+    for line in lines:
+        if cmd_old_path is None and cmd_new_path is None:
+            hm = git_diffcmd_header.match(line)
+            if hm:
+                cmd_old_path = hm.group(1)
+                cmd_new_path = hm.group(2)
+                continue
+
+        if old_version is None and new_version is None:
+            g = git_header_index.match(line)
+            if g:
+                old_version = g.group(1)
+                new_version = g.group(2)
+                continue
+
+        # the first is added file
+        if new_size is None:
+            literal = git_binary_literal_start.match(line)
+            if literal:
+                new_size = int(literal.group(1))
+                continue
+            delta = git_binary_delta_start.match(line)
+            if delta:
+                # not supported
+                new_size = 0
+                continue
+        elif new_size > 0:
+            if base85string.match(line):
+                assert len(line) >= 7 and ((len(line) - 2) % 5) != 0
+                new_encoded += line[1:]
+            elif 0 == len(line):
+                decoded = base64.b85decode(new_encoded)
+                added_data = zlib.decompress(decoded)
+                assert new_size == len(added_data)
+                change = Change(0, 0, added_data, None)
+                changes.append(change)
+                new_size = 0
+            else:
+                break
+
+        # the second is removed file
+        if old_size is None:
+            literal = git_binary_literal_start.match(line)
+            if literal:
+                old_size = int(literal.group(1))
+            delta = git_binary_delta_start.match(line)
+            if delta:
+                # not supported
+                old_size = 0
+                continue
+        elif old_size > 0:
+            if base85string.match(line):
+                assert len(line) >= 7 and ((len(line) - 2) % 5) != 0
+                old_encoded += line[1:]
+            elif 0 == len(line):
+                decoded = base64.b85decode(old_encoded)
+                removed_data = zlib.decompress(decoded)
+                assert old_size == len(removed_data)
+                change = Change(0, 0, None, removed_data)
+                changes.append(change)
+                old_size = 0
+            else:
+                break
+
+    return changes

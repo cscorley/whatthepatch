@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-
+import base64
 import os
 import time
 import unittest
+import zlib
 
 from src import whatthepatch as wtp
 from src.whatthepatch.patch import Change, diffobj
@@ -1449,6 +1450,85 @@ index 0000000..1111111 100644
         # Really all we care about is that this parses faster than it used to (200s+)
         self.assertGreater(20, time.time() - start_time)
 
+    def test_bin_patch(self):
+        text = """---
+ fox.bin   | Bin 0 -> 44 bytes
+ fox.txt   |   2 +-
+ lorem.bin | Bin 0 -> 446 bytes
+ lorem.zip | Bin 431 -> 432 bytes
+ 4 files changed, 1 insertion(+), 1 deletion(-)
+ create mode 100644 fox.bin
+ create mode 100644 lorem.bin
+
+diff --git a/fox.bin b/fox.bin
+new file mode 100644
+index 0000000000000000000000000000000000000000..e7683ad05fd121a9ca86cab5a827d471d29b4d4f
+GIT binary patch
+literal 44
+ycmWH^NL45-%}mZ#NGi%N&r?XtuTaP;%`GTa$S+GRQYZmR=Ok8DDx~D6GXMZ<wh!6>
+
+literal 0
+HcmV?d00001
+
+diff --git a/fox.txt b/fox.txt
+index ff3bb63..8fe2a4b 100644
+--- a/fox.txt
++++ b/fox.txt
+@@ -1 +1 @@
+-The quick brown fox jumps over the lazy dog
+\ No newline at end of file
++The quick brown fox jumps over the lazy dog.
+\ No newline at end of file
+diff --git a/lorem.bin b/lorem.bin
+new file mode 100644
+index 0000000000000000000000000000000000000000..aef2724fd9ff72caf4eb1ac8333f0b5b322d82fb
+GIT binary patch
+literal 446
+zcmXw#&2d992!vD07T|eRB)42s0Fkh>Gy1ax9+w~Fm)wMaW%v8+Q!6-@SL9y$#G*l}
+z+6Ae%rODKMLNW(eV!J^Lqq#K40+haL&oHecme~?Bvp0hqihPGW)J|zdm0J@?;oarH
+zmq8nAXrppJ9#KlY;O<;#ecAL3ed<g!G4=*8MQZA&@*d*izVwphh+(LN@fx1`86ZyC
+zf%h#bZVFBhPiIy(OdV5yv}K(UJU$-1_=s~Fb|NWsEk$A}|AZot<LWnxp>0DLGNbT$
+z;NzKem<F)LV9-+%O)-~zFiWULtcEc=v$joflZvCs%aENL{d#4hAnVe(yS0~XLpC4=
+Lj`hdY>+$vrMRcVJ
+
+literal 0
+HcmV?d00001
+
+diff --git a/lorem.zip b/lorem.zip
+index 0f6beb70488e2b29fcaadf724b6f48ef0ab5bc4e..3c8a65bf1a97bb4180c83a0e31352b4edb4c245e 100644
+GIT binary patch
+delta 275
+zcmZ3_yn#6)z?+#xgn@y9gP}7+C2a4}O*1$c85s5gF(-ozLr#8CYOY>MMM-D~Cj+xl
+z?ABymATF)oW?*D_!OXw_CQK(BEOa*HaEZRjWV65P$+T=Pg^u?VBeY_ymt>hupAyrM
+zu_ldGFZao&vTKV}cPYzE-4`VHX!@1~7xxOUc%}T}z;fqZ+pf4>{#%je`L@mdh12$@
+z##~QSCtp2z)oM{#R?hTKa+j9=zO;TxpG;eTRQ}78>li9e@lU*`!E<hhw&gFg7Dwam
+z8SImV7?t(so$}Jyl=3cb^RC<rY)d+m{}%R^{b303W@M6M#^TAz$&AWOMzNDS7!}#P
+Jfj(wn0067{YH|Po
+
+delta 274
+zcmdnMyq-BCz?+#xgn@y9gW*b=N|;w+e?B`S1H&F5=46mz$jL8C&DATZC<zVWWMKXf
+zwKe%I5SLbPGcdBeU}j(d6Q&am7CIYpxJ2J%vRS9J^XV)mjz|9|Mrg$d2bs?H_R@1O
+z3ERvx-K;3mI{Tu~UBN!DcuoF~-cc7`ykS}Oi(}X0%ZjnlS&LuR*=$}?c38P&;q6b7
+zte+;GeDx$tHc;Din|CGu%S*K{!-L%UoHcs4e@O{%uz6ZO@ty`xpT$&}TIoXzX1boS
+zo-D+utS58IOJh^YyS&Z2axbtg=}i7x*!zt+z?+dtjv0#|C#NtfGku7f+{viO<^}XH
+G0|Nj=Vq`=B
+
+-- 
+2.25.1
+"""
+        result = list(wtp.patch.parse_patch(text))
+        assert result
+        assert len(result) == 4
+        assert result[0].changes[0].line == b'The quick brown fox jumps over the lazy dog\x00'
+        assert result[1].changes[0].line == 'The quick brown fox jumps over the lazy dog'
+        assert result[1].changes[1].line == 'The quick brown fox jumps over the lazy dog.'
+        assert result[2].changes[0].line == \
+               b'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt' \
+               b' ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco' \
+               b' laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit' \
+               b' in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat' \
+               b' cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\x00'
+        assert len(result[3].changes) == 0
 
 if __name__ == "__main__":
     unittest.main()
