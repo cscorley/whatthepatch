@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import base64
+
 import os
 import time
 import unittest
-import zlib
 
 from src import whatthepatch as wtp
 from src.whatthepatch.patch import Change, diffobj

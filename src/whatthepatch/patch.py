@@ -974,7 +974,7 @@ def parse_binary_diff(text):
                 decoded = base64.b85decode(new_encoded)
                 added_data = zlib.decompress(decoded)
                 assert new_size == len(added_data)
-                change = Change(0, 0, added_data, None)
+                change = Change(None, 0, added_data, None)
                 changes.append(change)
                 new_size = 0
             else:
@@ -998,7 +998,7 @@ def parse_binary_diff(text):
                 decoded = base64.b85decode(old_encoded)
                 removed_data = zlib.decompress(decoded)
                 assert old_size == len(removed_data)
-                change = Change(0, 0, None, removed_data)
+                change = Change(0, None, None, removed_data)
                 changes.append(change)
                 old_size = 0
             else:
