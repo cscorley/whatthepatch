@@ -1,6 +1,6 @@
 [project]
 name = "whatthepatch"
-version = "1.0.4"
+version = "1.0.3"
 maintainers = [{ name = "Christopher S. Corley", email = "cscorley@gmail.com" }]
 requires-python = ">=3.7"
 readme = "README.rst"
