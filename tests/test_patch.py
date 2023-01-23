@@ -1449,7 +1449,7 @@ index 0000000..1111111 100644
         # Really all we care about is that this parses faster than it used to (200s+)
         self.assertGreater(20, time.time() - start_time)
 
-    def test_bin_patch(self):
+    def test_git_bin_patch(self):
         text = """---
  fox.bin   | Bin 0 -> 44 bytes
  fox.txt   |   2 +-

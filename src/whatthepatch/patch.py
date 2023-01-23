@@ -190,7 +190,7 @@ def parse_diff(text):
         (default_hunk_start, parse_default_diff),
         (ed_hunk_start, parse_ed_diff),
         (rcs_ed_hunk_start, parse_rcs_ed_diff),
-        (git_binary_patch_start, parse_binary_diff),
+        (git_binary_patch_start, parse_git_binary_diff),
     ]
 
     for hunk, parser in check:
@@ -923,7 +923,7 @@ def parse_rcs_ed_diff(text):
     return None
 
 
-def parse_binary_diff(text):
+def parse_git_binary_diff(text):
     try:
         lines = text.splitlines()
     except AttributeError:
