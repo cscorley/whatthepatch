@@ -2,7 +2,7 @@
 with python3Packages;
 buildPythonPackage rec {
   pname = "whatthepatch";
-  version = "1.0.3";
+  version = "1.0.4";
   format = "pyproject";
   src = ./.;
 
