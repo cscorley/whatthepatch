@@ -1518,16 +1518,26 @@ G0|Nj=Vq`=B
         result = list(wtp.patch.parse_patch(text))
         assert result
         assert len(result) == 4
-        assert result[0].changes[0].line == b'The quick brown fox jumps over the lazy dog\x00'
-        assert result[1].changes[0].line == 'The quick brown fox jumps over the lazy dog'
-        assert result[1].changes[1].line == 'The quick brown fox jumps over the lazy dog.'
-        assert result[2].changes[0].line == \
-               b'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt' \
-               b' ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco' \
-               b' laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit' \
-               b' in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat' \
-               b' cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\x00'
+        assert (
+            result[0].changes[0].line
+            == b"The quick brown fox jumps over the lazy dog\x00"
+        )
+        assert (
+            result[1].changes[0].line == "The quick brown fox jumps over the lazy dog"
+        )
+        assert (
+            result[1].changes[1].line == "The quick brown fox jumps over the lazy dog."
+        )
+        assert (
+            result[2].changes[0].line
+            == b"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt"
+            b" ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco"
+            b" laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit"
+            b" in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat"
+            b" cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\x00"
+        )
         assert len(result[3].changes) == 0
+
 
 if __name__ == "__main__":
     unittest.main()
