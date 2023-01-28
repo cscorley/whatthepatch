@@ -2,6 +2,11 @@
 
 Nothing yet :)
 
+# 1.0.4
+
+- PR #53 git binary patch support (Thanks, @babenek)
+- Add basic nix release support
+
 # 1.0.3
 
 - PR #46 Code optimization for unified diff parsing (Thanks, @babenek)
