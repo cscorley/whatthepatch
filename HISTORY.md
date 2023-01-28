@@ -5,6 +5,7 @@ Nothing yet :)
 # 1.0.4
 
 - PR #53 git binary patch support (Thanks, @babenek)
+- PR #51 Remove redundant wheel dep from pyproject.toml (Thanks, @mgorny)
 - Add basic nix release support
 
 # 1.0.3
