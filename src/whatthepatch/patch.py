@@ -992,7 +992,7 @@ def parse_git_binary_diff(text):
                 continue
         elif old_size > 0:
             if base85string.match(line):
-                assert len(line) >= 6 and ((len(line) - 2) % 5) != 0
+                assert len(line) >= 6 and ((len(line) - 1) % 5) == 0
                 old_encoded += line[1:]
             elif 0 == len(line):
                 decoded = base64.b85decode(old_encoded)
