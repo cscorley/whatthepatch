@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import hashlib
 import os
 import time
 import unittest
@@ -1512,9 +1512,7 @@ zte+;GeDx$tHc;Din|CGu%S*K{!-L%UoHcs4e@O{%uz6ZO@ty`xpT$&}TIoXzX1boS
 zo-D+utS58IOJh^YyS&Z2axbtg=}i7x*!zt+z?+dtjv0#|C#NtfGku7f+{viO<^}XH
 G0|Nj=Vq`=B
 
--- 
-2.25.1
-"""
+--"""
         result = list(wtp.patch.parse_patch(text))
         assert result
         assert len(result) == 4
@@ -1537,6 +1535,38 @@ G0|Nj=Vq`=B
             b" cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\x00"
         )
         assert len(result[3].changes) == 0
+
+    def test_git_bin_patch_minline(self):
+        # test path with minimal line in binary diff
+        text = """---
+ 95  | Bin 94 -> 95 bytes
+ 1 files changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/95 b/95
+index cf104291536b187e299023ae37523f4649ca0600..edf50979da25419fbb399ffa6b93142e50dbbba7 100644
+GIT binary patch
+literal 95
+zcmV-l0HFT>FaHM=!1loEo7=$@IDCW@J2o!_PR6;*Rs73Fmit;^XEfl3aOa~j;?1+w
+z`|Sh7<pH~|jb8KHD!MpYia}Lyu+Ot@)&HI>XeZ(}tCx^}pPZlER5Jer^*}gX^QK-R
+BGb8{2
+
+literal 94
+zcmV-k0HObM)Jh!P2BexYI{K1M2*Xhjg<rBg95P)btB3SD62E>3TEDprVXYw<r9s|q
+z3<q^r!wu=+9KVuWwwGi0e7gXw>S|c&%Px9;9nEE3cL}-^F2dKtTQun3NbDG}SFOY=
+AaR2}S
+
+--"""
+        result = list(wtp.patch.parse_patch(text))
+        assert result
+        assert len(result) == 1
+        assert (
+                hashlib.sha1(result[0].changes[0].line).hexdigest()
+                == "732e7e005ff8b71ab4b72398db0320f2fa012b81"
+        )
+        assert (
+                hashlib.sha1(result[0].changes[1].hunk).hexdigest()
+                == "b07b94142cfce2094b5be04e9d30b653a7c63917"
+        )
 
 
 if __name__ == "__main__":
