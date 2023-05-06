@@ -2,6 +2,10 @@
 
 Nothing yet :)
 
+# 1.0.5
+
+- PR #57 bugfix:min line in binary diff (Thanks, @babenek and @abbradar)
+
 # 1.0.4
 
 - PR #53 git binary patch support (Thanks, @babenek)
