@@ -1426,7 +1426,6 @@ class PatchTestSuite(unittest.TestCase):
         self.assertEqual(results[0].header, expected_header)
 
     def test_huge_patch(self):
-        start_time = time.time()
         text = """diff --git a/huge.file b/huge.file
 index 0000000..1111111 100644
 --- a/huge.file
@@ -1442,6 +1441,7 @@ index 0000000..1111111 100644
 """
         for n in range(0, 1000000):
             text += "+" + hex(n) + "\n"
+        start_time = time.time()
         result = list(wtp.patch.parse_patch(text))
         self.assertEqual(1, len(result))
         self.assertEqual(1000007, len(result[0].changes))
