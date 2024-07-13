@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }} for ${{ matrix.os }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -47,14 +47,20 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
+      - uses: ConorMacBride/install-package@v1
+        with:
+          brew: gpatch
+          apt: patch
+          choco: patch
+
       - name: Test
         run: |
-          pytest --doctest-modules --doctest-glob='*.rst' --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+          pytest --doctest-modules --doctest-glob='*.rst' --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
+          name: pytest-results-${{ matrix.python-version }}-${{ matrix.os }}
+          path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
