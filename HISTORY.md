@@ -1,6 +1,7 @@
 # next
 
-Nothing yet :)
+- Support up to 3.12
+- Drop support up to 3.7
 
 # 1.0.5
 
