@@ -1,8 +1,8 @@
 [project]
 name = "whatthepatch"
-version = "1.0.5"
+version = "1.0.6"
 maintainers = [{ name = "Christopher S. Corley", email = "cscorley@gmail.com" }]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 readme = "README.rst"
 description = "A patch parsing and application library."
 keywords = ["patch", "diff", "parser"]
