@@ -47,6 +47,12 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
+      - uses: ConorMacBride/install-package@v1
+        with:
+          brew: gpatch
+          apt: patch
+          choco: patch
+
       - name: Test
         run: |
           pytest --doctest-modules --doctest-glob='*.rst' --junitxml=junit/test-results-${{ matrix.python-version }}.xml
