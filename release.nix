@@ -1,8 +1,8 @@
 { lib, python3Packages, setuptools }:
 with python3Packages;
-buildPythonPackage rec {
+buildPythonPackage {
   pname = "whatthepatch";
-  version = "1.0.6";
+  version = "1.0.7";
   format = "pyproject";
   src = ./.;
 

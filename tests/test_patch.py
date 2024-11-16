@@ -1390,6 +1390,7 @@ class PatchTestSuite(unittest.TestCase):
         self.assert_diffs_equal(results, expected)
 
     def test_space_in_path_header(self):
+        # From https://bugzillaattachments.eclipsecontent.org/bugs/attachment.cgi?id=126343
         with open("tests/casefiles/eclipse-attachment-126343.header") as f:
             text = f.read()
 
@@ -1426,7 +1427,8 @@ class PatchTestSuite(unittest.TestCase):
         self.assertEqual(results[0].header, expected_header)
 
     def test_huge_patch(self):
-        text_parts = ["""diff --git a/huge.file b/huge.file
+        text_parts = [
+            """diff --git a/huge.file b/huge.file
 index 0000000..1111111 100644
 --- a/huge.file
 +++ a/huge.file
@@ -1438,9 +1440,10 @@ index 0000000..1111111 100644
 -44444444
 +55555555
 +66666666
-"""]
+"""
+        ]
         text_parts.extend("+" + hex(n) + "\n" for n in range(0, 1000000))
-        text = ''.join(text_parts)
+        text = "".join(text_parts)
         start_time = time.time()
         result = list(wtp.patch.parse_patch(text))
         self.assertEqual(1, len(result))
@@ -1507,6 +1510,46 @@ AaR2}S
             hashlib.sha1(result[0].changes[1].hunk).hexdigest()
             == "b07b94142cfce2094b5be04e9d30b653a7c63917"
         )
+
+    def test_linux_29e1dfc(self):
+        with open(
+            "tests/casefiles/linux-29e1dfcd5150097f32f34891c85a50d9ead19df3.patch"
+        ) as f:
+            text = f.read()
+
+        # testing we get to the diff
+        path = "net/bluetooth/6lowpan.c"
+        expected = headerobj(
+            index_path=None,
+            old_path=path,
+            old_version="357475cceec61b",
+            new_path=path,
+            new_version="9a75f9b00b5129",
+        )
+
+        results = list(wtp.patch.parse_patch(text))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].header, expected)
+
+    def test_eclipse_cvsdiff(self):
+        # From https://bugzillaattachments.eclipsecontent.org/bugs/attachment.cgi?id=1701
+        with open("tests/casefiles/eclipse-attachment-1701.patch") as f:
+            text = f.read()
+
+        expected = headerobj(
+            index_path=(
+                "model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java"
+            ),
+            old_path="model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java",
+            old_version="1.34",
+            new_path="model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java",
+            new_version="16 Jul 2002 20:37:56 -0000",
+        )
+
+        results = list(wtp.patch.parse_patch(text))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].header, expected)
+        self.assertEqual(len(results[0].changes), 20)
 
 
 if __name__ == "__main__":

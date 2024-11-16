@@ -2,6 +2,12 @@
 
 Nothing yet :)
 
+# 1.0.7
+
+- PR #62 fix: incorrect regular expression matching diffcmd (Thanks, @jingfelix)
+- Support up to 3.13
+- Drop support up to 3.8
+
 # 1.0.6
 
 - PR #60 Improve huge_patch test (Thanks, @arkamar)

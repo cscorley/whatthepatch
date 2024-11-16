@@ -19,7 +19,7 @@ file_timestamp_str = "(.+?)(?:\t|:|  +)(.*)"
 # .+? was previously [^:\t\n\r\f\v]+
 
 # general diff regex
-diffcmd_header = re.compile("^diff .* (.+) (.+)$")
+diffcmd_header = re.compile("^diff(?: .+)? (.+) (.+)$")
 unified_header_index = re.compile("^Index: (.+)$")
 unified_header_old_line = re.compile(r"^--- " + file_timestamp_str + "$")
 unified_header_new_line = re.compile(r"^\+\+\+ " + file_timestamp_str + "$")
@@ -68,7 +68,7 @@ cvs_header_index = unified_header_index
 cvs_header_rcs = re.compile(r"^RCS file: (.+)(?:,\w{1}$|$)")
 cvs_header_timestamp = re.compile(r"(.+)\t([\d.]+)")
 cvs_header_timestamp_colon = re.compile(r":([\d.]+)\t(.+)")
-old_cvs_diffcmd_header = re.compile("^diff.* (.+):(.*) (.+):(.*)$")
+old_cvs_diffcmd_header = re.compile("^diff(?: .+)? (.+):(.*) (.+):(.*)$")
 
 
 def parse_patch(text):

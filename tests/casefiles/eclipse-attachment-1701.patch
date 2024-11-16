@@ -1,0 +1,31 @@
+? cvsdiff
+? model/org/eclipse/jdt/internal/debug/core/BreakMouseGrab.java
+Index: model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java
+===================================================================
+RCS file: /home/eclipse/org.eclipse.jdt.debug/model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java,v
+retrieving revision 1.34
+diff -u -p -r1.34 JDIDebugPlugin.java
+--- model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java	6 Jun 2002 20:33:46 -0000	1.34
++++ model/org/eclipse/jdt/internal/debug/core/JDIDebugPlugin.java	16 Jul 2002 20:37:56 -0000
+@@ -61,6 +61,13 @@ public class JDIDebugPlugin extends Plug
+ 	private boolean fTrace = false;
+ 	
+ 	/**
++	 * On SWT/GTK applications, we need to drop
++	 * any mouse grabs when a breakpoint is hit
++	 * or the mouse is not usable.
++	 */
++	private BreakMouseGrab breakMouseGrab;
++	
++	/**
+ 	 * Returns whether the debug UI plug-in is in trace
+ 	 * mode.
+ 	 * 
+@@ -117,6 +124,7 @@ public class JDIDebugPlugin extends Plug
+ 		fBreakpointListeners = new ListenerList(5);
+ 		getPluginPreferences().setDefault(JDIDebugModel.PREF_REQUEST_TIMEOUT, JDIDebugModel.DEF_REQUEST_TIMEOUT);
+ 		getPluginPreferences().addPropertyChangeListener(this);
++		breakMouseGrab = new BreakMouseGrab();	
+ 	}
+ 	
+ 	/**
