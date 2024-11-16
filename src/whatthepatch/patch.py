@@ -19,7 +19,7 @@ file_timestamp_str = "(.+?)(?:\t|:|  +)(.*)"
 # .+? was previously [^:\t\n\r\f\v]+
 
 # general diff regex
-diffcmd_header = re.compile("^diff.* (.+) (.+)$")
+diffcmd_header = re.compile("^diff .* (.+) (.+)$")
 unified_header_index = re.compile("^Index: (.+)$")
 unified_header_old_line = re.compile(r"^--- " + file_timestamp_str + "$")
 unified_header_new_line = re.compile(r"^\+\+\+ " + file_timestamp_str + "$")
