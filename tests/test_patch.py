@@ -690,6 +690,57 @@ class PatchTestSuite(unittest.TestCase):
         results = list(wtp.parse_patch(text))
         self.assert_diffs_equal(results, expected)
 
+    def test_git_rename_only(self):
+        # A pure rename has no "index" line and no unified hunk, so the
+        # a/ and b/ prefixes used to leak through into old_path and
+        # new_path. See GH issue #43.
+        with open("tests/casefiles/git-rename-only.diff") as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            diffobj(
+                header=headerobj(
+                    index_path=None,
+                    old_path="myfile2.txt",
+                    old_version=None,
+                    new_path="myfile3.txt",
+                    new_version=None,
+                ),
+                changes=[],
+                text="\n".join(lines[:34]) + "\n",
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+        self.assert_diffs_equal(results, expected)
+
+    def test_git_mode_change_only(self):
+        # Same problem as a pure rename: a file mode change with no
+        # content diff has neither an "index" line nor a unified hunk.
+        with open("tests/casefiles/git-mode-change-only.diff") as f:
+            text = f.read()
+
+        lines = text.splitlines()
+
+        expected = [
+            diffobj(
+                header=headerobj(
+                    index_path=None,
+                    old_path="script.sh",
+                    old_version=None,
+                    new_path="script.sh",
+                    new_version=None,
+                ),
+                changes=[],
+                text="\n".join(lines[:34]) + "\n",
+            )
+        ]
+
+        results = list(wtp.parse_patch(text))
+        self.assert_diffs_equal(results, expected)
+
     def test_git_header(self):
         with open("tests/casefiles/git-header.diff") as f:
             text = f.read()

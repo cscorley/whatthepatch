@@ -163,6 +163,13 @@ def parse_diff_header(text):
     check = [
         (unified_header_new_line, parse_unified_header),
         (context_header_old_line, parse_context_header),
+        # A git diff with neither an "index" line nor a unified hunk (a
+        # rename or mode change with no content changes, for instance)
+        # still starts with a "diff --git a/... b/..." line. That line
+        # also happens to match the generic diffcmd_header below, so it
+        # has to be tried first, or the a/ and b/ prefixes never get
+        # stripped from the paths.
+        (git_diffcmd_header, parse_git_header),
         (diffcmd_header, parse_diffcmd_header),
         # TODO:
         # git_header can handle version-less unified headers, but
@@ -254,8 +261,11 @@ def parse_git_header(text):
             )
 
     # if we go through all of the text without finding our normal info,
-    # use the cmd if available
-    if cmd_old_path and cmd_new_path and old_version and new_version:
+    # use the cmd if available. A diff with no content changes at all
+    # (a plain rename or a file mode change) never has an "index" line,
+    # so old_version/new_version stay None; the paths from the "diff
+    # --git" line are still good enough to report.
+    if cmd_old_path and cmd_new_path:
         if cmd_old_path.startswith("a/"):
             cmd_old_path = cmd_old_path[2:]
 
